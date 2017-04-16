@@ -17,13 +17,13 @@ skye-log解决分布式环境日志分散问题,目的是将日志统一收集�
 ```xml
 <dependency>
 	<groupId>com.dafy.skye</groupId>
-	<artifactId>skye-klog</artifactId>
+	<artifactId>skye-klog-appender</artifactId>
 	<version>${skye-klog.version}</version>
 </dependency>
 ```
 ### 4.在需要收集日志的应用logback配置中添加logback appender
 ```xml
-<appender name="klog" class="com.dafy.skye.klog.producer.KLogProducerAppender">
+<appender name="klog" class="com.dafy.skye.klog.appender.KLogKafkaAppender">
 	<!--kafka地址-->
 	<kafkaAddress>kafka1.dafy.com:9092</kafkaAddress>
 	<!--对应上面创建的topic-->
