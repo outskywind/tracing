@@ -1,7 +1,12 @@
-package com.dafy.skye.klog.collector.storage.file;
+package com.dafy.skye.klog.collector.storage.rolling;
 
 import ch.qos.logback.classic.LoggerContext;
+import ch.qos.logback.classic.joran.JoranConfigurator;
+import ch.qos.logback.core.joran.spi.JoranException;
+import com.google.common.base.Strings;
+import org.slf4j.LoggerFactory;
 
+import java.io.InputStream;
 import java.util.Properties;
 
 /**
@@ -48,21 +53,10 @@ public class RollingFileStorageConfig {
         private String logPattern;
         private String logDir;
         private LoggerContext loggerContext;
-        public Builder load(Properties properties,LoggerContext loggerContext){
-            String fileNamePattern=properties.getProperty("skye-collector.fileName.pattern");
-            String logPattern=properties.getProperty("skye-collector.log.pattern");
-            String logDir=properties.getProperty("skye-collector.log.dir");
-            this.fileNamePattern(fileNamePattern);
-            this.logPattern(logPattern);
-            this.logDir(logDir);
-            this.loggerContext(loggerContext);
-            return this;
-        }
-        public static Builder create(Properties properties,LoggerContext loggerContext){
-            Builder builder=create();
-            builder.load(properties,loggerContext);
-            return builder;
-        }
+        public static final String PROPERTIES_PREFIX="skye-klog-collector.storage.rolling";
+        private static final String DEFAULT_FILE_NAME_PATTERN="logs/%sn/%addr-%d{yyyy-MM-dd}.log";
+        private static final String DEFAULT_LOG_PATTERN="[%sn-%pid@%addr] [%t] %-5level %d{yyyy-MM-dd HH:mm:ss.SSS} %logger{50} %L - %m%n";
+        private static final String DEFAULT_LOG_DIR="logs";
         public  static Builder create(){
             return new Builder();
         }
@@ -89,6 +83,25 @@ public class RollingFileStorageConfig {
             config.logDir=this.logDir;
             config.loggerContext=this.loggerContext;
             return config;
+        }
+        public RollingFileStorageConfig build(Properties properties) throws JoranException{
+            String fileNamePattern=properties.getProperty(PROPERTIES_PREFIX+".fileName.pattern",DEFAULT_FILE_NAME_PATTERN);
+            String logPattern=properties.getProperty(PROPERTIES_PREFIX+".log.pattern",DEFAULT_LOG_PATTERN);
+            String logDir=properties.getProperty(PROPERTIES_PREFIX+".log.dir",DEFAULT_LOG_DIR);
+            this.fileNamePattern(fileNamePattern);
+            this.logPattern(logPattern);
+            this.logDir(logDir);
+            String logbackConfigPath=properties.getProperty(PROPERTIES_PREFIX+".logback.path");
+            LoggerContext context = (LoggerContext) LoggerFactory.getILoggerFactory();
+            if(!Strings.isNullOrEmpty(logbackConfigPath)){
+                JoranConfigurator configurator = new JoranConfigurator();
+                context.reset();
+                configurator.setContext(context);
+                InputStream in = this.getClass().getClassLoader().getResourceAsStream(logbackConfigPath);
+                configurator.doConfigure(in);
+            }
+            this.loggerContext(context);
+            return this.build();
         }
     }
 }

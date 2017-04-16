@@ -8,7 +8,6 @@ import ch.qos.logback.core.util.Duration;
 import com.dafy.skye.klog.core.JavaSerializer;
 import com.dafy.skye.klog.core.logback.KLogConverter;
 import com.dafy.skye.klog.core.logback.KLogEvent;
-import com.dafy.skye.klog.core.logback.KLogSerializationTransformer;
 import org.apache.kafka.clients.producer.KafkaProducer;
 import org.apache.kafka.clients.producer.Producer;
 import org.apache.kafka.clients.producer.ProducerRecord;

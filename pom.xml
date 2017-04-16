@@ -16,6 +16,7 @@
         <kafka.version>0.10.2.0</kafka.version>
     </properties>
     <build>
+        
         <plugins>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>

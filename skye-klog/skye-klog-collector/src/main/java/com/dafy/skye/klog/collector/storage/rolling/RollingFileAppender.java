@@ -1,4 +1,4 @@
-package com.dafy.skye.klog.collector.storage.file;
+package com.dafy.skye.klog.collector.storage.rolling;
 
 import ch.qos.logback.classic.PatternLayout;
 import ch.qos.logback.classic.encoder.PatternLayoutEncoder;

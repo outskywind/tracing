@@ -1,4 +1,4 @@
-package com.dafy.skye.klog.collector.storage.file;
+package com.dafy.skye.klog.collector.storage.rolling;
 
 import com.dafy.skye.klog.collector.storage.StorageComponent;
 import com.dafy.skye.klog.core.logback.KLogEvent;
@@ -27,6 +27,11 @@ public class RollingFileStorage implements StorageComponent {
     }
 
     @Override
+    public void stop() {
+        
+    }
+
+    @Override
     public void save(KLogEvent event) {
         RollingFileAppender appender=getAppender(event);
         appender.doAppend(event);
@@ -39,9 +44,6 @@ public class RollingFileStorage implements StorageComponent {
         }
     }
 
-    @Override
-    public void shutdown() {
-    }
     /**
      * 获取Appender
      * */
