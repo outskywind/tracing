@@ -20,15 +20,12 @@ public class CollectorController {
         this.properties=properties;
     }
     public void start() throws Exception{
-        String consumerSizeValue=properties.getProperty("skye-klog-collector.parallel");
-        int consumerSize=1;
-        if(consumerSizeValue!=null){
-            consumerSize=Integer.parseInt(consumerSizeValue);
-        }
+        int parallel=Integer.parseInt(properties.getProperty("skye-klog-collector.parallel","4"));
         CollectorConfig collectorConfig=CollectorConfig.Builder.create()
                 .build(properties);
-        executorService= Executors.newFixedThreadPool(consumerSize);
-        for(int i=0;i<consumerSize;i++){
+        executorService= Executors.newFixedThreadPool(parallel);
+        for(int partition=0;partition<parallel;partition++){
+            collectorConfig.setPartition(partition);
             DefaultCollector.Builder builder= DefaultCollector.Builder.create();
             builder.collectorConfig(collectorConfig);
             builder.consumerComponent(new KafkaConsumerComponent(1000L,properties));

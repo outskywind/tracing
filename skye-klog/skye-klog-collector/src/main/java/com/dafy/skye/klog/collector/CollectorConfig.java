@@ -39,6 +39,16 @@ public class CollectorConfig {
     public void setGroupId(String groupId) {
         this.groupId = groupId;
     }
+
+    @Override
+    public String toString() {
+        return "CollectorConfig{" +
+                "topic='" + topic + '\'' +
+                ", partition=" + partition +
+                ", groupId='" + groupId + '\'' +
+                '}';
+    }
+
     public static class Builder{
         private String topic;
         private int partition;

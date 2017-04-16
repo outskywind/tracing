@@ -2,9 +2,11 @@ package com.dafy.skye.klog.collector.consumer;
 
 import com.dafy.skye.klog.collector.AbstractCollectorComponent;
 import com.dafy.skye.klog.collector.CollectorConfig;
+import com.dafy.skye.klog.core.JavaDeserializer;
 import com.dafy.skye.klog.core.logback.KLogEvent;
 import org.apache.kafka.clients.consumer.*;
 import org.apache.kafka.common.TopicPartition;
+import org.apache.kafka.common.serialization.StringDeserializer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -31,7 +33,7 @@ public class KafkaConsumerComponent extends AbstractCollectorComponent implement
     @Override
     public void start() {
         if(!started.get()){
-            kafkaConsumer=new KafkaConsumer<>(this.kafkaProperties);
+            kafkaConsumer=new KafkaConsumer<>(this.kafkaProperties,new StringDeserializer(),new JavaDeserializer());
             TopicPartition topicPartition=new TopicPartition(collectorConfig.getTopic(),collectorConfig.getPartition());
             kafkaConsumer.assign(Collections.singleton(topicPartition));
             this.topicPartition=topicPartition;
