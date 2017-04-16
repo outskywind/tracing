@@ -1,5 +1,6 @@
 package com.dafy.skye.klog.collector.storage.rolling;
 
+import com.dafy.skye.klog.collector.AbstractCollectorComponent;
 import com.dafy.skye.klog.collector.storage.StorageComponent;
 import com.dafy.skye.klog.core.logback.KLogEvent;
 
@@ -10,7 +11,7 @@ import java.util.concurrent.ConcurrentHashMap;
 /**
  * Created by Caedmon on 2017/4/14.
  */
-public class RollingFileStorage implements StorageComponent {
+public class RollingFileStorage extends AbstractCollectorComponent implements StorageComponent {
     /**
      * 不同appender的缓存
      * */
