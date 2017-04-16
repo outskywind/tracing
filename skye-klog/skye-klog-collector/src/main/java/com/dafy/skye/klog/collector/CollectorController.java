@@ -29,7 +29,7 @@ public class CollectorController {
                 .build(properties);
         executorService= Executors.newFixedThreadPool(consumerSize);
         for(int i=0;i<consumerSize;i++){
-            KafkaCollector.Builder builder= KafkaCollector.Builder.create();
+            DefaultCollector.Builder builder= DefaultCollector.Builder.create();
             builder.collectorConfig(collectorConfig);
             builder.consumerComponent(new KafkaConsumerComponent(1000L,properties));
             RollingFileStorageConfig rollingFileStorageConfig=RollingFileStorageConfig.Builder.create()
@@ -37,7 +37,7 @@ public class CollectorController {
             builder.storageComponent(new RollingFileStorage(rollingFileStorageConfig));
             RedisConfig redisConfig=RedisConfig.Builder.create().build(properties);
             builder.offsetComponent(new RedisOffsetComponent(redisConfig));
-            KafkaCollector collector=builder.build();
+            DefaultCollector collector=builder.build();
             executorService.execute(collector);
         }
     }

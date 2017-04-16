@@ -12,16 +12,16 @@ import java.util.concurrent.atomic.AtomicBoolean;
 /**
  * Created by Caedmon on 2017/4/14.
  */
-public class KafkaCollector extends AbstractCollectorComponent implements Runnable{
+public class DefaultCollector extends AbstractCollectorComponent implements Runnable{
     private ConsumerComponent consumerComponent;
     private OffsetComponent offsetComponent;
     private StorageComponent storageComponent;
     private AtomicBoolean closed=new AtomicBoolean(false);
-    private static final Logger log= LoggerFactory.getLogger(KafkaCollector.class);
+    private static final Logger log= LoggerFactory.getLogger(DefaultCollector.class);
 
-    public KafkaCollector(CollectorConfig collectorConfig,ConsumerComponent consumerComponent,
-                          StorageComponent storageComponent,
-                          OffsetComponent offsetComponent) {
+    public DefaultCollector(CollectorConfig collectorConfig, ConsumerComponent consumerComponent,
+                            StorageComponent storageComponent,
+                            OffsetComponent offsetComponent) {
         this.consumerComponent=consumerComponent;
         this.storageComponent=storageComponent;
         this.offsetComponent =offsetComponent;
@@ -97,8 +97,8 @@ public class KafkaCollector extends AbstractCollectorComponent implements Runnab
             return this;
         }
 
-        public KafkaCollector build(){
-            KafkaCollector collector=new KafkaCollector(this.collectorConfig,this.consumerComponent,
+        public DefaultCollector build(){
+            DefaultCollector collector=new DefaultCollector(this.collectorConfig,this.consumerComponent,
                     this.storageComponent,
                     this.offsetComponent
             );
