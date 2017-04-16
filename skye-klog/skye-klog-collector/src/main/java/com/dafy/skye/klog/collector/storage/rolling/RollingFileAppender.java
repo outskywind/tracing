@@ -1,5 +1,6 @@
 package com.dafy.skye.klog.collector.storage.rolling;
 
+import ch.qos.logback.classic.LoggerContext;
 import ch.qos.logback.classic.PatternLayout;
 import ch.qos.logback.classic.encoder.PatternLayoutEncoder;
 import ch.qos.logback.core.rolling.KLogTimeBasedRollingPolicy;
@@ -33,6 +34,7 @@ public class RollingFileAppender extends ch.qos.logback.core.rolling.RollingFile
         if(isStarted()){
             return;
         }
+        setContext(config.loggerContext);
         String logDir=config.logDir;
         setName(appenderName);
         if(Strings.isNullOrEmpty(logDir)){

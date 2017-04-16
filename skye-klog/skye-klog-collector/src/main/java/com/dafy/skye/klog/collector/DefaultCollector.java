@@ -72,6 +72,18 @@ public class DefaultCollector extends AbstractCollectorComponent implements Runn
             stop();
         }
     }
+
+    @Override
+    public String toString() {
+        return "DefaultCollector{" +
+                "collectorConfig="+collectorConfig+
+                ", consumerComponent=" + consumerComponent +
+                ", offsetComponent=" + offsetComponent +
+                ", storageComponent=" + storageComponent +
+                ", closed=" + closed +
+                '}';
+    }
+
     public static class Builder{
         private CollectorConfig collectorConfig;
         private ConsumerComponent consumerComponent;
