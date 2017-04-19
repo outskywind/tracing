@@ -97,6 +97,6 @@
                 </executions>
             </plugin>
         </plugins>
-        <finalName>klog</finalName>
+        <finalName>skye-klog-collector</finalName>
     </build>
 </project>

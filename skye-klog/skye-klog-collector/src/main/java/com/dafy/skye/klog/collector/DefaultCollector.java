@@ -55,7 +55,7 @@ public class DefaultCollector extends AbstractCollectorComponent implements Runn
                 //从kafka pull 消息
                 PollResult poll=consumerComponent.poll();
                 if(!poll.isEmpty()){
-                    log.debug("pull log success:partition={},com.dafy.skye.klog.collector.offset={},size={}",
+                    log.debug("pull log success:partition={},offset={},size={}",
                             this.collectorConfig.getPartition(),poll.getEndOffset(),poll.size());
                     this.storageComponent.batchSave(poll.getEvents());
                     this.consumerComponent.commit(poll.getEndOffset());
@@ -66,7 +66,7 @@ public class DefaultCollector extends AbstractCollectorComponent implements Runn
             }
         }catch (Throwable e){
             if(!closed.get()){
-                log.error("pull log error:partition={},com.dafy.skye.klog.collector.offset={}",this.collectorConfig.getPartition(),offset,e);
+                log.error("pull log error:partition={},offset={}",this.collectorConfig.getPartition(),offset,e);
             }
         }finally {
             stop();

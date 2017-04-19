@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 start()
 {
-        nohup java ${VM_OPTS} -classpath conf:lib/* -server -Xmx512M -Xmx512M com.dafy.klog.consumer.KLogConsumerStartup 1>/dev/null 2>error.log &
+        nohup java ${VM_OPTS} -classpath conf:lib/* -server -Xmx512M -Xmx512M com.dafy.skye.klog.collector.CollectorStarup 1>/dev/null 2>error.log &
         echo $! > pid
 }
 stop()

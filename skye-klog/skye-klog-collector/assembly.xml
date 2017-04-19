@@ -11,8 +11,13 @@
             <outputDirectory>/conf</outputDirectory>
         </fileSet>
         <fileSet>
-            <directory>bin</directory>
+            <directory>/bin</directory>
             <outputDirectory>/</outputDirectory>
+            <lineEnding>unix</lineEnding>
+            <fileMode>0755</fileMode>
+            <includes>
+                <include>*.sh</include>
+            </includes>
         </fileSet>
     </fileSets>
     <dependencySets>

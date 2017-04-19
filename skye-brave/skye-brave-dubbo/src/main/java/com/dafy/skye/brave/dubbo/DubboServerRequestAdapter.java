@@ -5,10 +5,13 @@ import com.alibaba.dubbo.rpc.Invoker;
 import com.alibaba.dubbo.rpc.RpcContext;
 import com.github.kristofa.brave.*;
 import com.twitter.zipkin.gen.Endpoint;
+import zipkin.Constants;
 
 import java.net.InetSocketAddress;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.List;
 
 /**
  * Created by Caedmon on 2017/4/11.
@@ -50,8 +53,8 @@ public class DubboServerRequestAdapter implements ServerRequestAdapter{
         tracer.setServerReceived(Endpoint.create(clientName,DubboBraveHelper.convertToInt(ipAddr)));
         InetSocketAddress socketAddress = RpcContext.getContext().getLocalAddress();
         if (socketAddress != null) {
-            KeyValueAnnotation remoteAddrAnnotation = KeyValueAnnotation.create("address", socketAddress.toString());
-            return Collections.singleton(remoteAddrAnnotation);
+            KeyValueAnnotation ra = KeyValueAnnotation.create("address", socketAddress.toString());
+            return Collections.singletonList(ra);
         } else {
             return Collections.emptyList();
         }

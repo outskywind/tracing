@@ -1,5 +1,7 @@
 package com.dafy.skye.brave.dubbo;
 
+import com.alibaba.dubbo.registry.integration.RegistryDirectory;
+import com.alibaba.dubbo.registry.integration.RegistryProtocol;
 import com.alibaba.dubbo.rpc.Invocation;
 import com.alibaba.dubbo.rpc.Invoker;
 import com.alibaba.dubbo.rpc.RpcContext;
@@ -12,6 +14,7 @@ import com.twitter.zipkin.gen.Endpoint;
 import java.net.InetSocketAddress;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.List;
 
 /**
  * Created by Caedmon on 2017/4/11.
@@ -47,16 +50,16 @@ public class DubboClientRequestAdapter implements ClientRequestAdapter {
         KeyValueAnnotation arguments=KeyValueAnnotation.create("arguments",context.getArguments().toString());
         return Collections.singletonList(arguments);
     }
-
+    @Override
     public Endpoint serverAddress() {
-        RpcContext rpcContext=RpcContext.getContext();
-        InetSocketAddress inetSocketAddress = RpcContext.getContext().getRemoteAddress();
-        String ip = rpcContext.getUrl().getIp();
-        String serviceName =RpcContext.getContext().getUrl().getParameter("application");
-        Endpoint.Builder endpointBuilder= Endpoint.builder();
-        endpointBuilder.ipv4(DubboBraveHelper.convertToInt(ip));
-        endpointBuilder.port(inetSocketAddress.getPort());
-        endpointBuilder.serviceName(serviceName);
-        return endpointBuilder.build();
+//        RpcContext rpcContext=RpcContext.getContext();
+//        InetSocketAddress inetSocketAddress = RpcContext.getContext().getRemoteAddress();
+//        String ip = rpcContext.getUrl().getIp();
+//        Endpoint.Builder endpointBuilder= Endpoint.builder();
+//        endpointBuilder.ipv4(DubboBraveHelper.convertToInt(ip));
+//        endpointBuilder.port(inetSocketAddress.getPort());
+//        endpointBuilder.serviceName("UNKNOWN");
+//        return endpointBuilder.build();
+        return null;
     }
 }

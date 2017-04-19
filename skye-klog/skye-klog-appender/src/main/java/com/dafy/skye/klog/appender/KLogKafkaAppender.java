@@ -27,7 +27,7 @@ public class KLogKafkaAppender extends UnsynchronizedAppenderBase<ILoggingEvent>
     private Producer<String,String> kafkaProducer;
     private int queueSize=2048;
     private String kafkaAddress;
-    private String kafkaTopic;
+    private String kafkaTopic="skye-klog";
     private BlockingQueue<KLogEvent> queue= new LinkedBlockingDeque(this.queueSize);
     private Duration eventDelayLimit = new Duration(100L);
     private PreSerializationTransformer transformer=new KLogSerializationTransformer();
