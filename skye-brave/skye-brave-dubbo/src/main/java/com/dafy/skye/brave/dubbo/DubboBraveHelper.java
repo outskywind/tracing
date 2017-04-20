@@ -13,6 +13,7 @@ public class DubboBraveHelper {
     public static String getSpanName(RpcContext rpcContext){
         String className = rpcContext.getUrl().getPath();
         String simpleName = className.substring(className.lastIndexOf(".")+1);
+        System.out.println("get span name");
         return simpleName+"."+rpcContext.getMethodName();
     }
     public  static  int convertToInt(String address){
