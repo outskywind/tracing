@@ -5,6 +5,7 @@ import com.alibaba.dubbo.rpc.*;
 import com.github.kristofa.brave.Brave;
 import com.github.kristofa.brave.ServerRequestInterceptor;
 import com.github.kristofa.brave.ServerResponseInterceptor;
+import org.slf4j.MDC;
 
 /**
  * Created by Caedmon on 2017/4/11.
@@ -15,6 +16,8 @@ import com.github.kristofa.brave.ServerResponseInterceptor;
 public class DubboBraveProviderFilter implements Filter {
     private volatile Brave brave;
     public Result invoke(Invoker<?> invoker, Invocation invocation) throws RpcException {
+        String traceId=invocation.getAttachment("traceId");
+        MDC.put("braveTraceId",traceId);
         ServerRequestInterceptor serverRequestInterceptor=brave.serverRequestInterceptor();
         ServerResponseInterceptor serverResponseInterceptor=brave.serverResponseInterceptor();
         serverRequestInterceptor.handle(new DubboServerRequestAdapter(invoker,invocation,brave.serverTracer()));

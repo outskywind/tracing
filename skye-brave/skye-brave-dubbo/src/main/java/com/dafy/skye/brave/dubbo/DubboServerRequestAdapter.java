@@ -4,6 +4,7 @@ import com.alibaba.dubbo.rpc.Invocation;
 import com.alibaba.dubbo.rpc.Invoker;
 import com.alibaba.dubbo.rpc.RpcContext;
 import com.github.kristofa.brave.*;
+import com.twitter.zipkin.gen.BinaryAnnotation;
 import com.twitter.zipkin.gen.Endpoint;
 import zipkin.Constants;
 
@@ -27,6 +28,7 @@ public class DubboServerRequestAdapter implements ServerRequestAdapter{
     }
 
     public TraceData getTraceData() {
+        TraceData defaultReturn=TraceData.EMPTY;
         String sampled =   invocation.getAttachment("sampled");
         if(sampled != null && sampled.equals("0")){
             return TraceData.NOT_SAMPLED;
@@ -39,7 +41,7 @@ public class DubboServerRequestAdapter implements ServerRequestAdapter{
                 return TraceData.create(span);
             }
         }
-        return TraceData.EMPTY;
+        return defaultReturn;
     }
 
     public String getSpanName() {
@@ -50,10 +52,11 @@ public class DubboServerRequestAdapter implements ServerRequestAdapter{
         String ipAddr = RpcContext.getContext().getUrl().getIp();
         InetSocketAddress inetSocketAddress = RpcContext.getContext().getRemoteAddress();
         final String clientName = RpcContext.getContext().getUrl().getParameter("clientName");
-        tracer.setServerReceived(Endpoint.create(clientName,DubboBraveHelper.convertToInt(ipAddr)));
         InetSocketAddress socketAddress = RpcContext.getContext().getLocalAddress();
         if (socketAddress != null) {
             KeyValueAnnotation ra = KeyValueAnnotation.create("address", socketAddress.toString());
+//            KeyValueAnnotation ra2=KeyValueAnnotation.create(Constants.CLIENT_RECV,
+//                    Endpoint.create(clientName,DubboBraveHelper.convertToInt(ipAddr)).toString());
             return Collections.singletonList(ra);
         } else {
             return Collections.emptyList();
@@ -63,6 +66,6 @@ public class DubboServerRequestAdapter implements ServerRequestAdapter{
         return SpanId.builder()
                 .traceId(IdConversion.convertToLong(traceId))
                 .spanId(IdConversion.convertToLong(spanId))
-                .parentId(parentSpanId == null ? null : Long.valueOf(parentSpanId)).build();
+                .parentId(parentSpanId == null ? null : IdConversion.convertToLong(parentSpanId)).build();
     }
 }

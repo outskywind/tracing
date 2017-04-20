@@ -10,6 +10,7 @@ import com.github.kristofa.brave.IdConversion;
 import com.github.kristofa.brave.KeyValueAnnotation;
 import com.github.kristofa.brave.SpanId;
 import com.twitter.zipkin.gen.Endpoint;
+import org.slf4j.MDC;
 
 import java.net.InetSocketAddress;
 import java.util.Collection;
@@ -30,7 +31,11 @@ public class DubboClientRequestAdapter implements ClientRequestAdapter {
         return DubboBraveHelper.getCurrentSpanName();
     }
 
+    public static void main(String[] args) {
+        System.out.println(IdConversion.convertToLong("4c9ebf0e29a166b8"));
+    }
     public void addSpanIdToRequest(SpanId spanId) {
+        MDC.put("braveTraceId",spanId.traceIdString());
         String application = RpcContext.getContext().getUrl().getParameter("application");
         RpcContext rpcContext=RpcContext.getContext();
         rpcContext.setAttachment("clientName", application);
