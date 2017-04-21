@@ -5,6 +5,7 @@ import com.dafy.skye.klog.collector.AbstractCollectorComponent;
 import com.dafy.skye.klog.collector.storage.StorageComponent;
 import com.dafy.skye.klog.core.logback.KLogEvent;
 import com.datastax.driver.core.*;
+import com.datastax.driver.core.utils.UUIDs;
 import com.google.common.base.Strings;
 import com.google.common.io.CharStreams;
 import org.slf4j.Logger;
@@ -96,7 +97,7 @@ public class CassandraStorage extends AbstractCollectorComponent implements Stor
         }
         Session session=getSession();
         TraceLogSchema schema=TraceLogSchema.build(event);
-
+        UUIDs.timeBased();
         String appender= JSON.toJSONString(schema);
         ResultSet resultSet=session.execute("INSERT INTO skye.traces_log JSON '"+appender+"'");
         System.out.println(resultSet);
