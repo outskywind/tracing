@@ -130,10 +130,7 @@ public class TraceLogSchema {
         schema.setMessage(event.getMessage());
         schema.setPid(event.getPid());
         schema.setMdc(event.getMdc());
-        schema.setTsUuid(new UUID(
-                UUIDs.startOf(0 != event.getTimeStamp() ? (event.getTimeStamp() / 1000) : 0)
-                        .getMostSignificantBits(),
-                UUIDs.random().getLeastSignificantBits()));
+        schema.setTsUuid("d2177dd0-eaa2-11de-a572-001b779c76e3");
         return schema;
     }
 }
