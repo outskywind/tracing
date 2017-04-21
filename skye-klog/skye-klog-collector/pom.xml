@@ -12,6 +12,9 @@
     <properties>
         <guava.version>19.0</guava.version>
         <jedis.version>2.7.3</jedis.version>
+        <datastx.cassandra.version>3.2.0</datastx.cassandra.version>
+        <junit.version>4.12</junit.version>
+        <fastjson.version>1.2.29</fastjson.version>
     </properties>
     <dependencies>
         <dependency>
@@ -28,6 +31,27 @@
             <groupId>com.google.guava</groupId>
             <artifactId>guava</artifactId>
             <version>${guava.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.datastax.cassandra</groupId>
+            <artifactId>cassandra-driver-core</artifactId>
+            <version>${datastx.cassandra.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>com.datastax.cassandra</groupId>
+            <artifactId>cassandra-driver-mapping</artifactId>
+            <version>${datastx.cassandra.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.alibaba</groupId>
+            <artifactId>fastjson</artifactId>
+            <version>${fastjson.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>junit</groupId>
+            <artifactId>junit</artifactId>
+            <version>${junit.version}</version>
         </dependency>
     </dependencies>
 

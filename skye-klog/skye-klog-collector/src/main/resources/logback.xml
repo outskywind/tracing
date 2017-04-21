@@ -15,9 +15,9 @@
             <pattern>[%t] %X{1} %date{HH:mm:ss.SSS} %-5level %logger{50}%L- %m%n </pattern>
         </encoder>
     </appender>
-    <logger name="org.apache.kafka" level="INFO" />
-    <root level="INFO">
-        <appender-ref ref="console"/>
+    <logger name="org.apache.kafka" level="DEBUG" />
+    <root level="DEBUG">
+        <appender-ref level="INFO" ref="console"/>
         <appender-ref ref="file"/>
     </root>
 </configuration>
