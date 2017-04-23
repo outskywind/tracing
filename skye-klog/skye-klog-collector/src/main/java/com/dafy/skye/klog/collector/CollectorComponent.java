@@ -8,7 +8,7 @@ public interface CollectorComponent {
 
     void stop();
 
-    void setCollectorConfig(CollectorConfig collectorConfig);
+    void setCollectorPartitionConfig(CollectorPartitionConfig collectorPartitionConfig);
 
-    CollectorConfig getCollectorConfig();
+    CollectorPartitionConfig getCollectorPartitionConfig();
 }

@@ -55,8 +55,6 @@ public class DubboServerRequestAdapter implements ServerRequestAdapter{
         InetSocketAddress socketAddress = RpcContext.getContext().getLocalAddress();
         if (socketAddress != null) {
             KeyValueAnnotation ra = KeyValueAnnotation.create("address", socketAddress.toString());
-//            KeyValueAnnotation ra2=KeyValueAnnotation.create(Constants.CLIENT_RECV,
-//                    Endpoint.create(clientName,DubboBraveHelper.convertToInt(ipAddr)).toString());
             return Collections.singletonList(ra);
         } else {
             return Collections.emptyList();

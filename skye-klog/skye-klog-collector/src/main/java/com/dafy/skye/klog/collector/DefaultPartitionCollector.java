@@ -12,23 +12,23 @@ import java.util.concurrent.atomic.AtomicBoolean;
 /**
  * Created by Caedmon on 2017/4/14.
  */
-public class DefaultCollector extends AbstractCollectorComponent implements Runnable{
+public class DefaultPartitionCollector extends AbstractCollectorComponent implements Runnable{
     private ConsumerComponent consumerComponent;
     private OffsetComponent offsetComponent;
     private StorageComponent storageComponent;
     private AtomicBoolean closed=new AtomicBoolean(false);
-    private static final Logger log= LoggerFactory.getLogger(DefaultCollector.class);
+    private static final Logger log= LoggerFactory.getLogger(DefaultPartitionCollector.class);
 
-    public DefaultCollector(CollectorConfig collectorConfig, ConsumerComponent consumerComponent,
-                            StorageComponent storageComponent,
-                            OffsetComponent offsetComponent) {
+    public DefaultPartitionCollector(CollectorPartitionConfig collectorPartitionConfig, ConsumerComponent consumerComponent,
+                                     StorageComponent storageComponent,
+                                     OffsetComponent offsetComponent) {
         this.consumerComponent=consumerComponent;
         this.storageComponent=storageComponent;
         this.offsetComponent =offsetComponent;
-        setCollectorConfig(collectorConfig);
-        this.consumerComponent.setCollectorConfig(getCollectorConfig());
-        this.storageComponent.setCollectorConfig(getCollectorConfig());
-        this.offsetComponent.setCollectorConfig(getCollectorConfig());
+        setCollectorPartitionConfig(collectorPartitionConfig);
+        this.consumerComponent.setCollectorPartitionConfig(getCollectorPartitionConfig());
+        this.storageComponent.setCollectorPartitionConfig(getCollectorPartitionConfig());
+        this.offsetComponent.setCollectorPartitionConfig(getCollectorPartitionConfig());
     }
     @Override
     public void start() {
@@ -56,7 +56,7 @@ public class DefaultCollector extends AbstractCollectorComponent implements Runn
                 PollResult poll=consumerComponent.poll();
                 if(!poll.isEmpty()){
                     log.debug("pull log success:partition={},offset={},size={}",
-                            this.collectorConfig.getPartition(),poll.getEndOffset(),poll.size());
+                            this.collectorPartitionConfig.getPartition(),poll.getEndOffset(),poll.size());
                     this.storageComponent.batchSave(poll.getEvents());
                     this.consumerComponent.commit(poll.getEndOffset());
                 }
@@ -66,7 +66,7 @@ public class DefaultCollector extends AbstractCollectorComponent implements Runn
             }
         }catch (Throwable e){
             if(!closed.get()){
-                log.error("pull log error:partition={},offset={}",this.collectorConfig.getPartition(),offset,e);
+                log.error("pull log error:partition={},offset={}",this.collectorPartitionConfig.getPartition(),offset,e);
             }
         }finally {
             stop();
@@ -75,8 +75,8 @@ public class DefaultCollector extends AbstractCollectorComponent implements Runn
 
     @Override
     public String toString() {
-        return "DefaultCollector{" +
-                "collectorConfig="+collectorConfig+
+        return "DefaultPartitionCollector{" +
+                "collectorPartitionConfig="+ collectorPartitionConfig +
                 ", consumerComponent=" + consumerComponent +
                 ", offsetComponent=" + offsetComponent +
                 ", storageComponent=" + storageComponent +
@@ -85,16 +85,16 @@ public class DefaultCollector extends AbstractCollectorComponent implements Runn
     }
 
     public static class Builder{
-        private CollectorConfig collectorConfig;
+        private CollectorPartitionConfig collectorPartitionConfig;
         private ConsumerComponent consumerComponent;
         private StorageComponent storageComponent;
         private OffsetComponent offsetComponent;
         public static Builder create(){
             return new Builder();
         }
-        public CollectorConfig collectorConfig(CollectorConfig collectorConfig){
-            this.collectorConfig=collectorConfig;
-            return collectorConfig;
+        public CollectorPartitionConfig collectorConfig(CollectorPartitionConfig collectorPartitionConfig){
+            this.collectorPartitionConfig = collectorPartitionConfig;
+            return collectorPartitionConfig;
         }
         public Builder consumerComponent(ConsumerComponent consumerComponent){
             this.consumerComponent=consumerComponent;
@@ -109,8 +109,8 @@ public class DefaultCollector extends AbstractCollectorComponent implements Runn
             return this;
         }
 
-        public DefaultCollector build(){
-            DefaultCollector collector=new DefaultCollector(this.collectorConfig,this.consumerComponent,
+        public DefaultPartitionCollector build(){
+            DefaultPartitionCollector collector=new DefaultPartitionCollector(this.collectorPartitionConfig,this.consumerComponent,
                     this.storageComponent,
                     this.offsetComponent
             );

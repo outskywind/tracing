@@ -3,6 +3,8 @@ package com.dafy.skye.klog.collector;
 import com.dafy.skye.klog.collector.consumer.KafkaConsumerComponent;
 import com.dafy.skye.klog.collector.offset.redis.RedisConfig;
 import com.dafy.skye.klog.collector.offset.redis.RedisOffsetComponent;
+import com.dafy.skye.klog.collector.storage.cassandra.CassandraConfigProperties;
+import com.dafy.skye.klog.collector.storage.cassandra.CassandraStorage;
 import com.dafy.skye.klog.collector.storage.rolling.RollingFileStorage;
 import com.dafy.skye.klog.collector.storage.rolling.RollingFileStorageConfig;
 import org.slf4j.Logger;
@@ -27,18 +29,19 @@ public class CollectorController {
 
         executorService= Executors.newFixedThreadPool(parallel);
         for(int partition=0;partition<parallel;partition++){
-            CollectorConfig collectorConfig=CollectorConfig.Builder.create()
+            CollectorPartitionConfig collectorPartitionConfig = CollectorPartitionConfig.Builder.create()
                     .build(properties);
-            collectorConfig.setPartition(partition);
-            DefaultCollector.Builder builder= DefaultCollector.Builder.create();
-            builder.collectorConfig(collectorConfig);
+            collectorPartitionConfig.setPartition(partition);
+            DefaultPartitionCollector.Builder builder= DefaultPartitionCollector.Builder.create();
+            builder.collectorConfig(collectorPartitionConfig);
             builder.consumerComponent(new KafkaConsumerComponent(1000L,properties));
-            RollingFileStorageConfig rollingFileStorageConfig=RollingFileStorageConfig.Builder.create()
-                    .build(properties);
-            builder.storageComponent(new RollingFileStorage(rollingFileStorageConfig));
+//            RollingFileStorageConfig rollingFileStorageConfig=RollingFileStorageConfig.Builder.create()
+//                    .build(properties);
+            CassandraConfigProperties cassandraConfigProperties=new CassandraConfigProperties();
+            builder.storageComponent(new CassandraStorage(cassandraConfigProperties));
             RedisConfig redisConfig=RedisConfig.Builder.create().build(properties);
             builder.offsetComponent(new RedisOffsetComponent(redisConfig));
-            DefaultCollector collector=builder.build();
+            DefaultPartitionCollector collector=builder.build();
             log.info("Create collector:{}",collector.toString());
             executorService.execute(collector);
         }

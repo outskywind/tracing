@@ -1,11 +1,9 @@
 package com.dafy.skye.klog.collector.storage.cassandra;
 
-import com.alibaba.fastjson.JSON;
 import com.dafy.skye.klog.collector.AbstractCollectorComponent;
 import com.dafy.skye.klog.collector.storage.StorageComponent;
 import com.dafy.skye.klog.core.logback.KLogEvent;
 import com.datastax.driver.core.*;
-import com.datastax.driver.core.utils.UUIDs;
 import com.google.common.base.Strings;
 import com.google.common.io.CharStreams;
 import org.slf4j.Logger;
@@ -17,7 +15,6 @@ import java.io.InputStreamReader;
 import java.io.Reader;
 import java.util.Collection;
 import java.util.Map;
-import java.util.UUID;
 
 /**
  * Created by Caedmon on 2017/4/22.
@@ -27,10 +24,14 @@ public class CassandraStorage extends AbstractCollectorComponent implements Stor
     private CassandraConfigProperties configProperties;
     private static final Logger log= LoggerFactory.getLogger(CassandraStorage.class);
     public static final String UTF_8="UTF-8";
+    private static final String INSERT_SQL="INSERT INTO skye.traces_log" +
+            " (trace_id,ts_uuid,service_name,address,pid,thread,logger_name,level,mdc,message)" +
+            " VALUES (?,?,?,?,?,?,?,?,?,?)";
     public CassandraStorage(CassandraConfigProperties configProperties){
         this.configProperties=configProperties;
     }
-
+    private Session session;
+    private static PreparedStatement INSERT_ST=null;
     @Override
     public void start() {
         String[] contactPoints=new String[configProperties.getContactPoints().size()];
@@ -52,7 +53,14 @@ public class CassandraStorage extends AbstractCollectorComponent implements Stor
         }
     }
     private Session getSession(){
-        return this.cluster.connect();
+        if(session==null){
+            synchronized (this){
+                if(this.session==null){
+                    this.session=this.cluster.connect();
+                }
+            }
+        }
+        return this.session;
     }
     private KeyspaceMetadata ensureExists(){
         String keySpace=configProperties.getKeySpace();
@@ -66,8 +74,8 @@ public class CassandraStorage extends AbstractCollectorComponent implements Stor
         }
         return result;
     }
-    void applyCqlFile(String keySpace, Session session, String resource) {
-        InputStream inputStream=TraceLogSchema.class.getClassLoader().getResourceAsStream(resource);
+    private void applyCqlFile(String keySpace, Session session, String resource) {
+        InputStream inputStream=TraceLogEntity.class.getClassLoader().getResourceAsStream(resource);
         try (Reader reader = new InputStreamReader(inputStream, UTF_8)) {
             for (String cmd : CharStreams.toString(reader).split(";")) {
                 cmd = cmd.trim().replace(" " + this.configProperties.getKeySpace(), " " + keySpace);
@@ -78,6 +86,18 @@ public class CassandraStorage extends AbstractCollectorComponent implements Stor
         } catch (IOException ex) {
             log.error(ex.getMessage(), ex);
         }
+    }
+    private BoundStatement buildInsertBST(TraceLogEntity entity){
+        if(INSERT_ST==null){
+            INSERT_ST=getSession().prepare(INSERT_SQL);
+        }
+        BoundStatement statement=new BoundStatement(INSERT_ST);
+        statement.bind(new Object[]{
+                entity.getTraceId(),entity.getTsUuid(),entity.getServiceName(),
+                entity.getAddress(),entity.getPid(),entity.getThread(),entity.getLoggerName(),
+                entity.getLevel(),entity.getMdc(),entity.getMessage()
+        });
+        return statement;
     }
     @Override
     public void stop() {
@@ -92,19 +112,24 @@ public class CassandraStorage extends AbstractCollectorComponent implements Stor
         }
         Map<String,String> mdc=event.getMdc();
         if(mdc==null||mdc.isEmpty()||Strings.isNullOrEmpty(mdc.get("skyeTraceId"))){
-            log.warn("KLogEvent traceId is empty:serviceName={}",event.getServiceName());
+            log.error("KLogEvent traceId is empty:serviceName={},address={}",event.getServiceName(),event.getAddress());
             return;
         }
         Session session=getSession();
-        TraceLogSchema schema=TraceLogSchema.build(event);
-        UUIDs.timeBased();
-        String appender= JSON.toJSONString(schema);
-        ResultSet resultSet=session.execute("INSERT INTO skye.traces_log JSON '"+appender+"'");
-        System.out.println(resultSet);
+        TraceLogEntity entity= TraceLogEntity.build(event);
+        BoundStatement statement= buildInsertBST(entity);
+        session.executeAsync(statement);
     }
-
     @Override
     public void batchSave(Collection<KLogEvent> events) {
-
+        BatchStatement batch = new BatchStatement();
+        Session session=getSession();
+        for (KLogEvent event:events) {
+            TraceLogEntity entity=TraceLogEntity.build(event);
+            Statement bs = buildInsertBST(entity);
+            batch.add(bs);
+        }
+        session.executeAsync(batch);
+        batch.clear();
     }
 }

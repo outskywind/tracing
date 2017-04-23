@@ -5,12 +5,12 @@ import java.util.Properties;
 /**
  * Created by Caedmon on 2017/4/16.
  */
-public class CollectorConfig {
+public class CollectorPartitionConfig {
     private String topic;
     private int partition;
     private String groupId;
 
-    public CollectorConfig(String topic,String groupId,int partition) {
+    public CollectorPartitionConfig(String topic, String groupId, int partition) {
         this.topic = topic;
         this.partition = partition;
         this.groupId = groupId;
@@ -42,7 +42,7 @@ public class CollectorConfig {
 
     @Override
     public String toString() {
-        return "CollectorConfig{" +
+        return "CollectorPartitionConfig{" +
                 "topic='" + topic + '\'' +
                 ", partition=" + partition +
                 ", groupId='" + groupId + '\'' +
@@ -69,10 +69,10 @@ public class CollectorConfig {
         public static Builder create(){
             return new Builder();
         }
-        public CollectorConfig build(){
-            return new CollectorConfig(this.topic,this.groupId,this.partition);
+        public CollectorPartitionConfig build(){
+            return new CollectorPartitionConfig(this.topic,this.groupId,this.partition);
         }
-        public CollectorConfig build(Properties properties){
+        public CollectorPartitionConfig build(Properties properties){
             this.topic=properties.getProperty(PROPERTIES_PREFIX+".topic","skye-klog");
             this.groupId=properties.getProperty(PROPERTIES_PREFIX+".groupId","skye-klog");
             this.partition=Integer.parseInt(properties.getProperty(PROPERTIES_PREFIX+".partition","0"));

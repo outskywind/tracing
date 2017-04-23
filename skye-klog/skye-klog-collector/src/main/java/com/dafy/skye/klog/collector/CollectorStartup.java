@@ -1,8 +1,5 @@
 package com.dafy.skye.klog.collector;
 
-import ch.qos.logback.classic.PatternLayout;
-import com.dafy.skye.klog.core.logback.KLogConverter;
-
 import java.io.InputStream;
 import java.util.Properties;
 

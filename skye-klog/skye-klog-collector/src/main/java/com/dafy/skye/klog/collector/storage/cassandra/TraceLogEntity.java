@@ -4,21 +4,22 @@ import com.alibaba.fastjson.annotation.JSONField;
 import com.dafy.skye.klog.core.logback.KLogEvent;
 import com.datastax.driver.core.utils.UUIDs;
 
-import java.text.SimpleDateFormat;
-import java.util.Date;
 import java.util.Map;
+import java.util.Random;
 import java.util.UUID;
 
 /**
  * Created by Caedmon on 2017/4/22.
  */
-public class TraceLogSchema {
+public class TraceLogEntity {
     @JSONField(name = "logger_name")
     private String loggerName;
     @JSONField(name = "trace_id")
     private String traceId;
     @JSONField(name = "service_name")
     private String serviceName;
+    @JSONField(name = "thread")
+    private String thread;
     @JSONField(name = "logger_name")
     private String address;
     @JSONField(name = "pid")
@@ -32,7 +33,7 @@ public class TraceLogSchema {
     @JSONField(name = "mdc")
     private Map<String,String> mdc;
     @JSONField(name = "ts_uuid")
-    private String tsUuid;
+    private UUID tsUuid;
 
     public String getLoggerName() {
         return loggerName;
@@ -106,16 +107,24 @@ public class TraceLogSchema {
         this.mdc = mdc;
     }
 
-    public String getTsUuid() {
+    public UUID getTsUuid() {
         return tsUuid;
     }
 
-    public void setTsUuid(String tsUuid) {
+    public void setTsUuid(UUID tsUuid) {
         this.tsUuid = tsUuid;
     }
 
-    public static TraceLogSchema build(KLogEvent event){
-        TraceLogSchema schema=new TraceLogSchema();
+    public String getThread() {
+        return thread;
+    }
+
+    public void setThread(String thread) {
+        this.thread = thread;
+    }
+
+    public static TraceLogEntity build(KLogEvent event){
+        TraceLogEntity schema=new TraceLogEntity();
         Map<String,String> mdc=event.getMdc();
         if(mdc!=null&&!mdc.isEmpty()){
             String traceId=mdc.get("skyeTraceId");
@@ -127,10 +136,13 @@ public class TraceLogSchema {
         schema.setServiceName(event.getServiceName());
         schema.setTs(event.getTimeStamp());
         schema.setLoggerName(event.getLoggerName());
-        schema.setMessage(event.getMessage());
+        schema.setMessage(event.getFormattedMessage());
         schema.setPid(event.getPid());
         schema.setMdc(event.getMdc());
-        schema.setTsUuid("d2177dd0-eaa2-11de-a572-001b779c76e3");
+        schema.setThread(event.getThreadName());
+        Random random = new Random();
+        UUID uuid = new UUID(UUIDs.startOf(event.getTimeStamp()).getMostSignificantBits(), random.nextLong());
+        schema.setTsUuid(uuid);
         return schema;
     }
 }

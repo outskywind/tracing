@@ -3,7 +3,6 @@ package com.dafy.skye.klog.collector;
 import ch.qos.logback.classic.Level;
 import com.dafy.skye.klog.collector.storage.cassandra.CassandraConfigProperties;
 import com.dafy.skye.klog.collector.storage.cassandra.CassandraStorage;
-import com.dafy.skye.klog.collector.storage.cassandra.TraceLogSchema;
 import com.dafy.skye.klog.core.logback.KLogEvent;
 import org.junit.Test;
 
@@ -29,6 +28,7 @@ public class CassandraStorageTest {
         event.setMessage("Skye build the event ");
         event.setLoggerName("com.dafy.skye.Builder");
         event.setPid("11581");
+        event.setThreadName("Thread-1");
         event.setMdcPropertyMap(mdc);
         event.setTimeStamp(System.currentTimeMillis());
         return event;

@@ -1,7 +1,6 @@
 package com.dafy.skye.klog.collector.offset.redis;
 
 import com.dafy.skye.klog.collector.AbstractCollectorComponent;
-import com.dafy.skye.klog.collector.CollectorConfig;
 import com.google.common.base.Strings;
 import com.dafy.skye.klog.collector.offset.OffsetComponent;
 import redis.clients.jedis.Jedis;
@@ -34,10 +33,10 @@ public class RedisOffsetComponent extends AbstractCollectorComponent implements 
 
     @Override
     public void setOffset(long offset) {
-        String groupId= getCollectorConfig().getGroupId();
-        String topicName= getCollectorConfig().getTopic();
+        String groupId= getCollectorPartitionConfig().getGroupId();
+        String topicName= getCollectorPartitionConfig().getTopic();
         Jedis jedis=jedisPool.getResource();
-        String field=topicName+"."+groupId+"."+getCollectorConfig().getPartition();
+        String field=topicName+"."+groupId+"."+ getCollectorPartitionConfig().getPartition();
         try{
             jedis.hset(KLOG_CONSUMER_KEY,field,String.valueOf(offset));
         }finally {
@@ -47,10 +46,10 @@ public class RedisOffsetComponent extends AbstractCollectorComponent implements 
 
     @Override
     public long getOffset() {
-        String groupId= getCollectorConfig().getGroupId();
-        String topicName= getCollectorConfig().getTopic();
+        String groupId= getCollectorPartitionConfig().getGroupId();
+        String topicName= getCollectorPartitionConfig().getTopic();
         Jedis jedis=jedisPool.getResource();
-        String field=topicName+"."+groupId+"."+ getCollectorConfig().getPartition();
+        String field=topicName+"."+groupId+"."+ getCollectorPartitionConfig().getPartition();
         long offset=0L;
         try{
             String offsetValue=jedis.hget(KLOG_CONSUMER_KEY,field);

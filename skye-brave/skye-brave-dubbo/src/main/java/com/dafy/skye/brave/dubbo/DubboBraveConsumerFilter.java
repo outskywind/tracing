@@ -2,10 +2,8 @@ package com.dafy.skye.brave.dubbo;
 
 import com.alibaba.dubbo.common.extension.Activate;
 import com.alibaba.dubbo.rpc.*;
-import com.github.kristofa.brave.Brave;
-import com.github.kristofa.brave.ClientRequestInterceptor;
-import com.github.kristofa.brave.ClientResponseInterceptor;
-import com.github.kristofa.brave.ClientSpanThreadBinder;
+import com.github.kristofa.brave.*;
+import com.twitter.zipkin.gen.Span;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -23,6 +21,7 @@ public class DubboBraveConsumerFilter implements Filter{
         ClientResponseInterceptor clientResponseInterceptor=brave.clientResponseInterceptor();
         ClientSpanThreadBinder clientSpanThreadBinder=brave.clientSpanThreadBinder();
         clientRequestInterceptor.handle(new DubboClientRequestAdapter(invoker,invocation));
+        final Span span=clientSpanThreadBinder.getCurrentClientSpan();
         try{
             Result result = invoker.invoke(invocation);
             clientResponseInterceptor.handle(new DubboClientResponseAdapter(result));
@@ -31,7 +30,8 @@ public class DubboBraveConsumerFilter implements Filter{
             clientResponseInterceptor.handle(new DubboClientResponseAdapter(ex));
             throw  new RpcException(ex);
         }finally {
-            clientSpanThreadBinder.setCurrentSpan(null);
+            //不能在client response后清除掉local span
+            brave.localSpanThreadBinder().setCurrentSpan(span);
         }
     }
 

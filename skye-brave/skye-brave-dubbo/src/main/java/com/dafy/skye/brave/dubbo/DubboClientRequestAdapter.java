@@ -30,12 +30,15 @@ public class DubboClientRequestAdapter implements ClientRequestAdapter {
     public String getSpanName() {
         return DubboBraveHelper.getCurrentSpanName();
     }
-
-    public static void main(String[] args) {
-        System.out.println(IdConversion.convertToLong("4c9ebf0e29a166b8"));
-    }
     public void addSpanIdToRequest(SpanId spanId) {
-        MDC.put("braveTraceId",spanId.traceIdString());
+        boolean parentIdNull=spanId.nullableParentId()==null;
+        String skyeTraceId;
+        if(parentIdNull){
+            skyeTraceId=spanId.traceIdString();
+        }else{
+            skyeTraceId=IdConversion.convertToString(spanId.parentId);
+        }
+        MDC.put(Constants.MDC_TRACE_ID_KEY,skyeTraceId);
         String application = RpcContext.getContext().getUrl().getParameter("application");
         RpcContext rpcContext=RpcContext.getContext();
         rpcContext.setAttachment("clientName", application);

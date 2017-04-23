@@ -17,7 +17,7 @@ public class DubboBraveProviderFilter implements Filter {
     private volatile Brave brave;
     public Result invoke(Invoker<?> invoker, Invocation invocation) throws RpcException {
         String traceId=invocation.getAttachment("traceId");
-        MDC.put("braveTraceId",traceId);
+        MDC.put(Constants.MDC_TRACE_ID_KEY,traceId);
         ServerRequestInterceptor serverRequestInterceptor=brave.serverRequestInterceptor();
         ServerResponseInterceptor serverResponseInterceptor=brave.serverResponseInterceptor();
         serverRequestInterceptor.handle(new DubboServerRequestAdapter(invoker,invocation,brave.serverTracer()));

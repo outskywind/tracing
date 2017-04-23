@@ -1,7 +1,6 @@
 package com.dafy.skye.klog.collector.consumer;
 
 import com.dafy.skye.klog.collector.AbstractCollectorComponent;
-import com.dafy.skye.klog.collector.CollectorConfig;
 import com.dafy.skye.klog.core.JavaDeserializer;
 import com.dafy.skye.klog.core.logback.KLogEvent;
 import org.apache.kafka.clients.consumer.*;
@@ -34,12 +33,12 @@ public class KafkaConsumerComponent extends AbstractCollectorComponent implement
     public void start() {
         if(!started.get()){
             kafkaConsumer=new KafkaConsumer<>(this.kafkaProperties,new StringDeserializer(),new JavaDeserializer());
-            TopicPartition topicPartition=new TopicPartition(collectorConfig.getTopic(),collectorConfig.getPartition());
+            TopicPartition topicPartition=new TopicPartition(collectorPartitionConfig.getTopic(), collectorPartitionConfig.getPartition());
             kafkaConsumer.assign(Collections.singleton(topicPartition));
             this.topicPartition=topicPartition;
             started.set(true);
             log.info("Consumer started:topicName={},partition={},pullInterval={}",
-                    collectorConfig.getTopic(),collectorConfig.getPartition(),
+                    collectorPartitionConfig.getTopic(), collectorPartitionConfig.getPartition(),
                     this.pollInterval);
         }else{
             log.warn("KafkaConsumer has already started");
