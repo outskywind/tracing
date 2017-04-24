@@ -2,6 +2,7 @@ package com.dafy.skye.klog.collector.storage.cassandra;
 
 import com.dafy.skye.klog.collector.AbstractCollectorComponent;
 import com.dafy.skye.klog.collector.storage.StorageComponent;
+import com.dafy.skye.klog.collector.storage.cassandra.domain.TraceLog;
 import com.dafy.skye.klog.core.logback.KLogEvent;
 import com.datastax.driver.core.*;
 import com.google.common.base.Strings;
@@ -48,9 +49,7 @@ public class CassandraStorage extends AbstractCollectorComponent implements Stor
                 .withPoolingOptions(poolingOptions)
                 .withCredentials(configProperties.getUsername(),configProperties.getPassword())
                 .withCodecRegistry(new CodecRegistry().register()).build();
-        if(configProperties.isEnsureSchema()){
-            ensureExists();
-        }
+        ensureExists();
     }
     private Session getSession(){
         if(session==null){
@@ -62,20 +61,22 @@ public class CassandraStorage extends AbstractCollectorComponent implements Stor
         }
         return this.session;
     }
-    private KeyspaceMetadata ensureExists(){
-        String keySpace=configProperties.getKeySpace();
-        String schemaResource=configProperties.getSchemaResource();
+    private synchronized KeyspaceMetadata ensureExists(){
         KeyspaceMetadata result=this.cluster.getMetadata().getKeyspace(configProperties.getKeySpace());
-        if (result == null || result.getTable("traces_log") == null) {
-            log.info("Installing schema {}", schemaResource);
-            applyCqlFile(keySpace, getSession(), schemaResource);
-            // refresh metadata since we've installed the schema
-            result = this.cluster.getMetadata().getKeyspace(keySpace);
+        if(configProperties.isEnsureSchema()){
+            String keySpace=configProperties.getKeySpace();
+            String schemaResource=configProperties.getSchemaResource();
+            if (result == null || result.getTable("traces_log") == null) {
+                log.info("Installing schema {}", schemaResource);
+                applyCqlFile(keySpace, getSession(), schemaResource);
+                // refresh metadata since we've installed the schema
+                result = this.cluster.getMetadata().getKeyspace(keySpace);
+            }
         }
         return result;
     }
     private void applyCqlFile(String keySpace, Session session, String resource) {
-        InputStream inputStream=TraceLogEntity.class.getClassLoader().getResourceAsStream(resource);
+        InputStream inputStream=TraceLog.class.getClassLoader().getResourceAsStream(resource);
         try (Reader reader = new InputStreamReader(inputStream, UTF_8)) {
             for (String cmd : CharStreams.toString(reader).split(";")) {
                 cmd = cmd.trim().replace(" " + this.configProperties.getKeySpace(), " " + keySpace);
@@ -87,7 +88,7 @@ public class CassandraStorage extends AbstractCollectorComponent implements Stor
             log.error(ex.getMessage(), ex);
         }
     }
-    private BoundStatement buildInsertBST(TraceLogEntity entity){
+    private BoundStatement buildInsertBST(TraceLog entity){
         if(INSERT_ST==null){
             INSERT_ST=getSession().prepare(INSERT_SQL);
         }
@@ -116,7 +117,7 @@ public class CassandraStorage extends AbstractCollectorComponent implements Stor
             return;
         }
         Session session=getSession();
-        TraceLogEntity entity= TraceLogEntity.build(event);
+        TraceLog entity= TraceLog.build(event);
         BoundStatement statement= buildInsertBST(entity);
         session.executeAsync(statement);
     }
@@ -125,7 +126,7 @@ public class CassandraStorage extends AbstractCollectorComponent implements Stor
         BatchStatement batch = new BatchStatement();
         Session session=getSession();
         for (KLogEvent event:events) {
-            TraceLogEntity entity=TraceLogEntity.build(event);
+            TraceLog entity= TraceLog.build(event);
             Statement bs = buildInsertBST(entity);
             batch.add(bs);
         }

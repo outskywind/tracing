@@ -1,8 +1,11 @@
 package com.dafy.skye.klog.collector;
 
+import com.dafy.skye.klog.collector.consumer.ConsumerComponent;
 import com.dafy.skye.klog.collector.consumer.KafkaConsumerComponent;
+import com.dafy.skye.klog.collector.offset.OffsetComponent;
 import com.dafy.skye.klog.collector.offset.redis.RedisConfig;
 import com.dafy.skye.klog.collector.offset.redis.RedisOffsetComponent;
+import com.dafy.skye.klog.collector.storage.StorageComponent;
 import com.dafy.skye.klog.collector.storage.cassandra.CassandraConfigProperties;
 import com.dafy.skye.klog.collector.storage.cassandra.CassandraStorage;
 import com.dafy.skye.klog.collector.storage.rolling.RollingFileStorage;

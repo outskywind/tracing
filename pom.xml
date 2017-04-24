@@ -11,10 +11,23 @@
     <modules>
         <module>skye-brave</module>
         <module>skye-klog</module>
+        <module>skye-server</module>
+        <module>skye-autoconfigure</module>
     </modules>
     <properties>
         <kafka.version>0.10.2.0</kafka.version>
+        <spring-boot.version>1.5.3.RELEASE</spring-boot.version>
     </properties>
+    <dependencyManagement>
+        <dependencies>
+            <dependency>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-dependencies</artifactId>
+                <version>${spring-boot.version}</version>
+                <scope>import</scope>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
     <build>
         
         <plugins>

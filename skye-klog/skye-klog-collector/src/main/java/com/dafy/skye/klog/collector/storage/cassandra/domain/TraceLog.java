@@ -1,4 +1,4 @@
-package com.dafy.skye.klog.collector.storage.cassandra;
+package com.dafy.skye.klog.collector.storage.cassandra.domain;
 
 import com.alibaba.fastjson.annotation.JSONField;
 import com.dafy.skye.klog.core.logback.KLogEvent;
@@ -11,7 +11,7 @@ import java.util.UUID;
 /**
  * Created by Caedmon on 2017/4/22.
  */
-public class TraceLogEntity {
+public class TraceLog {
     @JSONField(name = "logger_name")
     private String loggerName;
     @JSONField(name = "trace_id")
@@ -123,8 +123,8 @@ public class TraceLogEntity {
         this.thread = thread;
     }
 
-    public static TraceLogEntity build(KLogEvent event){
-        TraceLogEntity schema=new TraceLogEntity();
+    public static TraceLog build(KLogEvent event){
+        TraceLog schema=new TraceLog();
         Map<String,String> mdc=event.getMdc();
         if(mdc!=null&&!mdc.isEmpty()){
             String traceId=mdc.get("skyeTraceId");

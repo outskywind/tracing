@@ -12,6 +12,6 @@ CREATE TABLE IF NOT EXISTS skye.traces_log (
   message             text,
 PRIMARY KEY (trace_id, ts_uuid)
 )
-  WITH CLUSTERING ORDER BY (ts_uuid ASC)
+  WITH CLUSTERING ORDER BY (ts_uuid ASC )
 AND compaction = {'class': 'org.apache.cassandra.db.compaction.TimeWindowCompactionStrategy'}
 AND default_time_to_live =  604800;

@@ -21,7 +21,6 @@ public class DubboBraveConsumerFilter implements Filter{
         ClientResponseInterceptor clientResponseInterceptor=brave.clientResponseInterceptor();
         ClientSpanThreadBinder clientSpanThreadBinder=brave.clientSpanThreadBinder();
         clientRequestInterceptor.handle(new DubboClientRequestAdapter(invoker,invocation));
-        final Span span=clientSpanThreadBinder.getCurrentClientSpan();
         try{
             Result result = invoker.invoke(invocation);
             clientResponseInterceptor.handle(new DubboClientResponseAdapter(result));
@@ -31,7 +30,7 @@ public class DubboBraveConsumerFilter implements Filter{
             throw  new RpcException(ex);
         }finally {
             //不能在client response后清除掉local span
-            brave.localSpanThreadBinder().setCurrentSpan(span);
+            clientSpanThreadBinder.setCurrentSpan(null);
         }
     }
 
