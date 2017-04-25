@@ -7,9 +7,10 @@ import java.lang.annotation.*;
 /**
  * Created by Caedmon on 2017/4/24.
  */
-@Import(CollectorAutoConfiguration.class)
+
 @Target(ElementType.TYPE)
 @Retention(RetentionPolicy.RUNTIME)
 @Documented
+@Import(CollectorAutoConfiguration.class)
 public @interface EnableSkyeLogCollector {
 }

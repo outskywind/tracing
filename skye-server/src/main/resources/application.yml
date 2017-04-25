@@ -1,18 +1,34 @@
-skye:
-  log:
-    storage:
-      type: cassandra
-    collector:
-      kafka:
-        topic: skye-log
-        groupId: skye-log
-        parttion: 4
-        properties:
-          #kafka 地址
-          bootstrap.servers: kafka1.dafy.com:9092
-          #zookeeper 地址
-          zookeeper.connect: zookeeper1.dafy.com:2181
-          #zookeeper 链接超时时间
-          zookeeper.connection.timeout.ms: 6000
-          #是否自动ack
-          enable.auto.commit: false
+spring:
+  application:
+    admin:
+      enabled: true
+  jedis:
+    max-total: 10
+    max-idle: 5
+    min-idle: 5
+    host: master.redis.sevend.com
+    port: 16389
+    test-on-borrow: false
+    test-on-return: false
+    timeout: 30000
+skye.log.collector:
+  storage:
+    type: cassandra
+    cassandra:
+
+  kafka:
+    topic: skye-log
+    groupId: skye-log
+    partition: 4
+    offset:
+      type: redis
+    properties:
+      #kafka 地址
+      bootstrap.servers: kafka1.dafy.com:9092
+      #zookeeper 地址
+      zookeeper.connect: zookeeper1.dafy.com:2181
+      #zookeeper 链接超时时间
+      zookeeper.connection.timeout.ms: 6000
+      #是否自动ack
+      enable.auto.commit: false
+

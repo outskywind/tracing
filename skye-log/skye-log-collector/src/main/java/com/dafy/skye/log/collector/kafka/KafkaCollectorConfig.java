@@ -10,7 +10,7 @@ public class KafkaCollectorConfig {
     private String groupId;
     private int partition;
     private long pollInterval;
-    private Map<String,Object> properties;
+    private Map<String,String> properties;
 
     public String getTopic() {
         return topic;
@@ -36,11 +36,11 @@ public class KafkaCollectorConfig {
         this.partition = partition;
     }
 
-    public Map<String, Object> getProperties() {
+    public Map<String, String> getProperties() {
         return properties;
     }
 
-    public void setProperties(Map<String, Object> properties) {
+    public void setProperties(Map<String, String> properties) {
         this.properties = properties;
     }
 

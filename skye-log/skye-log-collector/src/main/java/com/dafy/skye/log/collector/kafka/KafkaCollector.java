@@ -40,7 +40,7 @@ public class KafkaCollector implements CollectorComponent {
             final int partition=kafkaCollectorConfig.getPartition();
             threadPool=partition<=1?Executors.newSingleThreadExecutor():Executors.newFixedThreadPool(partition);
             for(int i=0;i<partition;i++){
-                KafkaConsumer kafkaConsumer=new KafkaConsumer<>(kafkaCollectorConfig.getProperties(),
+                KafkaConsumer kafkaConsumer=new KafkaConsumer(kafkaCollectorConfig.getProperties(),
                         new StringDeserializer(),new JavaDeserializer());
                 TopicPartition topicPartition=new TopicPartition(
                         kafkaCollectorConfig.getTopic(),i);

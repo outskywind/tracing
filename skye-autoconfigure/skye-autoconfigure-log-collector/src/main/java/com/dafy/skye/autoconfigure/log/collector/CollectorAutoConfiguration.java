@@ -8,6 +8,7 @@ import com.dafy.skye.log.collector.kafka.offset.redis.RedisOffsetComponent;
 import com.dafy.skye.log.collector.storage.StorageComponent;
 import com.dafy.skye.log.collector.storage.cassandra.CassandraConfig;
 import com.dafy.skye.log.collector.storage.cassandra.CassandraStorage;
+import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
@@ -25,6 +26,9 @@ CassandraConfigProperties.class,
 KafkaCollectorConfigProperties.class})
 public class CollectorAutoConfiguration {
 
+    public CollectorAutoConfiguration(){
+        System.out.println("test");
+    }
     @Bean(initMethod = "start")
     @ConditionalOnMissingBean(StorageComponent.class)
     @ConditionalOnProperty(value = "skye.log.collector.storage.type",havingValue = "cassandra")
@@ -33,8 +37,8 @@ public class CollectorAutoConfiguration {
         return new CassandraStorage(cassandraConfig);
     }
 
-    @Bean(initMethod = "start")
     @ConditionalOnBean(StorageComponent.class)
+    @Bean
     CollectorDelegate collectorDelegate(StorageComponent storageComponent){
         CollectorDelegate delegate=new CollectorDelegate(storageComponent,null);
         return delegate;
@@ -46,8 +50,9 @@ public class CollectorAutoConfiguration {
         OffsetComponent offsetComponent=new RedisOffsetComponent(jedisPool);
         return offsetComponent;
     }
-    @Bean(initMethod = "start")
+
     @ConditionalOnBean({OffsetComponent.class,CollectorDelegate.class})
+    @Bean(initMethod = "start")
     KafkaCollector kafkaCollector(CollectorDelegate delegate,
                                          KafkaCollectorConfigProperties kafkaCollectorConfigProperties,
                                          OffsetComponent offsetComponent){
