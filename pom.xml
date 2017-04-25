@@ -10,7 +10,7 @@
     <version>1.0.0-SNAPSHOT</version>
     <modules>
         <module>skye-brave</module>
-        <module>skye-klog</module>
+        <module>skye-log</module>
         <module>skye-server</module>
         <module>skye-autoconfigure</module>
     </modules>

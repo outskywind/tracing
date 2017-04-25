@@ -12,7 +12,7 @@
     <artifactId>skye-autoconfigure</artifactId>
     <packaging>pom</packaging>
     <modules>
-        <module>skye-klog-collector-autoconfigure</module>
+        <module>skye-autoconfigure-log-collector</module>
     </modules>
     <dependencies>
         <dependency>
