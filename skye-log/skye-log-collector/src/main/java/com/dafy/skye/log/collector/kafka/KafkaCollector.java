@@ -79,30 +79,33 @@ public class KafkaCollector implements CollectorComponent {
                 final long beforePollOffset=offset;
                 final long pollInterval=KafkaCollector.this.kafkaCollectorConfig.getPollInterval();
                 try {
-                    ConsumerRecords<String, Object> records = kafkaConsumer.poll(pollInterval);
-                    for (ConsumerRecord<String, Object> record : records) {
-                        //如果消息offset小于start则忽略
-                        long lastOffset=record.offset();
-                        if (lastOffset <= currentOffset) {
-                            continue;
-                        }
-                        SkyeLogEvent event = (SkyeLogEvent) record.value();
-                        KafkaCollector.this.delegate.acceptEvent(event);
-                        if(lastOffset>offset){
-                            currentOffset=lastOffset;
-                            KafkaCollector.this.partitionOffsetMap.put(partition,record.offset());
-                            kafkaConsumer.commitAsync(new OffsetCommitCallback() {
-                                @Override
-                                public void onComplete(Map<TopicPartition, OffsetAndMetadata> offsets, Exception exception) {
-                                    if(exception!=null){
-                                        exception.printStackTrace();
-                                        log.error("Commit offset error ",exception);
+                    while (true){
+                        ConsumerRecords<String, Object> records = kafkaConsumer.poll(pollInterval);
+                        for (ConsumerRecord<String, Object> record : records) {
+                            //如果消息offset小于start则忽略
+                            long lastOffset=record.offset();
+                            if (lastOffset <= currentOffset) {
+                                continue;
+                            }
+                            SkyeLogEvent event = (SkyeLogEvent) record.value();
+                            KafkaCollector.this.delegate.acceptEvent(event);
+                            if(lastOffset>offset){
+                                currentOffset=lastOffset;
+                                KafkaCollector.this.partitionOffsetMap.put(partition,record.offset());
+                                kafkaConsumer.commitAsync(new OffsetCommitCallback() {
+                                    @Override
+                                    public void onComplete(Map<TopicPartition, OffsetAndMetadata> offsets, Exception exception) {
+                                        if(exception!=null){
+                                            exception.printStackTrace();
+                                            log.error("Commit offset error ",exception);
+                                        }
                                     }
-                                }
-                            });
-                            offsetComponent.setOffset(partitionKey,lastOffset);
+                                });
+                                offsetComponent.setOffset(partitionKey,lastOffset);
+                            }
                         }
                     }
+
                 } catch (Throwable e) {
                     log.error("Poll event error", e);
                     //回滚offset

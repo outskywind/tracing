@@ -12,6 +12,7 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 public class SkyeServer {
     public static void main(String[] args) {
         SpringApplication application=new SpringApplication(SkyeServer.class);
+        application.setWebEnvironment(false);
         application.run(args);
     }
 }

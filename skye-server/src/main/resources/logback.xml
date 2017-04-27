@@ -22,6 +22,7 @@
         </encoder>
     </appender>
     <logger name="org.apache.tomcat" level="WARN"/>
+    <logger name="org.apache.kafka" level="INFO"/>
     <root level="DEBUG">
         <appender-ref ref="console" />
         <appender-ref ref="file" />

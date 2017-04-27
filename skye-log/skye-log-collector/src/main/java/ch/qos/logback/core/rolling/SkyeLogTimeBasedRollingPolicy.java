@@ -7,6 +7,8 @@ import ch.qos.logback.core.rolling.helper.RenameUtil;
 
 import java.util.Date;
 
+import static ch.qos.logback.core.CoreConstants.UNBOUND_HISTORY;
+
 /**
  * Created by Caedmon on 2017/3/30.
  */
@@ -24,7 +26,7 @@ public class SkyeLogTimeBasedRollingPolicy<E>  extends TimeBasedRollingPolicy<E>
     @Override
     public void start() {
         super.start();
-        if (getMaxHistory() != INFINITE_HISTORY) {
+        if (getMaxHistory() != UNBOUND_HISTORY) {
             skyeRemover = timeBasedFileNamingAndTriggeringPolicy.getArchiveRemover();
             skyeRemover.setMaxHistory(getMaxHistory());
             if(cleanHistoryOnStart) {
@@ -48,11 +50,11 @@ public class SkyeLogTimeBasedRollingPolicy<E>  extends TimeBasedRollingPolicy<E>
                 skyeRenameUtil.rename(getParentsRawFileProperty(), elapsedPeriodsFileName);
             } // else { nothing to do if CompressionMode == NONE and parentsRawFileProperty == null }
         } else {
-            if (getParentsRawFileProperty() == null) {
-                future = asyncCompress(elapsedPeriodsFileName, elapsedPeriodsFileName, elapsedPeriodStem);
-            } else {
-                future = renamedRawAndAsyncCompress(elapsedPeriodsFileName, elapsedPeriodStem);
-            }
+//            if (getParentsRawFileProperty() == null) {
+//                future = asyncCompress(elapsedPeriodsFileName, elapsedPeriodsFileName, elapsedPeriodStem);
+//            } else {
+//                future = renamedRawAndAsyncCompress(elapsedPeriodsFileName, elapsedPeriodStem);
+//            }
         }
         if (skyeRemover != null) {
             skyeRemover.clean(new Date(timeBasedFileNamingAndTriggeringPolicy.getCurrentTime()));

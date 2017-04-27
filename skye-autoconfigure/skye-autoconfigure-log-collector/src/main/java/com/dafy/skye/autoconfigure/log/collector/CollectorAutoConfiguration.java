@@ -8,7 +8,7 @@ import com.dafy.skye.log.collector.kafka.offset.redis.RedisOffsetComponent;
 import com.dafy.skye.log.collector.storage.StorageComponent;
 import com.dafy.skye.log.collector.storage.cassandra.CassandraConfig;
 import com.dafy.skye.log.collector.storage.cassandra.CassandraStorage;
-import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
+import com.dafy.skye.log.collector.storage.elasticsearch.ElasticSearchStorage;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
@@ -23,20 +23,28 @@ import redis.clients.jedis.JedisPool;
 @Configuration
 @EnableConfigurationProperties({
 CassandraConfigProperties.class,
-KafkaCollectorConfigProperties.class})
+KafkaCollectorConfigProperties.class,
+ElasticSearchConfigProperties.class})
 public class CollectorAutoConfiguration {
 
     public CollectorAutoConfiguration(){
         System.out.println("test");
     }
-    @Bean(initMethod = "start")
+
     @ConditionalOnMissingBean(StorageComponent.class)
     @ConditionalOnProperty(value = "skye.log.collector.storage.type",havingValue = "cassandra")
+    @Bean(initMethod = "start")
     StorageComponent storageComponent(CassandraConfigProperties cassandraConfigProperties){
         CassandraConfig cassandraConfig=cassandraConfigProperties.buildCassandraConfig();
         return new CassandraStorage(cassandraConfig);
     }
-
+    @ConditionalOnMissingBean(StorageComponent.class)
+    @ConditionalOnProperty(value = "skye.log.collector.storage.type",havingValue = "elasticsearch")
+    @Bean(initMethod = "start")
+    ElasticSearchStorage elasticSearchStorage(ElasticSearchConfigProperties properties){
+        ElasticSearchStorage storage=new ElasticSearchStorage(properties.build());
+        return storage;
+    }
     @ConditionalOnBean(StorageComponent.class)
     @Bean
     CollectorDelegate collectorDelegate(StorageComponent storageComponent){
@@ -60,4 +68,6 @@ public class CollectorAutoConfiguration {
         KafkaCollector kafkaCollector=new KafkaCollector(kafkaCollectorConfig,delegate,offsetComponent);
         return kafkaCollector;
     }
+
+
 }

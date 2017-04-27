@@ -8,6 +8,7 @@ import ch.qos.logback.classic.spi.ILoggingEvent;
  */
 public class SkyeLogConverter {
     public static class ServiceNameConvert extends ClassicConverter {
+
         @Override
         public String convert(ILoggingEvent event) {
             if(event instanceof SkyeLogEvent){

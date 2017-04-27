@@ -1,6 +1,5 @@
 package com.dafy.skye.log.collector.storage.cassandra.domain;
 
-import com.alibaba.fastjson.annotation.JSONField;
 import com.dafy.skye.log.core.logback.SkyeLogEvent;
 import com.datastax.driver.core.utils.UUIDs;
 
@@ -11,28 +10,17 @@ import java.util.UUID;
 /**
  * Created by Caedmon on 2017/4/22.
  */
-public class TraceLog {
-    @JSONField(name = "logger_name")
+public class CassandraSkyeLogEntity {
     private String loggerName;
-    @JSONField(name = "trace_id")
     private String traceId;
-    @JSONField(name = "service_name")
     private String serviceName;
-    @JSONField(name = "thread")
     private String thread;
-    @JSONField(name = "logger_name")
     private String address;
-    @JSONField(name = "pid")
     private String pid;
-    @JSONField(name = "ts")
     private long ts;
-    @JSONField(name = "level")
     private String level;
-    @JSONField(name = "message")
     private String message;
-    @JSONField(name = "mdc")
     private Map<String,String> mdc;
-    @JSONField(name = "ts_uuid")
     private UUID tsUuid;
 
     public String getLoggerName() {
@@ -123,8 +111,8 @@ public class TraceLog {
         this.thread = thread;
     }
 
-    public static TraceLog build(SkyeLogEvent event){
-        TraceLog schema=new TraceLog();
+    public static CassandraSkyeLogEntity build(SkyeLogEvent event){
+        CassandraSkyeLogEntity schema=new CassandraSkyeLogEntity();
         Map<String,String> mdc=event.getMdc();
         if(mdc!=null&&!mdc.isEmpty()){
             String traceId=mdc.get("skyeTraceId");

@@ -1,7 +1,7 @@
 package com.dafy.skye.log.collector.storage.cassandra;
 
 import com.dafy.skye.log.collector.storage.StorageComponent;
-import com.dafy.skye.log.collector.storage.cassandra.domain.TraceLog;
+import com.dafy.skye.log.collector.storage.cassandra.domain.CassandraSkyeLogEntity;
 import com.dafy.skye.log.core.logback.SkyeLogEvent;
 import com.datastax.driver.core.*;
 import com.google.common.base.Strings;
@@ -75,7 +75,7 @@ public class CassandraStorage implements StorageComponent {
         return result;
     }
     private void applyCqlFile(String keySpace, Session session, String resource) {
-        InputStream inputStream=TraceLog.class.getClassLoader().getResourceAsStream(resource);
+        InputStream inputStream=CassandraSkyeLogEntity.class.getClassLoader().getResourceAsStream(resource);
         try (Reader reader = new InputStreamReader(inputStream, UTF_8)) {
             for (String cmd : CharStreams.toString(reader).split(";")) {
                 cmd = cmd.trim().replace(" " + this.configProperties.getKeySpace(), " " + keySpace);
@@ -87,7 +87,7 @@ public class CassandraStorage implements StorageComponent {
             log.error(ex.getMessage(), ex);
         }
     }
-    private BoundStatement buildInsertBST(TraceLog entity){
+    private BoundStatement buildInsertBST(CassandraSkyeLogEntity entity){
         if(INSERT_ST==null){
             INSERT_ST=getSession().prepare(INSERT_SQL);
         }
@@ -116,7 +116,7 @@ public class CassandraStorage implements StorageComponent {
             return;
         }
         Session session=getSession();
-        TraceLog entity= TraceLog.build(event);
+        CassandraSkyeLogEntity entity= CassandraSkyeLogEntity.build(event);
         BoundStatement statement= buildInsertBST(entity);
         session.executeAsync(statement);
     }
@@ -125,7 +125,7 @@ public class CassandraStorage implements StorageComponent {
         BatchStatement batch = new BatchStatement();
         Session session=getSession();
         for (SkyeLogEvent event:events) {
-            TraceLog entity= TraceLog.build(event);
+            CassandraSkyeLogEntity entity= CassandraSkyeLogEntity.build(event);
             Statement bs = buildInsertBST(entity);
             batch.add(bs);
         }

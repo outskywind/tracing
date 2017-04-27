@@ -13,8 +13,9 @@ spring:
     timeout: 30000
 skye.log.collector:
   storage:
-    type: cassandra
-    cassandra:
+    type: elasticsearch
+    elasticsearch:
+      nodes: 10.8.15.79:9200
 
   kafka:
     topic: skye-log
