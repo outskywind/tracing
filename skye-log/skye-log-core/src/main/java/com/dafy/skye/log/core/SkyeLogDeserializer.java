@@ -1,5 +1,6 @@
 package com.dafy.skye.log.core;
 
+import com.dafy.skye.log.core.logback.SkyeLogEvent;
 import org.apache.kafka.common.serialization.Deserializer;
 
 import java.io.ByteArrayInputStream;
@@ -10,8 +11,8 @@ import java.util.Map;
 /**
  * Created by Administrator on 2016/4/1.
  */
-public class JavaDeserializer implements Deserializer<Object>{
-    public JavaDeserializer() {
+public class SkyeLogDeserializer implements Deserializer<SkyeLogEvent>{
+    public SkyeLogDeserializer() {
         super();
     }
 
@@ -21,12 +22,12 @@ public class JavaDeserializer implements Deserializer<Object>{
     }
 
     @Override
-    public Object deserialize(String s, byte[] bytes) {
+    public SkyeLogEvent deserialize(String s, byte[] bytes) {
 
         try {
             ByteArrayInputStream bis=new ByteArrayInputStream(bytes);
             ObjectInputStream ois=new ObjectInputStream(bis);
-            return ois.readObject();
+            return (SkyeLogEvent) ois.readObject();
         } catch (IOException e) {
             e.printStackTrace();
         } catch (ClassNotFoundException e) {

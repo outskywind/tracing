@@ -16,7 +16,8 @@ skye.log.collector:
     type: elasticsearch
     elasticsearch:
       nodes: 10.8.15.79:9200
-
+      indexShards: 5
+      indexReplicas: 2
   kafka:
     topic: skye-log
     groupId: skye-log

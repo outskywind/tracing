@@ -1,9 +1,12 @@
 package com.dafy.skye.log.collector.storage.rolling;
 
 import com.dafy.skye.log.collector.storage.StorageComponent;
+import com.dafy.skye.log.collector.storage.domain.SkyeLogEntity;
+import com.dafy.skye.log.collector.storage.query.LogQueryRequest;
 import com.dafy.skye.log.core.logback.SkyeLogEvent;
 
 import java.util.Collection;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -57,5 +60,10 @@ public class RollingFileStorage implements StorageComponent {
             appender.start();
         }
         return appender;
+    }
+
+    @Override
+    public List<SkyeLogEntity> query(LogQueryRequest request) {
+        throw new UnsupportedOperationException("Temporary support");
     }
 }

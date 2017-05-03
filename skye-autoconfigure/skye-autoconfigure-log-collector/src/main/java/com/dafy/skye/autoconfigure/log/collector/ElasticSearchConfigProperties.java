@@ -47,10 +47,9 @@ public class ElasticSearchConfigProperties {
     }
     public ElasticsearchConfig build(){
         ElasticsearchConfig config=new ElasticsearchConfig();
-        config.setEnsureIndex(this.ensureIndex);
         config.setNodes(this.nodes);
-        config.setIndexName(this.indexName);
-        config.setTypeName(this.typeName);
+        config.setIndex(this.indexName);
+        config.setType(this.typeName);
         return config;
     }
 }

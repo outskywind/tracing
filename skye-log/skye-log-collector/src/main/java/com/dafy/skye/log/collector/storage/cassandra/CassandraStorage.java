@@ -2,6 +2,8 @@ package com.dafy.skye.log.collector.storage.cassandra;
 
 import com.dafy.skye.log.collector.storage.StorageComponent;
 import com.dafy.skye.log.collector.storage.cassandra.domain.CassandraSkyeLogEntity;
+import com.dafy.skye.log.collector.storage.domain.SkyeLogEntity;
+import com.dafy.skye.log.collector.storage.query.LogQueryRequest;
 import com.dafy.skye.log.core.logback.SkyeLogEvent;
 import com.datastax.driver.core.*;
 import com.google.common.base.Strings;
@@ -14,6 +16,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.Reader;
 import java.util.Collection;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -131,5 +134,10 @@ public class CassandraStorage implements StorageComponent {
         }
         session.executeAsync(batch);
         batch.clear();
+    }
+
+    @Override
+    public List<SkyeLogEntity> query(LogQueryRequest request) {
+        return null;
     }
 }

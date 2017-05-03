@@ -3,7 +3,7 @@ package com.dafy.skye.log.collector.kafka;
 import com.dafy.skye.log.collector.CollectorDelegate;
 import com.dafy.skye.log.collector.CollectorComponent;
 import com.dafy.skye.log.collector.kafka.offset.OffsetComponent;
-import com.dafy.skye.log.core.JavaDeserializer;
+import com.dafy.skye.log.core.SkyeLogDeserializer;
 import com.dafy.skye.log.core.logback.SkyeLogEvent;
 import org.apache.kafka.clients.consumer.*;
 import org.apache.kafka.common.TopicPartition;
@@ -22,7 +22,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 public class KafkaCollector implements CollectorComponent {
     private KafkaCollectorConfig kafkaCollectorConfig;
     private CollectorDelegate delegate;
-    private List<KafkaConsumer<String,Object>> kafkaConsumers;
+    private List<KafkaConsumer<String,SkyeLogEvent>> kafkaConsumers;
     private ExecutorService threadPool;
     private OffsetComponent offsetComponent;
     private Map<Integer,Long> partitionOffsetMap=new HashMap<>();
@@ -41,7 +41,7 @@ public class KafkaCollector implements CollectorComponent {
             threadPool=partition<=1?Executors.newSingleThreadExecutor():Executors.newFixedThreadPool(partition);
             for(int i=0;i<partition;i++){
                 KafkaConsumer kafkaConsumer=new KafkaConsumer(kafkaCollectorConfig.getProperties(),
-                        new StringDeserializer(),new JavaDeserializer());
+                        new StringDeserializer(),new SkyeLogDeserializer());
                 TopicPartition topicPartition=new TopicPartition(
                         kafkaCollectorConfig.getTopic(),i);
                 kafkaConsumer.assign(Collections.singleton(topicPartition));
@@ -72,42 +72,53 @@ public class KafkaCollector implements CollectorComponent {
         Runnable task=new Runnable() {
             @Override
             public void run() {
-                long offset = offsetComponent.getOffset(partitionKey);
-                kafkaConsumer.seek(topicPartition, offset);
-                partitionOffsetMap.put(partition, offset);
-                long currentOffset = offset;
-                final long beforePollOffset=offset;
+                //从redis读取offset
+                long currentOffset = offsetComponent.getOffset(partitionKey);
+                kafkaConsumer.seek(topicPartition, currentOffset);
+                partitionOffsetMap.put(partition, currentOffset);
+                //poll之前的offset
+                final long beforePollOffset=currentOffset;
                 final long pollInterval=KafkaCollector.this.kafkaCollectorConfig.getPollInterval();
                 try {
                     while (true){
-                        ConsumerRecords<String, Object> records = kafkaConsumer.poll(pollInterval);
-                        for (ConsumerRecord<String, Object> record : records) {
+                        ConsumerRecords<String, SkyeLogEvent> records = kafkaConsumer.poll(pollInterval);
+                        if(records.isEmpty()){
+                            continue;
+                        }
+                        List<SkyeLogEvent> list=new ArrayList<>(records.count());
+                        //最新offset
+                        long lastOffset=currentOffset;
+                        for (ConsumerRecord<String, SkyeLogEvent> record : records) {
                             //如果消息offset小于start则忽略
-                            long lastOffset=record.offset();
-                            if (lastOffset <= currentOffset) {
+                            if (record.offset() <= currentOffset) {
                                 continue;
                             }
-                            SkyeLogEvent event = (SkyeLogEvent) record.value();
-                            KafkaCollector.this.delegate.acceptEvent(event);
-                            if(lastOffset>offset){
-                                currentOffset=lastOffset;
-                                KafkaCollector.this.partitionOffsetMap.put(partition,record.offset());
-                                kafkaConsumer.commitAsync(new OffsetCommitCallback() {
-                                    @Override
-                                    public void onComplete(Map<TopicPartition, OffsetAndMetadata> offsets, Exception exception) {
-                                        if(exception!=null){
-                                            exception.printStackTrace();
-                                            log.error("Commit offset error ",exception);
-                                        }
+                            //更新最新offset
+                            lastOffset=record.offset();
+                            SkyeLogEvent event = record.value();
+                            list.add(event);
+                        }
+                        KafkaCollector.this.delegate.acceptEvents(list);
+                        //最后消费的offset如果大于当前offset则更新缓存并提交
+                        if(lastOffset>currentOffset){
+                            currentOffset=lastOffset;
+                            KafkaCollector.this.partitionOffsetMap.put(partition,lastOffset);
+                            kafkaConsumer.commitAsync(new OffsetCommitCallback() {
+                                @Override
+                                public void onComplete(Map<TopicPartition, OffsetAndMetadata> offsets, Exception exception) {
+                                    if(exception!=null){
+                                        exception.printStackTrace();
+                                        log.error("Commit offset error ",exception);
                                     }
-                                });
-                                offsetComponent.setOffset(partitionKey,lastOffset);
-                            }
+                                }
+                            });
+                            offsetComponent.setOffset(partitionKey,lastOffset);
+                            log.debug("Poll events success:beforePollOffset={},afterPollOffset={}",beforePollOffset,currentOffset);
                         }
                     }
 
                 } catch (Throwable e) {
-                    log.error("Poll event error", e);
+                    log.error("Poll event error,collector will shutdown", e);
                     //回滚offset
                     partitionOffsetMap.put(partition, beforePollOffset);
                     kafkaConsumer.close();

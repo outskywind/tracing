@@ -5,7 +5,7 @@ import ch.qos.logback.classic.spi.ILoggingEvent;
 import ch.qos.logback.core.UnsynchronizedAppenderBase;
 import ch.qos.logback.core.spi.PreSerializationTransformer;
 import ch.qos.logback.core.util.Duration;
-import com.dafy.skye.log.core.JavaSerializer;
+import com.dafy.skye.log.core.SkyeLogEventSerializer;
 import com.dafy.skye.log.core.logback.SkyeLogConverter;
 import com.dafy.skye.log.core.logback.SkyeLogEvent;
 import org.apache.kafka.clients.producer.KafkaProducer;
@@ -13,6 +13,7 @@ import org.apache.kafka.clients.producer.Producer;
 import org.apache.kafka.clients.producer.ProducerRecord;
 import org.apache.kafka.clients.producer.RecordMetadata;
 import org.apache.kafka.common.errors.InterruptException;
+import org.apache.kafka.common.serialization.StringSerializer;
 
 import java.util.Properties;
 import java.util.concurrent.BlockingQueue;
@@ -58,14 +59,17 @@ public class SkyeLogKafkaAppender extends UnsynchronizedAppenderBase<ILoggingEve
             }
             if(errorCount == 0) {
                 this.queue=new LinkedBlockingDeque<>(this.queueSize);
+                if(buildKafkaProducer()){
+                    Thread t=new Thread(this);
+                    t.start();
+                    super.start();
+                }
                 buildKafkaProducer();
             }
-            Thread t=new Thread(this);
-            t.start();
-            super.start();
+
         }
     }
-    private void buildKafkaProducer(){
+    private boolean buildKafkaProducer(){
         Properties props=new Properties();
         props.put("bootstrap.servers", kafkaAddress);
         props.put("acks", "all");
@@ -73,10 +77,18 @@ public class SkyeLogKafkaAppender extends UnsynchronizedAppenderBase<ILoggingEve
         props.put("batch.size", 16384);
         props.put("linger.ms", 1);
         props.put("buffer.memory", 33554432);
-        props.put("key.serializer", "org.apache.kafka.common.serialization.StringSerializer");
-        props.put("value.serializer", JavaSerializer.class.getName());
+        props.put("key.serializer", StringSerializer.class.getName());
+        props.put("value.serializer", SkyeLogEventSerializer.class.getName());
         kafkaProducer=new KafkaProducer(props);
-        this.addInfo("build kafka producer ok:kafkaAddress="+kafkaAddress);
+        try{
+            kafkaProducer.partitionsFor(this.kafkaTopic);
+        }catch (Throwable e){
+            this.addError("KafkaProducer init error ",e);
+            return false;
+        }
+
+        this.addInfo("KafkaProducer init success:kafkaAddress="+kafkaAddress);
+        return true;
     }
     @Override
     public void run() {

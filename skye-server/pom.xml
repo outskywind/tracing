@@ -12,6 +12,7 @@
     <artifactId>skye-server</artifactId>
     <properties>
         <spring-boot.version>1.5.3.RELEASE</spring-boot.version>
+        <zipkin.version>1.22.0</zipkin.version>
     </properties>
     <dependencyManagement>
         <dependencies>
@@ -38,6 +39,31 @@
             <groupId>com.dafy.spring-boot</groupId>
             <artifactId>jedis-spring-boot-starter</artifactId>
             <version>1.0.0-SNAPSHOT</version>
+        </dependency>
+        <dependency>
+            <groupId>io.zipkin.java</groupId>
+            <artifactId>zipkin-server</artifactId>
+            <version>${zipkin.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>io.zipkin.java</groupId>
+            <artifactId>zipkin-autoconfigure-storage-cassandra3</artifactId>
+            <version>${zipkin.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>io.zipkin.java</groupId>
+            <artifactId>zipkin-autoconfigure-collector-kafka</artifactId>
+            <version>${zipkin.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>io.zipkin.java</groupId>
+            <artifactId>zipkin-ui</artifactId>
+            <version>${zipkin.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>io.zipkin.java</groupId>
+            <artifactId>zipkin-autoconfigure-ui</artifactId>
+            <version>${zipkin.version}</version>
         </dependency>
     </dependencies>
 </project>

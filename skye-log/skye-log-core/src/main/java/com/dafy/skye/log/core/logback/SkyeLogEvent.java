@@ -15,6 +15,7 @@ import java.io.ObjectOutputStream;
 import java.io.Serializable;
 import java.net.SocketException;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicLong;
 
 /**
  * Created by Caedmon on 2016/4/1.
@@ -36,6 +37,8 @@ public class SkyeLogEvent implements ILoggingEvent,Serializable{
     private String serviceName;
     private String address;
     private String pid;
+    private long seqNo;
+    private static final AtomicLong seqNoFactory=new AtomicLong(0);
     public SkyeLogEvent() {
     }
 
@@ -63,7 +66,7 @@ public class SkyeLogEvent implements ILoggingEvent,Serializable{
         if(le.hasCallerData()) {
             ledo.callerDataArray = le.getCallerData();
         }
-
+        ledo.seqNo=seqNoFactory.getAndIncrement();
         return ledo;
     }
 
@@ -320,4 +323,11 @@ public class SkyeLogEvent implements ILoggingEvent,Serializable{
         this.address = address;
     }
 
+    public long getSeqNo() {
+        return seqNo;
+    }
+
+    public void setSeqNo(long seqNo) {
+        this.seqNo = seqNo;
+    }
 }

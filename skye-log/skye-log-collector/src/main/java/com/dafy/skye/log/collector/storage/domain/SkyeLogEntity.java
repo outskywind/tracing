@@ -1,5 +1,8 @@
-package com.dafy.skye.log.collector.storage.elasticsearch.domain;
+package com.dafy.skye.log.collector.storage.domain;
 
+import ch.qos.logback.classic.spi.ThrowableProxy;
+import ch.qos.logback.classic.spi.ThrowableProxyUtil;
+import ch.qos.logback.classic.spi.ThrowableProxyVO;
 import com.alibaba.fastjson.annotation.JSONField;
 import com.dafy.skye.log.core.logback.SkyeLogEvent;
 import com.datastax.driver.core.utils.UUIDs;
@@ -12,11 +15,11 @@ import java.util.UUID;
 /**
  * Created by Caedmon on 2017/4/26.
  */
-public class ESSkyeLogEntity {
+public class SkyeLogEntity {
     private String tsUuid;
     private String traceId;
     @JSONField(format = "yyyy-MM-dd HH:mm:ss.SSS")
-    private Date ts;
+    private Date timestamp;
     private String serviceName;
     private String address;
     private String pid;
@@ -25,7 +28,8 @@ public class ESSkyeLogEntity {
     private String level;
     private Map<String,String> mdc;
     private String message;
-
+    private Long seqNo;
+    private String exception;
     public String getTraceId() {
         return traceId;
     }
@@ -74,12 +78,12 @@ public class ESSkyeLogEntity {
         this.pid = pid;
     }
 
-    public Date getTs() {
-        return ts;
+    public Date getTimestamp() {
+        return timestamp;
     }
 
-    public void setTs(Date ts) {
-        this.ts = ts;
+    public void setTimestamp(Date timestamp) {
+        this.timestamp = timestamp;
     }
 
     public String getLevel() {
@@ -114,13 +118,29 @@ public class ESSkyeLogEntity {
         this.tsUuid = tsUuid;
     }
 
-    public static ESSkyeLogEntity build(SkyeLogEvent event){
-        ESSkyeLogEntity entity=new ESSkyeLogEntity();
+    public Long getSeqNo() {
+        return seqNo;
+    }
+
+    public void setSeqNo(Long seqNo) {
+        this.seqNo = seqNo;
+    }
+
+    public String getException() {
+        return exception;
+    }
+
+    public void setException(String exception) {
+        this.exception = exception;
+    }
+
+    public static SkyeLogEntity build(SkyeLogEvent event){
+        SkyeLogEntity entity=new SkyeLogEntity();
         entity.setTraceId(event.getMdc().get("skyeTraceId"));
         Random random=new Random();
         UUID uuid = new UUID(UUIDs.startOf(event.getTimeStamp()).getMostSignificantBits(), random.nextLong());
         entity.setTsUuid(uuid.toString());
-        entity.setTs(new Date(event.getTimeStamp()));
+        entity.setTimestamp(new Date(event.getTimeStamp()));
         entity.setServiceName(event.getServiceName());
         entity.setAddress(event.getAddress());
         entity.setPid(event.getPid());
@@ -129,6 +149,23 @@ public class ESSkyeLogEntity {
         entity.setLevel(event.getLevel().toString());
         entity.setMdc(event.getMdc());
         entity.setMessage(event.getFormattedMessage());
+        entity.setSeqNo(event.getSeqNo());
+        if(event.getThrowableProxy()!=null){
+            String exception=ThrowableProxyUtil.asString(event.getThrowableProxy());
+            entity.setException(exception);
+        }
         return entity;
+    }
+
+    public static void main(String[] args) {
+        try{
+            String s=new String("test");
+            System.out.println(Integer.parseInt(s));
+        }catch (Exception e){
+            String s=ThrowableProxyUtil.asString(ThrowableProxyVO.build(new ThrowableProxy(e)));
+            System.out.println(s);
+        }
+
+
     }
 }

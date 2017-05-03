@@ -1,0 +1,60 @@
+{
+  "template": "${__INDEX__}-*",
+  "settings": {
+    "number_of_shards": "${__NUMBER_OF_SHARDS__}",
+    "number_of_replicas": "${__NUMBER_OF_REPLICAS__}"
+  },
+  "mappings": {
+    "skye-log":{
+      "_source":{
+        "enabled": true
+      },
+      "properties": {
+        "tsUuid": {
+          "type":"keyword"
+        },
+        "traceId": {
+          "type":"keyword"
+        },
+        "timestamp":{
+          "type":"date",
+          "format":"yyyy-MM-dd HH:mm:ss.SSS"
+        },
+        "serviceName":{
+          "type":"keyword"
+        },
+        "address":{
+          "type":"keyword"
+        },
+        "pid":{
+          "type":"integer",
+          "index":false
+        },
+        "thread":{
+          "type":"keyword"
+        },
+        "loggerName":{
+          "type":"keyword"
+        },
+        "level":{
+          "type":"keyword"
+        },
+        "mdc":{
+          "type":"nested"
+        },
+        "message":{
+          "type":"text",
+          "analyzer":"standard"
+        },
+        "seqNo":{
+          "type":"long"
+        },
+        "exception":{
+          "type":"text",
+          "analyzer":"standard"
+        }
+      }
+    }
+
+  }
+}

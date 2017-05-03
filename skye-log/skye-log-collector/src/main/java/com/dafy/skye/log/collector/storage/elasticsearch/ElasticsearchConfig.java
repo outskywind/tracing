@@ -9,9 +9,10 @@ import java.util.List;
  */
 public class ElasticsearchConfig {
     private List<String> nodes= Lists.newArrayList("10.8.15.79:9200");
-    private String indexName="skye";
-    private String typeName="skye-log";
-    private boolean ensureIndex=true;
+    private String index ="skye";
+    private String type ="skye-log";
+    private Integer indexShards =5;
+    private Integer indexReplicas =2;
     public List<String> getNodes() {
         return nodes;
     }
@@ -20,27 +21,35 @@ public class ElasticsearchConfig {
         this.nodes = nodes;
     }
 
-    public String getIndexName() {
-        return indexName;
+    public String getIndex() {
+        return index;
     }
 
-    public void setIndexName(String indexName) {
-        this.indexName = indexName;
+    public void setIndex(String index) {
+        this.index = index;
     }
 
-    public String getTypeName() {
-        return typeName;
+    public String getType() {
+        return type;
     }
 
-    public void setTypeName(String typeName) {
-        this.typeName = typeName;
+    public void setType(String type) {
+        this.type = type;
     }
 
-    public boolean isEnsureIndex() {
-        return ensureIndex;
+    public Integer getIndexShards() {
+        return indexShards;
     }
 
-    public void setEnsureIndex(boolean ensureIndex) {
-        this.ensureIndex = ensureIndex;
+    public void setIndexShards(Integer indexShards) {
+        this.indexShards = indexShards;
+    }
+
+    public Integer getIndexReplicas() {
+        return indexReplicas;
+    }
+
+    public void setIndexReplicas(Integer indexReplicas) {
+        this.indexReplicas = indexReplicas;
     }
 }

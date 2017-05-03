@@ -5,13 +5,13 @@ import java.util.Date;
 /**
  * Created by Caedmon on 2017/4/26.
  */
-public class LogSearchRequest {
+public class LogQueryRequest {
     private String traceId;
     private String messageRegex;
     private Date minTime;
     private Date maxTime;
     private String level;
-
+    private String serviceName;
     public String getTraceId() {
         return traceId;
     }
@@ -50,5 +50,13 @@ public class LogSearchRequest {
 
     public void setLevel(String level) {
         this.level = level;
+    }
+
+    public String getServiceName() {
+        return serviceName;
+    }
+
+    public void setServiceName(String serviceName) {
+        this.serviceName = serviceName;
     }
 }

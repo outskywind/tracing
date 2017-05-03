@@ -1,5 +1,6 @@
 package com.dafy.skye.log.core;
 
+import com.dafy.skye.log.core.logback.SkyeLogEvent;
 import org.apache.kafka.common.serialization.Serializer;
 
 import java.io.ByteArrayOutputStream;
@@ -10,8 +11,8 @@ import java.util.Map;
 /**
  * Created by Caedmon on 2016/4/1.
  */
-public class JavaSerializer implements Serializer<Object> {
-    public JavaSerializer() {
+public class SkyeLogEventSerializer implements Serializer<SkyeLogEvent> {
+    public SkyeLogEventSerializer() {
         super();
     }
 
@@ -26,7 +27,7 @@ public class JavaSerializer implements Serializer<Object> {
     }
 
     @Override
-    public byte[] serialize(String s, Object serializable) {
+    public byte[] serialize(String s, SkyeLogEvent serializable) {
         ByteArrayOutputStream bos=new ByteArrayOutputStream();
         try {
             ObjectOutputStream ex = new ObjectOutputStream(bos);

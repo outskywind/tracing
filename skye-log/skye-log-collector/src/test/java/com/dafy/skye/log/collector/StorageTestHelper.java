@@ -17,7 +17,7 @@ public class StorageTestHelper {
         event.setServiceName("skye-collector");
         event.setAddress("localhost");
         event.setLevel(Level.DEBUG);
-        event.setMessage("Skye build the event ");
+        event.setMessage("陈龙 build the event ");
         event.setLoggerName("com.dafy.skye.Builder");
         event.setPid("11581");
         event.setThreadName("Thread-1");
