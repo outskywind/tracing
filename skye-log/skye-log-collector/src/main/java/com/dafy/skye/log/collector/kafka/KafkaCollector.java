@@ -3,8 +3,8 @@ package com.dafy.skye.log.collector.kafka;
 import com.dafy.skye.log.collector.CollectorDelegate;
 import com.dafy.skye.log.collector.CollectorComponent;
 import com.dafy.skye.log.collector.kafka.offset.OffsetComponent;
-import com.dafy.skye.log.core.SkyeLogDeserializer;
-import com.dafy.skye.log.core.logback.SkyeLogEvent;
+import com.dafy.skye.log.core.SkyeLogEventCodec;
+import com.dafy.skye.log.core.SkyeLogEventDeserializer;
 import org.apache.kafka.clients.consumer.*;
 import org.apache.kafka.common.TopicPartition;
 import org.apache.kafka.common.serialization.StringDeserializer;
@@ -18,13 +18,17 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  * Created by Caedmon on 2017/4/25.
+ * Kafka 收集器,日志通过SkyeLogKafkaAppender 写入kafka
+ * 通过KafkaCollector 消费后写入存储组件
  */
 public class KafkaCollector implements CollectorComponent {
     private KafkaCollectorConfig kafkaCollectorConfig;
     private CollectorDelegate delegate;
     private List<KafkaConsumer<String,byte[]>> kafkaConsumers;
     private ExecutorService threadPool;
+    //消费指针管理组件
     private OffsetComponent offsetComponent;
+    //每个分区对应的消费指针
     private Map<Integer,Long> partitionOffsetMap=new HashMap<>();
     public KafkaCollector(KafkaCollectorConfig kafkaCollectorConfig,
                           CollectorDelegate delegate, OffsetComponent offsetComponent){
@@ -41,7 +45,7 @@ public class KafkaCollector implements CollectorComponent {
             threadPool=partition<=1?Executors.newSingleThreadExecutor():Executors.newFixedThreadPool(partition);
             for(int i=0;i<partition;i++){
                 KafkaConsumer kafkaConsumer=new KafkaConsumer(kafkaCollectorConfig.getProperties(),
-                        new StringDeserializer(),new SkyeLogDeserializer());
+                        new StringDeserializer(),new SkyeLogEventDeserializer());
                 TopicPartition topicPartition=new TopicPartition(
                         kafkaCollectorConfig.getTopic(),i);
                 kafkaConsumer.assign(Collections.singleton(topicPartition));
@@ -85,7 +89,7 @@ public class KafkaCollector implements CollectorComponent {
                         if(records.isEmpty()){
                             continue;
                         }
-                        List<SkyeLogEvent> list=new ArrayList<>(records.count());
+                        List<byte[]> list=new ArrayList<>(records.count());
                         //最新offset
                         long lastOffset=currentOffset;
                         for (ConsumerRecord<String, byte[]> record : records) {
@@ -96,15 +100,11 @@ public class KafkaCollector implements CollectorComponent {
                             //更新最新offset
                             lastOffset=record.offset();
                             byte[] content = record.value();
-                            SkyeLogDeserializer deserializer=new SkyeLogDeserializer();
-                            SkyeLogEvent event=deserializer.deserialize(null,content);
-                            if(event==null){
-                                log.error("Deserialize SkyeLogEvent error,event is null");
-                                continue;
+                            if(content!=null&&content.length>0){
+                                list.add(content);
                             }
-                            list.add(event);
                         }
-                        KafkaCollector.this.delegate.acceptEvents(list);
+                        KafkaCollector.this.delegate.acceptEvents(list, SkyeLogEventCodec.DEFAULT);
                         //最后消费的offset如果大于当前offset则更新缓存并提交
                         if(lastOffset>currentOffset){
                             currentOffset=lastOffset;

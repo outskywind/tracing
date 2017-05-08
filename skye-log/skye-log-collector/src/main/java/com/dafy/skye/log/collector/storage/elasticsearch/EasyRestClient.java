@@ -18,6 +18,7 @@ import java.util.Map;
 
 /**
  * Created by Caedmon on 2017/4/28.
+ * 基于RestClient的简单封装
  */
 public class EasyRestClient {
     private RestClient restClient;
@@ -29,10 +30,14 @@ public class EasyRestClient {
         try {
             return restClient.performRequest(method,endpoint);
         } catch (IOException e) {
-            log.error("EasyRestClient request error",e);
             throw new RestRuntimeException(method,endpoint,e);
         }
     }
+    /**
+     * 同步HTTP请求
+     * @param builder request构造器
+     * @return 相应结果
+     * */
     public Response request(EasyRequestBuilder builder){
         HttpEntity httpEntity=null;
         if(!Strings.isNullOrEmpty(builder.body)){
@@ -53,10 +58,14 @@ public class EasyRestClient {
             }
             return response;
         } catch (IOException e) {
-            log.error("EasyRestClient request error ",e);
             throw new RestRuntimeException(method,endpoint,e);
         }
     }
+    /**
+     * 异步HTTP请求
+     * @param builder request构造器
+     * @param listener 异步结果回调监听器
+     * */
     public void requestAsync(EasyRequestBuilder builder, ResponseListener listener){
         HttpEntity httpEntity=null;
         if(!Strings.isNullOrEmpty(builder.body)){

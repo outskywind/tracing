@@ -2,6 +2,7 @@ package com.dafy.skye.log.collector.storage.elasticsearch;
 
 /**
  * Created by Caedmon on 2017/5/2.
+ * EasyRestClient 请求方法包装的运行时异常
  */
 public class RestRuntimeException extends RuntimeException {
     private String method;

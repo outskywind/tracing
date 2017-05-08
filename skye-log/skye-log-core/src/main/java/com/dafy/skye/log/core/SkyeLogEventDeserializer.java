@@ -11,8 +11,8 @@ import java.util.Map;
 /**
  * Created by Administrator on 2016/4/1.
  */
-public class SkyeLogDeserializer implements Deserializer<SkyeLogEvent>{
-    public SkyeLogDeserializer() {
+public class SkyeLogEventDeserializer implements Deserializer<SkyeLogEvent>{
+    public SkyeLogEventDeserializer() {
         super();
     }
 
@@ -23,18 +23,7 @@ public class SkyeLogDeserializer implements Deserializer<SkyeLogEvent>{
 
     @Override
     public SkyeLogEvent deserialize(String s, byte[] bytes) {
-
-        try {
-            ByteArrayInputStream bis=new ByteArrayInputStream(bytes);
-            ObjectInputStream ois=new ObjectInputStream(bis);
-            return (SkyeLogEvent) ois.readObject();
-        } catch (IOException e) {
-            e.printStackTrace();
-        } catch (ClassNotFoundException e) {
-            e.printStackTrace();
-        }
-
-        return null;
+        return SkyeLogEventCodec.DEFAULT.decode(bytes);
     }
 
     @Override

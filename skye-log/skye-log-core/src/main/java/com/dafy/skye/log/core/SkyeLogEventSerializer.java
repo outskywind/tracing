@@ -28,14 +28,6 @@ public class SkyeLogEventSerializer implements Serializer<SkyeLogEvent> {
 
     @Override
     public byte[] serialize(String s, SkyeLogEvent serializable) {
-        ByteArrayOutputStream bos=new ByteArrayOutputStream();
-        try {
-            ObjectOutputStream ex = new ObjectOutputStream(bos);
-            ex.writeObject(serializable);
-            return bos.toByteArray();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        return null;
+        return SkyeLogEventCodec.DEFAULT.encode(serializable);
     }
 }

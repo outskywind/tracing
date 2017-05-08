@@ -156,16 +156,4 @@ public class SkyeLogEntity {
         }
         return entity;
     }
-
-    public static void main(String[] args) {
-        try{
-            String s=new String("test");
-            System.out.println(Integer.parseInt(s));
-        }catch (Exception e){
-            String s=ThrowableProxyUtil.asString(ThrowableProxyVO.build(new ThrowableProxy(e)));
-            System.out.println(s);
-        }
-
-
-    }
 }

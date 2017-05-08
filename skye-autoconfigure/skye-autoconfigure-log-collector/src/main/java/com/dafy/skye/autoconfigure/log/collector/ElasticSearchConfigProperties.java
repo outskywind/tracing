@@ -10,7 +10,9 @@ import java.util.List;
  */
 @ConfigurationProperties("skye.log.collector.storage.elasticsearch")
 public class ElasticSearchConfigProperties {
+    //ES节点地址
     private List<String> nodes;
+    //索引前缀,实际是按天存储
     private String indexName="skye";
     private String typeName="skye-log";
     private boolean ensureIndex=true;

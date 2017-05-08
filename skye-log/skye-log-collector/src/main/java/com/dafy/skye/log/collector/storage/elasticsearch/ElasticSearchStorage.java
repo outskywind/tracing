@@ -44,6 +44,9 @@ public class ElasticSearchStorage implements StorageComponent {
         this.indexNameFormatter=formatterBuilder.index(esConfig.getIndex()).build();
 
     }
+    /**
+     * 确认模版是否已存在,如果模版不存在则创建一个
+     * */
     boolean ensureTemplate(){
         final String index=esConfig.getIndex();
         Response response=easyRestClient.request("HEAD","/_template/"+index+"_template");
@@ -105,7 +108,7 @@ public class ElasticSearchStorage implements StorageComponent {
             @Override
             public void onFailure(Exception exception) {
                 log.error("Save log error:traceId={}",entity.getTraceId(),exception);
-                //backup
+                //TODO 存入ES失败的日志,需要备份存储,除非能保证collector的高可用
             }
         });
 

@@ -13,13 +13,9 @@ import java.util.List;
  * 存储组件接口,存储上报日志
  */
 public interface StorageComponent extends CollectorComponent {
-    /**
-     * 保存
-     * */
+
     void save(SkyeLogEvent event);
-    /**
-     * 批量保存
-     * */
+
     void batchSave(Collection<SkyeLogEvent> events);
 
     List<SkyeLogEntity> query(LogQueryRequest request);
