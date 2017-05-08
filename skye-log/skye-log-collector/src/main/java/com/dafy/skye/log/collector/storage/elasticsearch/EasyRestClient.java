@@ -30,7 +30,7 @@ public class EasyRestClient {
             return restClient.performRequest(method,endpoint);
         } catch (IOException e) {
             log.error("EasyRestClient request error",e);
-            throw new RestRequestException(method,endpoint,e);
+            throw new RestRuntimeException(method,endpoint,e);
         }
     }
     public Response request(EasyRequestBuilder builder){
@@ -54,7 +54,7 @@ public class EasyRestClient {
             return response;
         } catch (IOException e) {
             log.error("EasyRestClient request error ",e);
-            throw new RestRequestException(method,endpoint,e);
+            throw new RestRuntimeException(method,endpoint,e);
         }
     }
     public void requestAsync(EasyRequestBuilder builder, ResponseListener listener){

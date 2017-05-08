@@ -1,9 +1,7 @@
 package com.dafy.skye.log.collector;
 
-import com.dafy.skye.log.collector.storage.cassandra.CassandraConfig;
-import com.dafy.skye.log.collector.storage.cassandra.CassandraStorage;
 import com.dafy.skye.log.collector.storage.elasticsearch.ElasticSearchStorage;
-import com.dafy.skye.log.collector.storage.elasticsearch.ElasticsearchConfig;
+import com.dafy.skye.log.collector.storage.elasticsearch.ElasticsearchStorageConfig;
 import com.dafy.skye.log.core.logback.SkyeLogEvent;
 import com.google.common.collect.Lists;
 import org.junit.Test;
@@ -13,7 +11,7 @@ import org.junit.Test;
  */
 public class ElasticSearchStorageTest {
     public ElasticSearchStorage startStorage(){
-        ElasticsearchConfig config=new ElasticsearchConfig();
+        ElasticsearchStorageConfig config=new ElasticsearchStorageConfig();
         ElasticSearchStorage storage=new ElasticSearchStorage(config);
         storage.start();
         return storage;

@@ -49,6 +49,7 @@ public class RollingFileAppender extends ch.qos.logback.core.rolling.RollingFile
         policy.start();
         this.setRollingPolicy(policy);
         PatternLayoutEncoder encoder=new PatternLayoutEncoder();
+        encoder.start();
         encoder.setContext(context);
         setEncoder(encoder);
         encoder.setPattern(config.logPattern);

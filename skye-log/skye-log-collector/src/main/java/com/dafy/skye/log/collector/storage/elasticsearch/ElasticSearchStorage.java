@@ -7,7 +7,6 @@ import com.dafy.skye.log.collector.storage.query.LogQueryRequest;
 import com.dafy.skye.log.collector.util.IndexNameFormatter;
 import com.dafy.skye.log.collector.util.ResourceUtil;
 import com.dafy.skye.log.core.logback.SkyeLogEvent;
-import com.google.common.base.Strings;
 import org.apache.http.HttpHost;
 import org.apache.http.HttpStatus;
 import org.apache.http.StatusLine;
@@ -25,10 +24,10 @@ import java.util.List;
  */
 public class ElasticSearchStorage implements StorageComponent {
     private EasyRestClient easyRestClient;
-    private ElasticsearchConfig esConfig;
+    private ElasticsearchStorageConfig esConfig;
     private IndexNameFormatter indexNameFormatter;
     private static final Logger log= LoggerFactory.getLogger(ElasticSearchStorage.class);
-    public ElasticSearchStorage(ElasticsearchConfig esConfig){
+    public ElasticSearchStorage(ElasticsearchStorageConfig esConfig){
         this.esConfig = esConfig;
         HttpHost[] hosts=new HttpHost[esConfig.getNodes().size()];
         int i=0;

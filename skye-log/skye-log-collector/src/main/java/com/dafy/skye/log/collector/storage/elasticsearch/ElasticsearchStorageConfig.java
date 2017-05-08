@@ -7,7 +7,7 @@ import java.util.List;
 /**
  * Created by Caedmon on 2017/4/26.
  */
-public class ElasticsearchConfig {
+public class ElasticsearchStorageConfig {
     private List<String> nodes= Lists.newArrayList("10.8.15.79:9200");
     private String index ="skye";
     private String type ="skye-log";

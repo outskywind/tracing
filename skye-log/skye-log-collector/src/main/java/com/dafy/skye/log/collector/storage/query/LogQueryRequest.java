@@ -8,8 +8,8 @@ import java.util.Date;
 public class LogQueryRequest {
     private String traceId;
     private String messageRegex;
-    private Date minTime;
-    private Date maxTime;
+    private Date startTs;
+    private Date endTs;
     private String level;
     private String serviceName;
     public String getTraceId() {
@@ -28,20 +28,20 @@ public class LogQueryRequest {
         this.messageRegex = messageRegex;
     }
 
-    public Date getMinTime() {
-        return minTime;
+    public Date getStartTs() {
+        return startTs;
     }
 
-    public void setMinTime(Date minTime) {
-        this.minTime = minTime;
+    public void setStartTs(Date startTs) {
+        this.startTs = startTs;
     }
 
-    public Date getMaxTime() {
-        return maxTime;
+    public Date getEndTs() {
+        return endTs;
     }
 
-    public void setMaxTime(Date maxTime) {
-        this.maxTime = maxTime;
+    public void setEndTs(Date endTs) {
+        this.endTs = endTs;
     }
 
     public String getLevel() {

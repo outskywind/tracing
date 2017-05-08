@@ -3,10 +3,10 @@ package com.dafy.skye.log.collector.storage.elasticsearch;
 /**
  * Created by Caedmon on 2017/5/2.
  */
-public class RestRequestException extends RuntimeException {
+public class RestRuntimeException extends RuntimeException {
     private String method;
     private String endpoint;
-    public RestRequestException(String method,String endpoint,Throwable throwable){
+    public RestRuntimeException(String method, String endpoint, Throwable throwable){
         super("["+method+"] "+endpoint,throwable);
         this.endpoint=endpoint;
         this.method=method;

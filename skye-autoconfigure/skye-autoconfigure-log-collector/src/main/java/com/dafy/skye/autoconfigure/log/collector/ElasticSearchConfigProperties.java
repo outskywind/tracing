@@ -1,6 +1,6 @@
 package com.dafy.skye.autoconfigure.log.collector;
 
-import com.dafy.skye.log.collector.storage.elasticsearch.ElasticsearchConfig;
+import com.dafy.skye.log.collector.storage.elasticsearch.ElasticsearchStorageConfig;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 
 import java.util.List;
@@ -45,8 +45,8 @@ public class ElasticSearchConfigProperties {
     public void setEnsureIndex(boolean ensureIndex) {
         this.ensureIndex = ensureIndex;
     }
-    public ElasticsearchConfig build(){
-        ElasticsearchConfig config=new ElasticsearchConfig();
+    public ElasticsearchStorageConfig build(){
+        ElasticsearchStorageConfig config=new ElasticsearchStorageConfig();
         config.setNodes(this.nodes);
         config.setIndex(this.indexName);
         config.setType(this.typeName);

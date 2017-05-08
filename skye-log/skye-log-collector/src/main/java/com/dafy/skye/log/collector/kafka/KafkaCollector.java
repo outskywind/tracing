@@ -22,7 +22,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 public class KafkaCollector implements CollectorComponent {
     private KafkaCollectorConfig kafkaCollectorConfig;
     private CollectorDelegate delegate;
-    private List<KafkaConsumer<String,SkyeLogEvent>> kafkaConsumers;
+    private List<KafkaConsumer<String,byte[]>> kafkaConsumers;
     private ExecutorService threadPool;
     private OffsetComponent offsetComponent;
     private Map<Integer,Long> partitionOffsetMap=new HashMap<>();
@@ -81,21 +81,27 @@ public class KafkaCollector implements CollectorComponent {
                 final long pollInterval=KafkaCollector.this.kafkaCollectorConfig.getPollInterval();
                 try {
                     while (true){
-                        ConsumerRecords<String, SkyeLogEvent> records = kafkaConsumer.poll(pollInterval);
+                        ConsumerRecords<String, byte[]> records = kafkaConsumer.poll(pollInterval);
                         if(records.isEmpty()){
                             continue;
                         }
                         List<SkyeLogEvent> list=new ArrayList<>(records.count());
                         //最新offset
                         long lastOffset=currentOffset;
-                        for (ConsumerRecord<String, SkyeLogEvent> record : records) {
+                        for (ConsumerRecord<String, byte[]> record : records) {
                             //如果消息offset小于start则忽略
                             if (record.offset() <= currentOffset) {
                                 continue;
                             }
                             //更新最新offset
                             lastOffset=record.offset();
-                            SkyeLogEvent event = record.value();
+                            byte[] content = record.value();
+                            SkyeLogDeserializer deserializer=new SkyeLogDeserializer();
+                            SkyeLogEvent event=deserializer.deserialize(null,content);
+                            if(event==null){
+                                log.error("Deserialize SkyeLogEvent error,event is null");
+                                continue;
+                            }
                             list.add(event);
                         }
                         KafkaCollector.this.delegate.acceptEvents(list);
