@@ -18,5 +18,6 @@ public class SkyeServer {
                 .properties("spring.config.name=skye-log-server,skye-zipkin-server").build();
         application.setWebEnvironment(true);
         application.run(args);
+
     }
 }
