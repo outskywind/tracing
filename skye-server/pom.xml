@@ -21,6 +21,7 @@
                 <artifactId>spring-boot-dependencies</artifactId>
                 <version>${spring-boot.version}</version>
                 <scope>import</scope>
+                <type>pom</type>
             </dependency>
         </dependencies>
     </dependencyManagement>
@@ -47,13 +48,19 @@
         </dependency>
         <dependency>
             <groupId>io.zipkin.java</groupId>
-            <artifactId>zipkin-autoconfigure-storage-cassandra3</artifactId>
+            <artifactId>zipkin-autoconfigure-storage-elasticsearch-http</artifactId>
             <version>${zipkin.version}</version>
         </dependency>
         <dependency>
             <groupId>io.zipkin.java</groupId>
             <artifactId>zipkin-autoconfigure-collector-kafka</artifactId>
             <version>${zipkin.version}</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>org.apache.kafka</groupId>
+                    <artifactId>kafka-clients</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
         <dependency>
             <groupId>io.zipkin.java</groupId>

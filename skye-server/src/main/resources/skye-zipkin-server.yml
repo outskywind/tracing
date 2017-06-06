@@ -34,7 +34,7 @@ zipkin:
 
   storage:
     strict-trace-id: ${STRICT_TRACE_ID:true}
-    type: ${STORAGE_TYPE:cassandra3}
+    type: ${STORAGE_TYPE:elasticsearch}
     cassandra:
       # Comma separated list of hosts / ip addresses part of Cassandra cluster.
       contact-points: ${CASSANDRA_CONTACT_POINTS:cassandra.dafy.com}
@@ -79,7 +79,7 @@ zipkin:
       use-ssl: ${CASSANDRA3_USE_SSL:false}
     elasticsearch:
       # host is left unset intentionally, to defer the decision
-      hosts: ${ES_HOSTS:}
+      hosts: ${ES_HOSTS:http://10.8.15.79:9200}
       pipeline: ${ES_PIPELINE:}
       max-requests: ${ES_MAX_REQUESTS:64}
       aws:
