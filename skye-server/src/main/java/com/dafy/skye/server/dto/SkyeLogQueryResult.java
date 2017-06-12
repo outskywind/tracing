@@ -1,18 +1,21 @@
 package com.dafy.skye.server.dto;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
+
 import java.util.Date;
 
 /**
  * Created by Caedmon on 2017/6/5.
  */
-public class SkyeLogDTO {
+public class SkyeLogQueryResult {
+    @JsonFormat(pattern="yyyy-MM-dd HH:mm:ss.SSS")
     private Date timestamp;
     private String traceId;
     private String serviceName;
     private String level;
     private String formattedMessage;
 
-    private SkyeLogDTO(Builder builder) {
+    private SkyeLogQueryResult(Builder builder) {
         setTimestamp(builder.timestamp);
         setTraceId(builder.traceId);
         setServiceName(builder.serviceName);
@@ -95,8 +98,8 @@ public class SkyeLogDTO {
             return this;
         }
 
-        public SkyeLogDTO build() {
-            return new SkyeLogDTO(this);
+        public SkyeLogQueryResult build() {
+            return new SkyeLogQueryResult(this);
         }
     }
 }

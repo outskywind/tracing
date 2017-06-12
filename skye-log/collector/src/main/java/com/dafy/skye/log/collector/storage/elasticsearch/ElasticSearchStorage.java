@@ -1,13 +1,16 @@
 package com.dafy.skye.log.collector.storage.elasticsearch;
 
-import com.alibaba.fastjson.JSON;
 import com.dafy.skye.log.collector.storage.StorageComponent;
-import com.dafy.skye.log.collector.storage.elasticsearch.internal.SearchRequest;
+import com.dafy.skye.log.collector.storage.elasticsearch.internal.ESearchRequest;
+import com.dafy.skye.log.collector.storage.elasticsearch.internal.ESearchResponse;
 import com.dafy.skye.log.collector.storage.entity.SkyeLogEntity;
 import com.dafy.skye.log.collector.storage.query.LogQueryRequest;
+import com.dafy.skye.log.collector.storage.query.LogQueryResult;
 import com.dafy.skye.log.collector.util.IndexNameFormatter;
+import com.dafy.skye.log.collector.util.JacksonConvert;
 import com.dafy.skye.log.collector.util.ResourceUtil;
 import com.dafy.skye.log.core.logback.SkyeLogEvent;
+import com.fasterxml.jackson.databind.JavaType;
 import com.google.common.base.Charsets;
 import com.google.common.base.Strings;
 import com.google.common.collect.Maps;
@@ -21,6 +24,7 @@ import org.elasticsearch.client.RestClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.text.SimpleDateFormat;
@@ -70,10 +74,11 @@ public class ElasticSearchStorage implements StorageComponent {
             Response putResponse=easyRestClient.request(builder);
             if(putResponse.getStatusLine().getStatusCode()==HttpStatus.SC_OK){
                 log.info("Put elasticSearch template success");
+                return true;
             }else{
                 log.error("Put elasticSearch Template Fail");
+                return false;
             }
-            return true;
         }else if(line.getStatusCode()==HttpStatus.SC_OK){
             log.info("ElasticSearch template has already exists");
             return true;
@@ -100,8 +105,8 @@ public class ElasticSearchStorage implements StorageComponent {
         final String endpoint="/"+logIndex+"/"+type;
         EasyRestClient.EasyRequestBuilder builder=new EasyRestClient.EasyRequestBuilder();
         final SkyeLogEntity entity=SkyeLogEntity.build(event);
-        builder.method("POST").enpoint(endpoint).body(entity);
-        easyRestClient.requestAsync(builder, new ResponseListener() {
+        builder.method("POST").enpoint(endpoint).body(JacksonConvert.toJsonString(entity));
+         easyRestClient.requestAsync(builder, new ResponseListener() {
             @Override
             public void onSuccess(Response response) {
                 int status=response.getStatusLine().getStatusCode();
@@ -129,7 +134,7 @@ public class ElasticSearchStorage implements StorageComponent {
             SkyeLogEntity entity=SkyeLogEntity.build(event);
             String logIndexName=indexNameFormatter.indexNameForTimestamp(event.getTimeStamp());
             String indexMetadata=indexMetadata(logIndexName,typeName);
-            String documentSource=JSON.toJSONString(entity)+"\n";
+            String documentSource= JacksonConvert.toJsonString(entity)+"\n";
             body.append(indexMetadata).append(documentSource);
         }
         EasyRestClient.EasyRequestBuilder builder=new EasyRestClient.EasyRequestBuilder();
@@ -159,37 +164,38 @@ public class ElasticSearchStorage implements StorageComponent {
         return builder.toString();
     }
     @Override
-    public List<SkyeLogEntity> query(LogQueryRequest request) throws Exception{
-        String begin=new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS").format(request.getStartTs());
-        String end=new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS").format(request.getEndTs());
-        long beginMills=request.getStartTs().getTime();
-        long endMills=request.getEndTs().getTime();
-        List<String> indices=indexNameFormatter.indexNamePatternsForRange(beginMills,endMills);
-        SearchRequest searchRequest=SearchRequest.forIndicesAndType(indices,esConfig.getType());
-        SearchRequest.Filters filters = new SearchRequest.Filters();
+    public LogQueryResult query(LogQueryRequest request) {
+        SimpleDateFormat dateFormat=new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS");
+        String begin=dateFormat.format(request.getStartTs());
+        String end=dateFormat.format(request.getEndTs());
+        List<String> indices=indexNameFormatter.indexNamePatternsForRange(request.getStartTs(),request.getEndTs());
+        ESearchRequest searchRequest= ESearchRequest.forIndicesAndType(indices,esConfig.getType());
+        ESearchRequest.Filters filters = new ESearchRequest.Filters();
         filters.addDateRange("timestamp", begin, end,"yyyy-MM-dd HH:mm:ss.SSS");
-        if (request.getServiceName() != null) {
-            filters.addTerm("serviceName",request.getServiceName());
+        if (request.getServiceNames() != null&&!request.getServiceNames().isEmpty()) {
+            filters.addTerms("serviceName",request.getServiceNames());
         }
-
-        if (request.getTraceId() != null) {
+        if(request.getLevels()!=null&&!request.getLevels().isEmpty()){
+            filters.addTerms("level",request.getLevels());
+        }
+        if (!Strings.isNullOrEmpty(request.getTraceId())) {
             filters.addTerm("traceId", request.getTraceId());
-        }
-        if(request.getLevel()!=null){
-            filters.addTerm("level",request.getLevel());
         }
         if(!Strings.isNullOrEmpty(request.getMessage())){
             filters.addTerm("message",request.getMessage());
         }
-        if(request.getMdc()!=null&&!request.getMdc().isEmpty()){
+        if(!Strings.isNullOrEmpty(request.getMdc())){
+            JavaType javaType=JacksonConvert.mapper()
+                    .getTypeFactory().constructMapType(HashMap.class,String.class,String.class);
+            Map<String,String> mdcMap=(Map<String, String>) JacksonConvert.readValue(request.getMdc(),javaType);
             Map<String,String> mdcNestedTerms=Maps.newHashMap();
-            for(Map.Entry<String,String> entry:request.getMdc().entrySet()){
-                entry.setValue("mdc."+entry.getValue());
+            for(Map.Entry entry:mdcMap.entrySet()){
+                mdcNestedTerms.put("mdc."+entry.getKey(),entry.getValue().toString());
             }
             filters.addNestedTerms(mdcNestedTerms);
         }
         searchRequest.filters(filters);
-        searchRequest.addSort("tsUuid",new SearchRequest.SortOrder("desc",null));
+        searchRequest.addSort("tsUuid",new ESearchRequest.SortOrder("desc",null));
         EasyRestClient.EasyRequestBuilder builder= new EasyRestClient.EasyRequestBuilder();
         StringBuilder endpointBuilder=new StringBuilder();
         endpointBuilder.append("/").append(join(indices))
@@ -200,17 +206,42 @@ public class ElasticSearchStorage implements StorageComponent {
         params.put("allow_no_indices","true");
         params.put("expand_wildcards","open");
         params.put("ignore_unavailable","true");
+        LogQueryResult.Builder resultBuilder=LogQueryResult.newBuilder();
         builder.method("GET").enpoint(endpointBuilder.toString())
                 .params(params)
-                .body(searchRequest);
-        Response response=easyRestClient.request(builder);
-        int statusCode=response.getStatusLine().getStatusCode();
-        if(statusCode==HttpStatus.SC_OK){
-            InputStream inputStream=response.getEntity().getContent();
-            String respBody=CharStreams.toString(new InputStreamReader(inputStream, Charsets.UTF_8));
-            System.out.println(JSON.toJSONString(JSON.parse(respBody),true));
+                .body(JacksonConvert.toJsonString(searchRequest));
+        Response restResponse=easyRestClient.request(builder);
+        int statusCode=restResponse.getStatusLine().getStatusCode();
+        String respBody=null;
+        try{
+            InputStream inputStream=restResponse.getEntity().getContent();
+            respBody=CharStreams.toString(new InputStreamReader(inputStream, Charsets.UTF_8));
+        }catch (IOException e){
+            resultBuilder.success(false);
+            resultBuilder.error("Read http response error:"+e.getMessage());
+            return resultBuilder.build();
         }
-        return null;
+        JavaType javaType= JacksonConvert.mapper.getTypeFactory()
+                .constructParametricType(ESearchResponse.class,SkyeLogEntity.class);
+        ESearchResponse<SkyeLogEntity> response=(ESearchResponse<SkyeLogEntity>) JacksonConvert.readValue(respBody,javaType);
+        response.setStatus(statusCode);
+        if(!response.isSucces()){
+            resultBuilder.success(false);
+            resultBuilder.error(response.getError().toString());
+            return resultBuilder.build();
+        }else{
+            resultBuilder.success(true);
+            List<SkyeLogEntity> entities=new ArrayList<>(response.getHits().getTotal());
+            List<ESearchResponse.Document<SkyeLogEntity>> documents=response.getHits().getHits();
+            for(ESearchResponse.Document<SkyeLogEntity> document:documents){
+                SkyeLogEntity entity=document.get_source();
+                entities.add(entity);
+            }
+            resultBuilder.content(entities);
+            resultBuilder.took(response.getTook());
+            resultBuilder.total(response.getHits().getTotal());
+            return resultBuilder.build();
+        }
     }
     static String join(List<String> parts) {
         StringBuilder to = new StringBuilder();

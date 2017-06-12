@@ -1,9 +1,9 @@
 package com.dafy.skye.log.collector.storage.entity;
 
 import ch.qos.logback.classic.spi.ThrowableProxyUtil;
-import com.alibaba.fastjson.annotation.JSONField;
 import com.dafy.skye.log.core.logback.SkyeLogEvent;
 import com.datastax.driver.core.utils.UUIDs;
+import com.fasterxml.jackson.annotation.JsonFormat;
 
 import java.util.Date;
 import java.util.Map;
@@ -16,7 +16,7 @@ import java.util.UUID;
 public class SkyeLogEntity {
     private String tsUuid;
     private String traceId;
-    @JSONField(format = "yyyy-MM-dd HH:mm:ss.SSS")
+    @JsonFormat(pattern="yyyy-MM-dd HH:mm:ss.SSS")
     private Date timestamp;
     private String serviceName;
     private String address;

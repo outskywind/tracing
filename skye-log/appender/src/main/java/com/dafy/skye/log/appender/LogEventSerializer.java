@@ -9,8 +9,8 @@ import java.util.Map;
 /**
  * Created by Caedmon on 2016/4/1.
  */
-public class SkyeLogEventSerializer implements Serializer<SkyeLogEvent> {
-    public SkyeLogEventSerializer() {
+public class LogEventSerializer implements Serializer<SkyeLogEvent> {
+    public LogEventSerializer() {
         super();
     }
 

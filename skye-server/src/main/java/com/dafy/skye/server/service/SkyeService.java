@@ -1,7 +1,8 @@
 package com.dafy.skye.server.service;
 
 import com.dafy.skye.log.collector.storage.query.LogQueryRequest;
-import com.dafy.skye.server.dto.SkyeLogDTO;
+import com.dafy.skye.log.collector.storage.query.LogQueryResult;
+import com.dafy.skye.server.dto.SkyeLogQueryResult;
 
 import java.util.List;
 
@@ -10,5 +11,5 @@ import java.util.List;
  */
 public interface SkyeService {
 
-    List<SkyeLogDTO> queryLogs(LogQueryRequest request);
+    LogQueryResult logsQuery(LogQueryRequest request);
 }

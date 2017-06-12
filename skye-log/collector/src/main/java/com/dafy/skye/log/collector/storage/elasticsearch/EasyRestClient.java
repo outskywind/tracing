@@ -1,6 +1,5 @@
 package com.dafy.skye.log.collector.storage.elasticsearch;
 
-import com.alibaba.fastjson.JSON;
 import com.google.common.base.Charsets;
 import com.google.common.base.Strings;
 import org.apache.http.Header;
@@ -111,10 +110,6 @@ public class EasyRestClient {
         }
         public EasyRequestBuilder body(String body){
             this.body=body;
-            return this;
-        }
-        public EasyRequestBuilder body(Object body){
-            this.body= JSON.toJSONString(body);
             return this;
         }
         public EasyRequestBuilder headers(Header... headers){

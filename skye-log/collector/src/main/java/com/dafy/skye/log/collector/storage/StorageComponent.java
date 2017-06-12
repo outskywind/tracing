@@ -1,8 +1,8 @@
 package com.dafy.skye.log.collector.storage;
 
 import com.dafy.skye.log.collector.CollectorComponent;
-import com.dafy.skye.log.collector.storage.entity.SkyeLogEntity;
 import com.dafy.skye.log.collector.storage.query.LogQueryRequest;
+import com.dafy.skye.log.collector.storage.query.LogQueryResult;
 import com.dafy.skye.log.core.logback.SkyeLogEvent;
 
 import java.util.Collection;
@@ -18,5 +18,5 @@ public interface StorageComponent extends CollectorComponent {
 
     void batchSave(Collection<SkyeLogEvent> events);
 
-    List<SkyeLogEntity> query(LogQueryRequest request) throws Exception;
+    LogQueryResult query(LogQueryRequest request);
 }

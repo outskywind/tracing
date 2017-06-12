@@ -1,6 +1,9 @@
 package com.dafy.skye.log.collector.storage.query;
 
-import java.util.Date;
+import org.slf4j.MDC;
+
+import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -9,11 +12,11 @@ import java.util.Map;
 public class LogQueryRequest {
     private String traceId;
     private String message;
-    private Date startTs;
-    private Date endTs;
-    private String level;
-    private String serviceName;
-    private Map<String,String> mdc;
+    private Long startTs;
+    private Long endTs;
+    private List<String> levels;
+    private List<String> serviceNames;
+    private String mdc;
     public String getTraceId() {
         return traceId;
     }
@@ -30,43 +33,56 @@ public class LogQueryRequest {
         this.message = message;
     }
 
-    public Date getStartTs() {
+    public Long getStartTs() {
         return startTs;
     }
 
-    public void setStartTs(Date startTs) {
+    public void setStartTs(Long startTs) {
         this.startTs = startTs;
     }
 
-    public Date getEndTs() {
+    public Long getEndTs() {
         return endTs;
     }
 
-    public void setEndTs(Date endTs) {
+    public void setEndTs(Long endTs) {
         this.endTs = endTs;
     }
 
-    public String getLevel() {
-        return level;
+    public List<String> getLevels() {
+        return levels;
     }
 
-    public void setLevel(String level) {
-        this.level = level;
+    public void setLevels(List<String> levels) {
+        this.levels = levels;
     }
 
-    public String getServiceName() {
-        return serviceName;
+    public List<String> getServiceNames() {
+        return serviceNames;
     }
 
-    public void setServiceName(String serviceName) {
-        this.serviceName = serviceName;
+    public void setServiceNames(List<String> serviceNames) {
+        this.serviceNames = serviceNames;
     }
 
-    public Map<String, String> getMdc() {
+    public String getMdc() {
         return mdc;
     }
 
-    public void setMdc(Map<String, String> mdc) {
+    public void setMdc(String mdc) {
         this.mdc = mdc;
+    }
+
+    @Override
+    public String toString() {
+        return "LogQueryRequest{" +
+                "traceId='" + traceId + '\'' +
+                ", message='" + message + '\'' +
+                ", startTs=" + startTs +
+                ", endTs=" + endTs +
+                ", levels='" + levels + '\'' +
+                ", serviceNames='" + serviceNames + '\'' +
+                ", mdc=" + mdc +
+                '}';
     }
 }

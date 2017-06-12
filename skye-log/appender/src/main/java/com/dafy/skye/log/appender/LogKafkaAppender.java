@@ -23,14 +23,14 @@ import java.util.concurrent.TimeUnit;
 /**
  * Created by Caedmon on 2016/4/1.
  */
-public class SkyeLogKafkaAppender extends UnsynchronizedAppenderBase<ILoggingEvent> implements Runnable{
+public class LogKafkaAppender extends UnsynchronizedAppenderBase<ILoggingEvent> implements Runnable{
     private Producer<String,String> kafkaProducer;
     private int queueSize=2048;
     private String kafkaAddress;
     private String kafkaTopic="skye-log";
     private BlockingQueue<SkyeLogEvent> queue= new LinkedBlockingDeque(this.queueSize);
     private Duration eventDelayLimit = new Duration(100L);
-    private PreSerializationTransformer transformer=new SkyeLogSerializationTransformer();
+    private PreSerializationTransformer transformer=new LogSerializationTransformer();
     private String serviceName;
     private boolean includeCallerData=false;
     static {
@@ -77,7 +77,7 @@ public class SkyeLogKafkaAppender extends UnsynchronizedAppenderBase<ILoggingEve
         props.put("linger.ms", 1);
         props.put("buffer.memory", 33554432);
         props.put("key.serializer", StringSerializer.class.getName());
-        props.put("value.serializer", SkyeLogEventSerializer.class.getName());
+        props.put("value.serializer", LogEventSerializer.class.getName());
         kafkaProducer=new KafkaProducer(props);
         try{
             kafkaProducer.partitionsFor(this.kafkaTopic);

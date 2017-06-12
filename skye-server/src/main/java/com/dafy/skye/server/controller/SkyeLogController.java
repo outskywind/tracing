@@ -1,24 +1,26 @@
 package com.dafy.skye.server.controller;
 
 import com.dafy.skye.log.collector.storage.query.LogQueryRequest;
-import com.dafy.skye.server.dto.SkyeLogDTO;
+import com.dafy.skye.log.collector.storage.query.LogQueryResult;
 import com.dafy.skye.server.service.SkyeService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.util.List;
+import java.util.Map;
 
 /**
  * Created by Caedmon on 2017/6/5.
  */
-@RestController("/api/log")
+@RestController
+@RequestMapping("/api/logs")
 public class SkyeLogController {
     @Autowired
     private SkyeService skyeService;
     @RequestMapping("/query")
-    List<SkyeLogDTO> query(LogQueryRequest request){
-        List<SkyeLogDTO> entities=skyeService.queryLogs(request);
-        return entities;
+    LogQueryResult query(@RequestBody LogQueryRequest request){
+        LogQueryResult result=skyeService.logsQuery(request);
+        return result;
     }
 }

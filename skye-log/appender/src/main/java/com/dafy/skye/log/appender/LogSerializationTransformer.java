@@ -10,7 +10,7 @@ import java.io.Serializable;
 /**
  * Created by Caedmon on 2016/4/1.
  */
-public class SkyeLogSerializationTransformer implements PreSerializationTransformer<ILoggingEvent> {
+public class LogSerializationTransformer implements PreSerializationTransformer<ILoggingEvent> {
     @Override
     public Serializable transform(ILoggingEvent event) {
         if(event==null) return null;

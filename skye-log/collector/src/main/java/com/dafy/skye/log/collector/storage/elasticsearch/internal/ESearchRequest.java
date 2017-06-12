@@ -1,13 +1,12 @@
 package com.dafy.skye.log.collector.storage.elasticsearch.internal;
 
-import com.alibaba.fastjson.annotation.JSONField;
 
 import java.util.*;
 
 /**
  * Created by Caedmon on 2017/6/5.
  */
-public final class SearchRequest {
+public final class ESearchRequest {
     /**
      * The maximum results returned in a query. This only affects non-aggregation requests.
      *
@@ -21,12 +20,11 @@ public final class SearchRequest {
     transient final String type;
 
     Integer size = MAX_RESULT_WINDOW;
-    @JSONField(name = "_source")
     Boolean _source;
     Object query;
     Map<String, Aggregation> aggs;
     List<Map<String,Object>> sort;
-    SearchRequest(List<String> indices, String type) {
+    ESearchRequest(List<String> indices, String type) {
         this.indices = indices;
         this.type = type;
         this._source=true;
@@ -46,13 +44,17 @@ public final class SearchRequest {
             add(new Term(field, value));
             return this;
         }
+        public Filters addTerms(String field,List<String> values){
+            add(new Terms(field, values));
+            return this;
+        }
         public Filters addNestedTerms(Collection<String> nestedFields, String value) {
             add(_nestedTermsEqual(nestedFields, value));
             return this;
         }
 
         public Filters addNestedTerms(Map<String, String> nestedTerms) {
-            List<SearchRequest.Term> terms = new ArrayList<>();
+            List<ESearchRequest.Term> terms = new ArrayList<>();
             String field = null;
             for (Map.Entry<String, String> nestedTerm : nestedTerms.entrySet()) {
                 terms.add(new Term(field = nestedTerm.getKey(), nestedTerm.getValue()));
@@ -62,32 +64,32 @@ public final class SearchRequest {
         }
     }
 
-    public SearchRequest filters(Filters filters) {
+    public ESearchRequest filters(Filters filters) {
         return query(new BoolQuery("must", filters));
     }
 
-    static SearchRequest.BoolQuery _nestedTermsEqual(Collection<String> nestedFields, String value) {
-        List<SearchRequest.NestedBoolQuery> conditions = new ArrayList<>();
+    static ESearchRequest.BoolQuery _nestedTermsEqual(Collection<String> nestedFields, String value) {
+        List<ESearchRequest.NestedBoolQuery> conditions = new ArrayList<>();
         for (String nestedField : nestedFields) {
             conditions.add(new NestedBoolQuery(nestedField.substring(0, nestedField.indexOf('.')), "must",
-                    new SearchRequest.Term(nestedField, value)));
+                    new ESearchRequest.Term(nestedField, value)));
         }
-        return new SearchRequest.BoolQuery("should", conditions);
+        return new ESearchRequest.BoolQuery("should", conditions);
     }
 
-    public static SearchRequest forIndicesAndType(List<String> indices, String type) {
-        return new SearchRequest(indices, type);
+    public static ESearchRequest forIndicesAndType(List<String> indices, String type) {
+        return new ESearchRequest(indices, type);
     }
 
-    public SearchRequest term(String field, String value) {
+    public ESearchRequest term(String field, String value) {
         return query(new Term(field, value));
     }
 
-    public SearchRequest terms(String field, List<String> values) {
+    public ESearchRequest terms(String field, List<String> values) {
         return query(new Terms(field, values));
     }
 
-    public SearchRequest addAggregation(Aggregation agg) {
+    public ESearchRequest addAggregation(Aggregation agg) {
         size = null; // we return aggs, not source data
         _source = false;
         if (aggs == null) aggs = new LinkedHashMap<>();
@@ -99,11 +101,11 @@ public final class SearchRequest {
         return aggs != null ? "aggregation" : "search";
     }
 
-    SearchRequest query(Object filter) {
+    ESearchRequest query(Object filter) {
         query = Collections.singletonMap("bool", Collections.singletonMap("filter", filter));
         return this;
     }
-    public SearchRequest addSort(String field,SortOrder order){
+    public ESearchRequest addSort(String field, SortOrder order){
         if(this.sort==null){
             this.sort=new ArrayList<>();
         }
