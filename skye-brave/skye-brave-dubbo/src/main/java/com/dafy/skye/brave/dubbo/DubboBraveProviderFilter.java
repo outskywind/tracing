@@ -17,12 +17,15 @@ public class DubboBraveProviderFilter implements Filter {
     private volatile Brave brave;
     public Result invoke(Invoker<?> invoker, Invocation invocation) throws RpcException {
         String traceId=invocation.getAttachment("traceId");
+        //请求进入植入TraceId
         MDC.put(Constants.MDC_TRACE_ID_KEY,traceId);
         ServerRequestInterceptor serverRequestInterceptor=brave.serverRequestInterceptor();
         ServerResponseInterceptor serverResponseInterceptor=brave.serverResponseInterceptor();
         serverRequestInterceptor.handle(new DubboServerRequestAdapter(invoker,invocation,brave.serverTracer()));
         Result result = invoker.invoke(invocation);
         serverResponseInterceptor.handle(new DubboServerResponseAdapter(result));
+        //请求处理完毕清除TraceId
+        MDC.remove(Constants.MDC_TRACE_ID_KEY);
         return result;
     }
 

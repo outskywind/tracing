@@ -3,6 +3,7 @@ package com.dafy.skye.brave.dubbo;
 import com.alibaba.dubbo.rpc.Result;
 import com.github.kristofa.brave.KeyValueAnnotation;
 import com.github.kristofa.brave.ServerResponseAdapter;
+import org.slf4j.MDC;
 
 import java.util.ArrayList;
 import java.util.Collection;
