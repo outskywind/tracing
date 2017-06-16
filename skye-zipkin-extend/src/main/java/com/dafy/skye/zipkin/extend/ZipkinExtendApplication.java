@@ -15,5 +15,6 @@ public class ZipkinExtendApplication {
     public static void main(String[] args) {
         SpringApplication application=new SpringApplication(ZipkinExtendApplication.class);
         application.run(args);
+
     }
 }
