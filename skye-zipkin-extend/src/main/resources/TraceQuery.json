@@ -1,0 +1,69 @@
+// GET zipkin-2017-06-14/_search
+{
+  "aggs": {
+    "trace_overview": {
+      "terms": {
+        "field": "traceId"
+      },
+      "aggs": {
+        //Trace调用时长
+        "trace_duration": {
+          "max": {
+            "field": "duration"
+          }
+        },
+        //每个Trace包含多少个Span
+        "trace_span_num": {
+          "cardinality": {
+            "field": "id"
+          }
+        },
+        //每个Trace调了多少个不同的Span
+        "trace_span_type_num": {
+          "cardinality": {
+            "field": "name"
+          }
+        }
+      }
+    },
+    //包含多少种Span,每种span总计有多少个
+    "span_call_times": {
+      "terms": {
+        "field": "name"
+      }
+    },
+    "span_overview": {
+      "terms": {
+        "field": "id"
+      },
+      "aggs": {
+        //Span耗时
+        "span_duration": {
+          "max": {
+            "field": "duration"
+          }
+        }
+      }
+    },
+    "stats_trace_duration": {
+      "stats_bucket": {
+        "buckets_path": "trace_overview>trace_duration"
+      }
+    },
+    "stats_span_duration": {
+      "stats_bucket": {
+        "buckets_path": "trace_overview>span_overview"
+      }
+    },
+    "stats_trace_span_num": {
+      "stats_bucket": {
+        "buckets_path": "trace_overview>trace_span_num"
+      }
+    },
+    "stats_trace_span_type_num": {
+      "stats_bucket": {
+        "buckets_path": "trace_overview>trace_span_type_num"
+      }
+    }
+  }
+}
