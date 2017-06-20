@@ -1,0 +1,34 @@
+SearchRequest{searchType=QUERY_THEN_FETCH, indices=[zipkin-2017-06-16, zipkin-2017-06-17], indicesOptions=IndicesOptions[id=15, ignore_unavailable=true, allow_no_indices=true, expand_wildcards_open=true, expand_wildcards_closed=true, allow_alisases_to_multiple_indices=true, forbid_closed_indices=false], types=[], routing='null', preference='null', requestCache=null, scroll=null, source={
+  "aggregations" : {
+    "traceAgg" : {
+      "terms" : {
+        "field" : "traceId",
+        "size" : 10,
+        "min_doc_count" : 1,
+        "shard_min_doc_count" : 0,
+        "show_term_doc_count_error" : false,
+        "order" : [
+          {
+            "_count" : "desc"
+          },
+          {
+            "_term" : "asc"
+          }
+        ]
+      },
+      "aggregations" : {
+        "trace_duration" : {
+          "max" : {
+            "field" : "duration"
+          }
+        }
+      }
+    },
+    "trace_duration_stat" : {
+      "extended_stats" : {
+        "field" : "traceAgg>trace_duration",
+        "sigma" : 2.0
+      }
+    }
+  }
+}}

@@ -169,6 +169,9 @@ public class ElasticSearchStorage implements StorageComponent {
     }
     @Override
     public LogQueryResult query(LogQueryRequest request) {
+        if(request.getStartTs()==null){
+            request.setStartTs();
+        }
         SimpleDateFormat dateFormat=new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS");
         String begin=dateFormat.format(request.getStartTs());
         String end=dateFormat.format(request.getEndTs());

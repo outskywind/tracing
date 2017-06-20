@@ -18,6 +18,7 @@ public class ElasticSearchConfigProperties {
     private boolean ensureIndex=true;
     private Integer indexShards=5;
     private Integer indexReplicas=1;
+    private Long defaultLookback=604800000L;
     public List<String> getHosts() {
         return hosts;
     }
@@ -64,5 +65,13 @@ public class ElasticSearchConfigProperties {
 
     public void setIndexReplicas(Integer indexReplicas) {
         this.indexReplicas = indexReplicas;
+    }
+
+    public Long getDefaultLookback() {
+        return defaultLookback;
+    }
+
+    public void setDefaultLookback(Long defaultLookback) {
+        this.defaultLookback = defaultLookback;
     }
 }

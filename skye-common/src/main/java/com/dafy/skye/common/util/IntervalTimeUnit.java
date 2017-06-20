@@ -22,4 +22,18 @@ public enum IntervalTimeUnit {
     public static IntervalTimeUnit valueOf(int value){
         return map.get(value);
     }
+
+    public long getMills(){
+        switch (this){
+            case MINUTES:
+                return 60*1000;
+            case HOUR:
+                return 60*1000*60;
+            case DAY:
+                return 60*1000*60*24;
+            case WEEK:
+                return 60*1000*60*24*7;
+        }
+        throw new NullPointerException("unit is null");
+    }
 }

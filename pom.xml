@@ -31,7 +31,7 @@
         <zipkin.version>1.22.0</zipkin.version>
         <nodepencies.version>1.0.0-SNAPSHOT</nodepencies.version>
         <datastx.cassandra.version>3.2.0</datastx.cassandra.version>
-        <jackson.version>2.8.5</jackson.version>
+        <jackson.version>2.8.8</jackson.version>
         <spring-boot.version>1.5.3.RELEASE</spring-boot.version>
         <logback.version>1.1.7</logback.version>
     </properties>

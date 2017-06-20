@@ -41,6 +41,14 @@ public class JacksonConvert {
             throw new IllegalArgumentException(e);
         }
     }
+    public static String toPrettyString(Object object){
+        try{
+            return mapper.writerWithDefaultPrettyPrinter().writeValueAsString(object);
+        }catch (JsonProcessingException e){
+            throw new IllegalArgumentException(e);
+        }
+
+    }
     public static ObjectMapper mapper(){
         return mapper;
     }
