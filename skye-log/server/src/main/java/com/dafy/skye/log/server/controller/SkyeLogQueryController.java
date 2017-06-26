@@ -12,7 +12,7 @@ import org.springframework.web.bind.annotation.RestController;
  * Created by Caedmon on 2017/6/5.
  */
 @RestController
-@RequestMapping("/log/api/v1")
+@RequestMapping("/api/v1/logs")
 public class SkyeLogQueryController {
     @Autowired
     private StorageComponent storageComponent;

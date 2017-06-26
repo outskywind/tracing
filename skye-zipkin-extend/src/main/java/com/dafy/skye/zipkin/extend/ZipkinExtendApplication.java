@@ -3,6 +3,7 @@ package com.dafy.skye.zipkin.extend;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.context.annotation.ComponentScan;
 import zipkin.server.EnableZipkinServer;
 
 /**
@@ -11,6 +12,7 @@ import zipkin.server.EnableZipkinServer;
 @SpringBootApplication
 @EnableAutoConfiguration
 @EnableZipkinServer
+@ComponentScan("com.dafy.skye.zipkin.extend")
 public class ZipkinExtendApplication {
     public static void main(String[] args) {
         SpringApplication application=new SpringApplication(ZipkinExtendApplication.class);

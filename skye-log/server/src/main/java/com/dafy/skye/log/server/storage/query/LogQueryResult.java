@@ -13,6 +13,30 @@ public class LogQueryResult extends QueryResult{
     private List<SkyeLogEntity> content;
     private Integer total;
 
+    private LogQueryResult(Builder builder) {
+        setTook(builder.took);
+        setSuccess(builder.success);
+        setError(builder.error);
+        setExtra(builder.extra);
+        setContent(builder.content);
+        setTotal(builder.total);
+    }
+
+    public static Builder newBuilder() {
+        return new Builder();
+    }
+
+    public static Builder newBuilder(LogQueryResult copy) {
+        Builder builder = new Builder();
+        builder.took = copy.took;
+        builder.success = copy.success;
+        builder.error = copy.error;
+        builder.extra = copy.extra;
+        builder.content = copy.content;
+        builder.total = copy.total;
+        return builder;
+    }
+
     public List<SkyeLogEntity> getContent() {
         return content;
     }
@@ -39,5 +63,51 @@ public class LogQueryResult extends QueryResult{
                 ", content=" + content +
                 ", total=" + total +
                 '}';
+    }
+
+    public static final class Builder {
+        private Long took;
+        private boolean success;
+        private String error;
+        private Map<String, Object> extra;
+        private List<SkyeLogEntity> content;
+        private Integer total;
+
+        private Builder() {
+        }
+
+        public Builder took(Long val) {
+            took = val;
+            return this;
+        }
+
+        public Builder success(boolean val) {
+            success = val;
+            return this;
+        }
+
+        public Builder error(String val) {
+            error = val;
+            return this;
+        }
+
+        public Builder extra(Map<String, Object> val) {
+            extra = val;
+            return this;
+        }
+
+        public Builder content(List<SkyeLogEntity> val) {
+            content = val;
+            return this;
+        }
+
+        public Builder total(Integer val) {
+            total = val;
+            return this;
+        }
+
+        public LogQueryResult build() {
+            return new LogQueryResult(this);
+        }
     }
 }

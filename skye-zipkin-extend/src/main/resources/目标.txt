@@ -1,5 +1,2 @@
-1.根据查询条件查询相应Trace记录
-2.输出Trace的曲线图:Trace总数,平均耗时(发现异常时间段)
-3.输出Span统计结果
-①耗时:SpanName总数,SpanName平均调用时长(如果跟Trace耗时一致,则可以认为是Root Span),
-SpanName总计调用时长
+1.Trace和Span耗时曲线图
+2.服务调用次数

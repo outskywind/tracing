@@ -6,15 +6,16 @@ import java.util.Map;
  * Created by Caedmon on 2017/6/20.
  */
 public class QueryResult {
-    protected Integer took;
+    protected Long took;
     protected boolean success;
     protected String error;
     protected Map<String,Object> extra;
-    public Integer getTook() {
+
+    public Long getTook() {
         return took;
     }
 
-    public void setTook(Integer took) {
+    public void setTook(Long took) {
         this.took = took;
     }
 

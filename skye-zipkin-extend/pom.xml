@@ -33,6 +33,11 @@
             <version>${zipkin.version}</version>
         </dependency>
         <dependency>
+            <groupId>io.zipkin.brave</groupId>
+            <artifactId>brave-core</artifactId>
+            <version>${brave.version}</version>
+        </dependency>
+        <dependency>
             <groupId>com.dafy.skye</groupId>
             <artifactId>skye-common</artifactId>
             <version>${project.version}</version>

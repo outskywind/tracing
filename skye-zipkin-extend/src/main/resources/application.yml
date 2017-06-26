@@ -26,7 +26,7 @@ zipkin:
       port: ${COLLECTOR_PORT:19410}
   query:
     # 7 days in millis
-    lookback: ${QUERY_LOOKBACK:8640000}
+    lookback: ${QUERY_LOOKBACK:604800000}
     # The Cache-Control max-age (seconds) for /api/v1/services and /api/v1/spans
     names-max-age: 300
     # CORS allowed-origins.
@@ -94,3 +94,9 @@ logging:
 #     com.datastax.driver.core.QueryLogger: 'TRACE'
 #     # log cassandra trace propagation
 #     com.datastax.driver.core.Message: 'TRACE'
+zipkin-extend:
+    elasticsearch:
+      transport-hosts:
+        - 10.8.15.79:9300
+      type: zipkin
+      cluster-name: skye

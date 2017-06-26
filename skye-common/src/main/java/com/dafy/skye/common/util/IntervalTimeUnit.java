@@ -26,13 +26,13 @@ public enum IntervalTimeUnit {
     public long getMills(){
         switch (this){
             case MINUTES:
-                return 60*1000;
+                return 600000;
             case HOUR:
-                return 60*1000*60;
+                return 3600000;
             case DAY:
-                return 60*1000*60*24;
+                return 86400000;
             case WEEK:
-                return 60*1000*60*24*7;
+                return 604800000;
         }
         throw new NullPointerException("unit is null");
     }
