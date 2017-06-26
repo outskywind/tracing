@@ -1,6 +1,7 @@
 package com.dafy.skye.log.server.autoconfig;
 
 import com.dafy.skye.log.server.collector.CollectorDelegate;
+import com.dafy.skye.log.server.controller.LogQueryController;
 import com.dafy.skye.log.server.kafka.KafkaCollector;
 import com.dafy.skye.log.server.kafka.offset.OffsetComponent;
 import com.dafy.skye.log.server.kafka.offset.redis.RedisOffsetComponent;
@@ -12,6 +13,7 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import redis.clients.jedis.JedisPool;
 
@@ -21,13 +23,13 @@ import redis.clients.jedis.JedisPool;
 @Configuration
 @EnableConfigurationProperties({
 KafkaCollectorConfigProperties.class,
-ElasticSearchConfigProperties.class})
+LogStorageESConfigProperties.class})
 public class LogServerAutoConfiguration {
 
     @ConditionalOnMissingBean(StorageComponent.class)
     @ConditionalOnProperty(value = "skye.log.server.storage.type",havingValue = "elasticsearch")
     @Bean(initMethod = "start")
-    ElasticSearchStorage elasticSearchStorage(ElasticSearchConfigProperties properties){
+    ElasticSearchStorage elasticSearchStorage(LogStorageESConfigProperties properties){
         ElasticSearchStorage storage=new ElasticSearchStorage(properties);
         return storage;
     }
@@ -39,7 +41,7 @@ public class LogServerAutoConfiguration {
     }
 
     @Bean(initMethod = "start")
-    @ConditionalOnProperty(name = "skye.log.collector.kafka.offset.type",havingValue = "redis")
+    @ConditionalOnProperty(name = "skye.log.server.kafka.offset.type",havingValue = "redis")
     OffsetComponent offsetComponent(JedisPool jedisPool){
         OffsetComponent offsetComponent=new RedisOffsetComponent(jedisPool);
         return offsetComponent;

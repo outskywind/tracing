@@ -70,16 +70,6 @@ server:
     # Includes dynamic json content and large static assets from zipkin-ui
     mime-types: application/json,application/javascript,text/css,image/svg
 
-spring:
-  mvc:
-    favicon:
-      # zipkin has its own favicon
-      enabled: false
-  autoconfigure:
-    exclude:
-      # otherwise we might initialize even when not needed (ex when storage type is cassandra)
-      - org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration
-
 info:
   zipkin:
     version: "@project.version@"
@@ -100,3 +90,48 @@ zipkin-extend:
         - 10.8.15.79:9300
       type: zipkin
       cluster-name: skye
+
+spring:
+  mvc:
+    favicon:
+      # zipkin has its own favicon
+      enabled: false
+  autoconfigure:
+    exclude:
+      # otherwise we might initialize even when not needed (ex when storage type is cassandra)
+      - org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration
+  application:
+    admin:
+      enabled: true
+  jedis:
+    max-total: 10
+    max-idle: 5
+    min-idle: 5
+    host: master.redis.sevend.com
+    port: 16389
+    test-on-borrow: false
+    test-on-return: false
+    timeout: 30000
+skye.log.server:
+  storage:
+    type: elasticsearch
+    elasticsearch:
+      transport-hosts: 10.8.15.79:9300
+      index-shards: 5
+      index-replicas: 2
+  kafka:
+    topic: skye-log
+    groupId: skye-log
+    partition: 4
+    offset:
+      type: redis
+    properties:
+      #kafka 地址
+      bootstrap.servers: kafka1.dafy.com:9092
+      #zookeeper 地址
+      zookeeper.connect: zookeeper1.dafy.com:2181
+      #zookeeper 链接超时时间
+      zookeeper.connection.timeout.ms: 6000
+      #是否自动ack
+      enable.auto.commit: false
+

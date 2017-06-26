@@ -1,5 +1,6 @@
 package com.dafy.skye.log.server.autoconfig;
 
+import com.dafy.skye.log.server.controller.LogQueryController;
 import org.springframework.context.annotation.Import;
 
 import java.lang.annotation.*;
@@ -11,6 +12,9 @@ import java.lang.annotation.*;
 @Target(ElementType.TYPE)
 @Retention(RetentionPolicy.RUNTIME)
 @Documented
-@Import(LogServerAutoConfiguration.class)
-public @interface EnableSkyeLogCollector {
+@Import({
+        LogServerAutoConfiguration.class,LogQueryController.class
+}
+        )
+public @interface EnableSkyeLogServer {
 }

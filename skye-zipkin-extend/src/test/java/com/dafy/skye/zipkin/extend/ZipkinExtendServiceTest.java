@@ -3,7 +3,7 @@ package com.dafy.skye.zipkin.extend;
 import com.dafy.skye.common.util.IntervalTimeUnit;
 import com.dafy.skye.common.util.JacksonConvert;
 import com.dafy.skye.zipkin.extend.dto.*;
-import com.dafy.skye.zipkin.extend.service.ZipkinExtendService;
+import com.dafy.skye.zipkin.extend.service.ZipkinExtendServiceImpl;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -12,7 +12,6 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
 import java.util.Base64;
 import java.util.Set;
-import java.util.concurrent.TimeUnit;
 
 /**
  * Created by Caedmon on 2017/6/18.
@@ -22,7 +21,7 @@ import java.util.concurrent.TimeUnit;
 public class ZipkinExtendServiceTest {
 
     @Autowired
-    private ZipkinExtendService zipkinExtendService;
+    private ZipkinExtendServiceImpl zipkinExtendService;
     @Test
     public void testGetServiceNames(){
         ServiceNameQueryRequest request=new ServiceNameQueryRequest();

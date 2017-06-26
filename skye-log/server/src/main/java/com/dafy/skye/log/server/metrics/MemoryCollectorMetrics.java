@@ -19,4 +19,9 @@ public class MemoryCollectorMetrics implements CollectorMetrics{
     public void incrementMessageDropped(int quantity) {
 
     }
+
+    @Override
+    public void incrementMessageError(int quantity) {
+
+    }
 }

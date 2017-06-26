@@ -1,12 +1,13 @@
 package com.dafy.skye.log.server.storage;
 
 import com.dafy.skye.log.server.collector.CollectorComponent;
-import com.dafy.skye.log.server.storage.query.LogQueryRequest;
+import com.dafy.skye.log.server.storage.query.LogSearchRequest;
 import com.dafy.skye.log.server.storage.query.LogQueryResult;
 import com.dafy.skye.log.core.logback.SkyeLogEvent;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.Set;
 
 /**
  * Created by Caedmon on 2017/4/14.
@@ -14,13 +15,13 @@ import java.util.List;
  */
 public interface StorageComponent extends CollectorComponent {
 
-    void save(SkyeLogEvent event);
+    void save(SkyeLogEvent event) throws Exception;
 
-    void batchSave(Collection<SkyeLogEvent> events);
+    void batchSave(Collection<SkyeLogEvent> events) throws Exception;
 
-    LogQueryResult query(LogQueryRequest request);
+    LogQueryResult query(LogSearchRequest request);
 
-    List<String> getServiceNames();
+    Set<String> getServices();
 
 
 

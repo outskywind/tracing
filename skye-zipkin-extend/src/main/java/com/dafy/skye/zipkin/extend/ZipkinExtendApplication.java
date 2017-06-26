@@ -1,5 +1,6 @@
 package com.dafy.skye.zipkin.extend;
 
+import com.dafy.skye.log.server.autoconfig.EnableSkyeLogServer;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -12,6 +13,7 @@ import zipkin.server.EnableZipkinServer;
 @SpringBootApplication
 @EnableAutoConfiguration
 @EnableZipkinServer
+@EnableSkyeLogServer
 @ComponentScan("com.dafy.skye.zipkin.extend")
 public class ZipkinExtendApplication {
     public static void main(String[] args) {

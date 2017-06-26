@@ -7,7 +7,7 @@ import java.util.Map;
 /**
  * Created by Caedmon on 2017/4/25.
  */
-@ConfigurationProperties("skye.log.collector.kafka")
+@ConfigurationProperties("skye.log.server.kafka")
 public class KafkaCollectorConfigProperties {
     private String topic;
     private String groupId;

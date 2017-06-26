@@ -19,4 +19,6 @@ public interface CollectorMetrics {
      * 统计消息丢失数
      * */
     void incrementMessageDropped(int quantity);
+
+    void incrementMessageError(int quantity);
 }

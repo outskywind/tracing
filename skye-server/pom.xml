@@ -27,23 +27,13 @@
     <dependencies>
         <dependency>
             <groupId>com.dafy.skye</groupId>
-            <artifactId>skye-autoconfigure-log-collector</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-web</artifactId>
-            <version>${spring-boot.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>com.dafy.spring-boot</groupId>
-            <artifactId>jedis-spring-boot-starter</artifactId>
+            <artifactId>skye-log-server</artifactId>
             <version>1.0.0-SNAPSHOT</version>
         </dependency>
         <dependency>
-            <groupId>org.elasticsearch.client</groupId>
-            <artifactId>transport</artifactId>
-            <version>${elasticsearch.version}</version>
+            <groupId>com.dafy.skye</groupId>
+            <artifactId>skye-zipkin-extend</artifactId>
+            <version>1.0.0-SNAPSHOT</version>
         </dependency>
     </dependencies>
 </project>

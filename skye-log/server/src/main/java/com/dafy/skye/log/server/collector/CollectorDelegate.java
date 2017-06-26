@@ -23,11 +23,23 @@ public class CollectorDelegate {
         this.metrics=metrics;
     }
     public void acceptEvent(SkyeLogEvent event){
-        storage.save(event);
+        try{
+            storage.save(event);
+        }catch (Exception e){
+            log.error("Accept event error ",e);
+            metrics.incrementMessageError(1);
+            return;
+        }
         metrics.incrementMessages(1);
     }
     public void acceptEvents(List<SkyeLogEvent> events){
-        storage.batchSave(events);
+        try{
+            storage.batchSave(events);
+        }catch (Exception e){
+            log.error("Accept events error ",e);
+            metrics.incrementMessageError(1);
+            return;
+        }
         metrics.incrementMessages(events.size());
     }
 

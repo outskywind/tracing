@@ -8,10 +8,10 @@ import java.util.List;
 /**
  * Created by Caedmon on 2017/4/26.
  */
-@ConfigurationProperties("skye.log.collector.storage.elasticsearch")
-public class ElasticSearchConfigProperties {
+@ConfigurationProperties("skye.log.storage.elasticsearch")
+public class LogStorageESConfigProperties {
     //ES节点地址
-    private List<String> hosts = Lists.newArrayList("10.8.15.79:9200");
+    private List<String> transportHosts = Lists.newArrayList("10.8.15.79:9300");
     //索引前缀,实际是按天存储
     private String index ="skye";
     private String type ="skye-log";
@@ -19,12 +19,13 @@ public class ElasticSearchConfigProperties {
     private Integer indexShards=5;
     private Integer indexReplicas=1;
     private Long defaultLookback=604800000L;
-    public List<String> getHosts() {
-        return hosts;
+    private String clusterName="skye";
+    public List<String> getTransportHosts() {
+        return transportHosts;
     }
 
-    public void setHosts(List<String> hosts) {
-        this.hosts = hosts;
+    public void setTransportHosts(List<String> transportHosts) {
+        this.transportHosts = transportHosts;
     }
 
     public String getIndex() {
@@ -73,5 +74,13 @@ public class ElasticSearchConfigProperties {
 
     public void setDefaultLookback(Long defaultLookback) {
         this.defaultLookback = defaultLookback;
+    }
+
+    public String getClusterName() {
+        return clusterName;
+    }
+
+    public void setClusterName(String clusterName) {
+        this.clusterName = clusterName;
     }
 }

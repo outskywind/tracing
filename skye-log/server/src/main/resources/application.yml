@@ -1,3 +1,4 @@
+
 spring:
   application:
     admin:
@@ -11,11 +12,11 @@ spring:
     test-on-borrow: false
     test-on-return: false
     timeout: 30000
-skye.log.collector:
+skye.log.server:
   storage:
     type: elasticsearch
     elasticsearch:
-      hosts: 10.8.15.79:9200
+      transportHosts: 10.8.15.79:9300
       indexShards: 5
       indexReplicas: 2
   kafka:
@@ -33,4 +34,6 @@ skye.log.collector:
       zookeeper.connection.timeout.ms: 6000
       #是否自动ack
       enable.auto.commit: false
+server:
+  port: 8081
 

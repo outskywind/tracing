@@ -1,95 +1,103 @@
 package com.dafy.skye.log.server.storage.elasticsearch;
 
-import com.dafy.skye.common.elasticsearch.ESSearchRequest;
-import com.dafy.skye.common.elasticsearch.ESearchResponse;
-import com.dafy.skye.common.elasticsearch.EasyRestClient;
+import com.dafy.skye.common.elasticsearch.DefaultOptions;
 import com.dafy.skye.common.util.IndexNameFormatter;
 import com.dafy.skye.common.util.JacksonConvert;
 import com.dafy.skye.common.util.ResourceUtil;
 import com.dafy.skye.log.core.logback.SkyeLogEvent;
-import com.dafy.skye.log.server.autoconfig.ElasticSearchConfigProperties;
+import com.dafy.skye.log.server.autoconfig.LogStorageESConfigProperties;
 import com.dafy.skye.log.server.storage.StorageComponent;
 import com.dafy.skye.log.server.storage.entity.SkyeLogEntity;
-import com.dafy.skye.log.server.storage.query.LogQueryRequest;
+import com.dafy.skye.log.server.storage.query.LogSearchRequest;
 import com.dafy.skye.log.server.storage.query.LogQueryResult;
-import com.dafy.skye.log.server.util.JacksonConvert;
 import com.fasterxml.jackson.databind.JavaType;
-import com.google.common.base.Charsets;
 import com.google.common.base.Strings;
-import com.google.common.collect.Maps;
-import com.google.common.io.CharStreams;
-import org.apache.http.HttpHost;
-import org.apache.http.HttpStatus;
-import org.apache.http.StatusLine;
-import org.elasticsearch.client.Response;
-import org.elasticsearch.client.ResponseListener;
-import org.elasticsearch.client.RestClient;
+import org.apache.lucene.search.join.ScoreMode;
+import org.elasticsearch.action.DocWriteRequest;
+import org.elasticsearch.action.admin.indices.template.get.GetIndexTemplatesRequestBuilder;
+import org.elasticsearch.action.admin.indices.template.get.GetIndexTemplatesResponse;
+import org.elasticsearch.action.admin.indices.template.put.PutIndexTemplateRequestBuilder;
+import org.elasticsearch.action.admin.indices.template.put.PutIndexTemplateResponse;
+import org.elasticsearch.action.bulk.BulkRequestBuilder;
+import org.elasticsearch.action.index.IndexRequestBuilder;
+import org.elasticsearch.action.index.IndexResponse;
+import org.elasticsearch.action.search.SearchRequestBuilder;
+import org.elasticsearch.action.search.SearchResponse;
+import org.elasticsearch.client.IndicesAdminClient;
+import org.elasticsearch.client.transport.TransportClient;
+import org.elasticsearch.cluster.metadata.IndexTemplateMetaData;
+import org.elasticsearch.common.settings.Settings;
+import org.elasticsearch.common.transport.InetSocketTransportAddress;
+import org.elasticsearch.common.xcontent.XContentType;
+import org.elasticsearch.index.VersionType;
+import org.elasticsearch.index.query.BoolQueryBuilder;
+import org.elasticsearch.index.query.QueryBuilders;
+import org.elasticsearch.index.query.TermsQueryBuilder;
+import org.elasticsearch.search.SearchHit;
+import org.elasticsearch.search.sort.SortOrder;
+import org.elasticsearch.transport.client.PreBuiltTransportClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.util.StringUtils;
+import org.springframework.util.CollectionUtils;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.text.SimpleDateFormat;
+import javax.annotation.PostConstruct;
+import java.net.InetAddress;
+import java.net.UnknownHostException;
 import java.util.*;
 
 /**
  * Created by Caedmon on 2017/4/26.
  */
 public class ElasticSearchStorage implements StorageComponent {
-    private EasyRestClient easyRestClient;
-    private ElasticSearchConfigProperties esConfig;
+    private LogStorageESConfigProperties esConfig;
     private IndexNameFormatter indexNameFormatter;
     private static final Logger log= LoggerFactory.getLogger(ElasticSearchStorage.class);
-    public ElasticSearchStorage(ElasticSearchConfigProperties esConfig){
-        this.esConfig = esConfig;
-        HttpHost[] hosts=new HttpHost[esConfig.getHosts().size()];
-        int i=0;
-        for(String address: esConfig.getHosts()){
-            String[] array=address.split(":");
-            String host=array[0];
-            int port=Integer.parseInt(array[1]);
-            hosts[i]=new HttpHost(host,port);
-            i++;
+    private TransportClient transportClient;
+    public ElasticSearchStorage(LogStorageESConfigProperties esConfig){
+        this.esConfig=esConfig;
+    }
+    @PostConstruct
+    public void init() throws UnknownHostException{
+        Settings settings = Settings.builder()
+                .put("cluster.name", esConfig.getClusterName()).build();
+        this.transportClient= new PreBuiltTransportClient(settings);
+        for(String host: esConfig.getTransportHosts()){
+            String[] array=host.split(":");
+            this.transportClient
+                    .addTransportAddress(new InetSocketTransportAddress(
+                            InetAddress.getByName(array[0]), Integer.parseInt(array[1])));
         }
-        this.easyRestClient =new EasyRestClient(RestClient.builder(hosts).build());
         IndexNameFormatter.Builder formatterBuilder=IndexNameFormatter.builder();
         formatterBuilder.dateSeparator('-');
-        this.indexNameFormatter=formatterBuilder.index(esConfig.getIndex()).build();
-
+        final String index=esConfig.getIndex();
+        this.indexNameFormatter=formatterBuilder.index(index).build();
     }
     /**
      * 确认模版是否已存在,如果模版不存在则创建一个
      * */
     boolean ensureTemplate(){
-        final String index=esConfig.getIndex();
-        Response response=easyRestClient.request("HEAD","/_template/"+index+"_template");
-        StatusLine line=response.getStatusLine();
-        //not exists
-        if(line.getStatusCode()==HttpStatus.SC_NOT_FOUND){
-            EasyRestClient.EasyRequestBuilder builder= new EasyRestClient.EasyRequestBuilder();
-            builder.method("PUT").enpoint("/_template/"+index+"_template");
-            String templateBody= ResourceUtil.readString("elasticsearch-template.json");
-            String afterReplace=templateBody.replace("${__INDEX__}",index)
-            .replace("${__NUMBER_OF_SHARDS__}",String.valueOf(esConfig.getIndexShards()))
-            .replace("${__NUMBER_OF_REPLICAS__}",String.valueOf(esConfig.getIndexReplicas()));
-            builder.body(afterReplace);
-            Response putResponse=easyRestClient.request(builder);
-            if(putResponse.getStatusLine().getStatusCode()==HttpStatus.SC_OK){
-                log.info("Put elasticSearch template success");
-                return true;
-            }else{
-                log.error("Put elasticSearch Template Fail");
-                return false;
+        final IndicesAdminClient adminClient=transportClient.admin().indices();
+        GetIndexTemplatesRequestBuilder getTemplatesRequest=adminClient.prepareGetTemplates();
+        GetIndexTemplatesResponse getIndexTemplatesResponse=getTemplatesRequest.execute().actionGet();
+        List<IndexTemplateMetaData> templateMetaDatas=getIndexTemplatesResponse.getIndexTemplates();
+        String templateName=esConfig.getIndex()+"_template";
+        if(templateMetaDatas!=null||!templateMetaDatas.isEmpty()){
+            for(IndexTemplateMetaData metaData:templateMetaDatas){
+                if(metaData.getName().equals(templateName)){
+                    return true;
+                }
             }
-        }else if(line.getStatusCode()==HttpStatus.SC_OK){
-            log.info("ElasticSearch template has already exists");
-            return true;
-        }else{
-            log.error("Ensure template error:status={}",line.getStatusCode());
-            return false;
         }
+        PutIndexTemplateRequestBuilder requestBuilder=adminClient
+                .preparePutTemplate(templateName);
+        Settings.Builder settings=Settings.builder().put("number_of_shards",esConfig.getIndexShards());
+        settings.put("number_of_replicas",1);
+        requestBuilder.setSettings(settings.build());
+        requestBuilder.setTemplate(esConfig.getIndex()+"-*");
+        String mappingSource=ResourceUtil.readString("elasticsearch-template.json");
+        requestBuilder.addMapping(esConfig.getType(),mappingSource, XContentType.JSON);
+        PutIndexTemplateResponse putIndexTemplateResponse=requestBuilder.execute().actionGet();
+        return putIndexTemplateResponse.isAcknowledged();
     }
     @Override
     public void start() {
@@ -99,160 +107,88 @@ public class ElasticSearchStorage implements StorageComponent {
 
     @Override
     public void stop() {
-        easyRestClient.close();
+        this.transportClient.close();
     }
 
     @Override
-    public void save(final SkyeLogEvent event) {
-        final String type= esConfig.getType();
-        String logIndex=indexNameFormatter.indexNameForTimestamp(event.getTimeStamp());
-        final String endpoint="/"+logIndex+"/"+type;
-        EasyRestClient.EasyRequestBuilder builder=new EasyRestClient.EasyRequestBuilder();
-        final SkyeLogEntity entity=SkyeLogEntity.build(event);
-        builder.method("POST").enpoint(endpoint).body(JacksonConvert.toJsonString(entity));
-         easyRestClient.requestAsync(builder, new ResponseListener() {
-            @Override
-            public void onSuccess(Response response) {
-                int status=response.getStatusLine().getStatusCode();
-                if(status>=HttpStatus.SC_OK&&status<=HttpStatus.SC_MULTIPLE_CHOICES){
-                    log.debug("Save log success:traceId={}",entity.getTraceId());
-                }else{
-                    log.warn("Save log something wrong:status={},traceId={}",status,entity.getTraceId());
-                }
-            }
-
-            @Override
-            public void onFailure(Exception exception) {
-                log.error("Save log error:traceId={}",entity.getTraceId(),exception);
-                //TODO 存入ES失败的日志,需要备份存储,除非能保证collector的高可用
-            }
-        });
-
+    public void save(final SkyeLogEvent event) throws Exception{
+        String index=indexNameFormatter.indexNameForTimestamp(event.getTimeStamp());
+        IndexRequestBuilder indexRequestBuilder=transportClient.prepareIndex(index,esConfig.getType());
+        indexRequestBuilder.setOpType(DocWriteRequest.OpType.CREATE);
+        SkyeLogEntity entity=SkyeLogEntity.build(event);
+        indexRequestBuilder.setVersionType(null);
+        indexRequestBuilder.setSource(JacksonConvert.toJsonString(entity),XContentType.JSON);
+        IndexResponse response=indexRequestBuilder.execute().actionGet();
     }
 
     @Override
-    public void batchSave(Collection<SkyeLogEvent> events) {
-        final String typeName= esConfig.getType();
-        StringBuilder body=new StringBuilder();
+    public void batchSave(Collection<SkyeLogEvent> events) throws Exception{
+        BulkRequestBuilder bulkRequestBuilder=transportClient.prepareBulk();
         for(SkyeLogEvent event:events){
+            String index=indexNameFormatter.indexNameForTimestamp(event.getTimeStamp());
+            IndexRequestBuilder indexRequestBuilder=transportClient.prepareIndex(index,esConfig.getType());
+            indexRequestBuilder.setOpType(DocWriteRequest.OpType.INDEX);
             SkyeLogEntity entity=SkyeLogEntity.build(event);
-            String logIndexName=indexNameFormatter.indexNameForTimestamp(event.getTimeStamp());
-            String indexMetadata=indexMetadata(logIndexName,typeName);
-            String documentSource= JacksonConvert.toJsonString(entity)+"\n";
-            body.append(indexMetadata).append(documentSource);
+            indexRequestBuilder.setSource(JacksonConvert.toJsonString(entity),XContentType.JSON);
+            bulkRequestBuilder.add(indexRequestBuilder);
         }
-        EasyRestClient.EasyRequestBuilder builder=new EasyRestClient.EasyRequestBuilder();
-        builder.method("POST").enpoint("/_bulk").body(body.toString());
-        easyRestClient.requestAsync(builder, new ResponseListener() {
-            @Override
-            public void onSuccess(Response response) {
-                int status=response.getStatusLine().getStatusCode();
-                if(status==HttpStatus.SC_OK){
-                    log.debug("BatchSave log success");
-                }else{
-                    log.warn("BatchSave log something wrong:status={}");
-                }
-            }
-
-            @Override
-            public void onFailure(Exception exception) {
-                log.error("BatchSave log error",exception);
-            }
-        });
-    }
-    String indexMetadata(String indexName,String typeName){
-        StringBuilder builder=new StringBuilder();
-        builder.append("{\"index\":{\"_index\":\"").append(indexName).append('"');
-        builder.append(",\"_type\":\"").append(typeName).append('"');
-        builder.append("}}\n");
-        return builder.toString();
+        bulkRequestBuilder.execute().actionGet();
     }
     @Override
-    public LogQueryResult query(LogQueryRequest request) {
-        if(request.getStartTs()==null){
-            request.setStartTs();
+    public LogQueryResult query(LogSearchRequest request) {
+        if(request.endTs==null){
+            request.endTs=System.currentTimeMillis();
         }
-        SimpleDateFormat dateFormat=new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS");
-        String begin=dateFormat.format(request.getStartTs());
-        String end=dateFormat.format(request.getEndTs());
-        List<String> indices=indexNameFormatter.indexNamePatternsForRange(request.getStartTs(),request.getEndTs());
-        ESSearchRequest searchRequest= ESSearchRequest.forIndicesAndType(indices,esConfig.getType());
-        ESSearchRequest.Filters filters = new ESSearchRequest.Filters();
-        filters.addDateRange("timestamp", begin, end,"yyyy-MM-dd HH:mm:ss.SSS");
-        if (request.getServiceNames() != null&&!request.getServiceNames().isEmpty()) {
-            filters.addTerms("serviceName",request.getServiceNames());
+        if(request.lookback==null){
+            request.lookback=Long.valueOf(7*24*3600*1000);
         }
-        if(request.getLevels()!=null&&!request.getLevels().isEmpty()){
-            filters.addTerms("level",request.getLevels());
+        List<String> indices=indexNameFormatter.indexNamePatternsForRange(request.endTs-request.lookback,request.endTs);
+        String[] indicess=new String[indices.size()];
+        indices.toArray(indicess);
+        SearchRequestBuilder searchRequestBuilder=transportClient.prepareSearch(indicess)
+                .setIndicesOptions(DefaultOptions.defaultIndicesOptions());
+        BoolQueryBuilder root= QueryBuilders.boolQuery();
+        if(!CollectionUtils.isEmpty(request.serviceNames)){
+            root.filter(QueryBuilders.termsQuery("serviceName",request.serviceNames));
         }
-        if (!Strings.isNullOrEmpty(request.getTraceId())) {
-            filters.addTerm("traceId", request.getTraceId());
+        if(!CollectionUtils.isEmpty(request.levels)){
+            root.filter(QueryBuilders.termsQuery("level",request.levels));
         }
-        if(!Strings.isNullOrEmpty(request.getMessage())){
-            filters.addTerm("message",request.getMessage());
+        if (!Strings.isNullOrEmpty(request.traceId)) {
+            root.filter(QueryBuilders.termsQuery("traceId", request.traceId));
+        }
+        if(!Strings.isNullOrEmpty(request.message)){
+            root.filter(QueryBuilders.termsQuery("message",request.message));
         }
         if(!Strings.isNullOrEmpty(request.getMdc())){
-            JavaType javaType=JacksonConvert.mapper()
+            JavaType javaType= JacksonConvert.mapper()
                     .getTypeFactory().constructMapType(HashMap.class,String.class,String.class);
             Map<String,String> mdcMap=(Map<String, String>) JacksonConvert.readValue(request.getMdc(),javaType);
-            Map<String,String> mdcNestedTerms=Maps.newHashMap();
             for(Map.Entry entry:mdcMap.entrySet()){
-                mdcNestedTerms.put("mdc."+entry.getKey(),entry.getValue().toString());
+                TermsQueryBuilder childTermsQuery=QueryBuilders.termsQuery(entry.getKey().toString()
+                        ,entry.getValue().toString());
+                root.filter(QueryBuilders.nestedQuery("mdc",childTermsQuery, ScoreMode.None));
             }
-            filters.addNestedTerms(mdcNestedTerms);
         }
-        searchRequest.filters(filters);
-        searchRequest.addSort("tsUuid",new ESSearchRequest.SortOrder("desc",null));
-        EasyRestClient.EasyRequestBuilder builder= new EasyRestClient.EasyRequestBuilder();
-        StringBuilder endpointBuilder=new StringBuilder();
-        endpointBuilder.append("/").append(StringUtils.arrayToDelimitedString(indices.toArray(),","))
-                .append("/")
-                .append(esConfig.getType())
-                .append("/_search");
-        Map<String,String> params=new HashMap<>();
-        params.put("allow_no_indices","true");
-        params.put("expand_wildcards","open");
-        params.put("ignore_unavailable","true");
+        searchRequestBuilder.setQuery(root);
+        searchRequestBuilder.addSort("tsUuid", SortOrder.DESC);
+        SearchResponse response=searchRequestBuilder.execute().actionGet();
+        response.getTook();
         LogQueryResult.Builder resultBuilder=LogQueryResult.newBuilder();
-        builder.method("GET").enpoint(endpointBuilder.toString())
-                .params(params)
-                .body(JacksonConvert.toJsonString(searchRequest));
-        Response restResponse=easyRestClient.request(builder);
-        int statusCode=restResponse.getStatusLine().getStatusCode();
-        String respBody=null;
-        try{
-            InputStream inputStream=restResponse.getEntity().getContent();
-            respBody=CharStreams.toString(new InputStreamReader(inputStream, Charsets.UTF_8));
-        }catch (IOException e){
-            resultBuilder.success(false);
-            resultBuilder.error("Read http response error:"+e.getMessage());
-            return resultBuilder.build();
+        resultBuilder.took(response.getTookInMillis());
+        resultBuilder.error(response.getShardFailures().toString());
+        SearchHit[] hits=response.getHits().getHits();
+        List<SkyeLogEntity> entities=new LinkedList<>();
+        for(SearchHit hit:hits){
+            entities.add(JacksonConvert.readValue(hit.getSourceAsString(),SkyeLogEntity.class));
         }
-        JavaType javaType= JacksonConvert.mapper.getTypeFactory()
-                .constructParametricType(ESearchResponse.class,SkyeLogEntity.class);
-        ESearchResponse<SkyeLogEntity> response=(ESearchResponse<SkyeLogEntity>) JacksonConvert.readValue(respBody,javaType);
-        response.setStatus(statusCode);
-        if(!response.isSucces()){
-            resultBuilder.success(false);
-            resultBuilder.error(response.getError().toString());
-            return resultBuilder.build();
-        }else{
-            resultBuilder.success(true);
-            List<SkyeLogEntity> entities=new ArrayList<>(response.getHits().getTotal());
-            List<ESearchResponse.Document<SkyeLogEntity>> documents=response.getHits().getHits();
-            for(ESearchResponse.Document<SkyeLogEntity> document:documents){
-                SkyeLogEntity entity=document.get_source();
-                entities.add(entity);
-            }
-            resultBuilder.content(entities);
-            resultBuilder.took(response.getTook());
-            resultBuilder.total(response.getHits().getTotal());
-            return resultBuilder.build();
-        }
+        resultBuilder.content(entities);
+        resultBuilder.total((int) response.getHits().totalHits);
+        return resultBuilder.build();
     }
 
     @Override
-    public List<String> getServiceNames() {
+    public Set<String> getServices() {
         return null;
     }
 

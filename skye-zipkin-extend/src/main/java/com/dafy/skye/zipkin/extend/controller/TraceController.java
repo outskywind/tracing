@@ -1,7 +1,7 @@
 package com.dafy.skye.zipkin.extend.controller;
 
 import com.dafy.skye.zipkin.extend.dto.*;
-import com.dafy.skye.zipkin.extend.service.IZipkinExtendService;
+import com.dafy.skye.zipkin.extend.service.ZipkinExtendService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -16,7 +16,7 @@ import java.util.Set;
 @RequestMapping("/api/v1/trace")
 public class TraceController {
     @Autowired
-    IZipkinExtendService zipkinExtendService;
+    ZipkinExtendService zipkinExtendService;
     @RequestMapping("/metrics")
     TraceMetricsResult getTraceMetrics(@RequestBody  TraceQueryRequest request){
         return zipkinExtendService.getTracesMetrics(request);

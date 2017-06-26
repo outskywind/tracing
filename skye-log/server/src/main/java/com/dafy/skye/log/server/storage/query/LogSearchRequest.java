@@ -5,14 +5,15 @@ import java.util.List;
 /**
  * Created by Caedmon on 2017/4/26.
  */
-public class LogQueryRequest {
-    private String traceId;
-    private String message;
-    private Long startTs;
-    private Long endTs;
-    private List<String> levels;
-    private List<String> serviceNames;
-    private String mdc;
+public class LogSearchRequest {
+    public String traceId;
+    public String message;
+    public Long lookback;
+    public Long endTs;
+    public List<String> levels;
+    public List<String> serviceNames;
+    public String mdc;
+
     public String getTraceId() {
         return traceId;
     }
@@ -29,12 +30,12 @@ public class LogQueryRequest {
         this.message = message;
     }
 
-    public Long getStartTs() {
-        return startTs;
+    public Long getLookback() {
+        return lookback;
     }
 
-    public void setStartTs(Long startTs) {
-        this.startTs = startTs;
+    public void setLookback(Long lookback) {
+        this.lookback = lookback;
     }
 
     public Long getEndTs() {
@@ -71,14 +72,14 @@ public class LogQueryRequest {
 
     @Override
     public String toString() {
-        return "LogQueryRequest{" +
+        return "LogSearchRequest{" +
                 "traceId='" + traceId + '\'' +
                 ", message='" + message + '\'' +
-                ", startTs=" + startTs +
+                ", lookback=" + lookback +
                 ", endTs=" + endTs +
-                ", levels='" + levels + '\'' +
-                ", serviceNames='" + serviceNames + '\'' +
-                ", mdc=" + mdc +
+                ", levels=" + levels +
+                ", serviceNames=" + serviceNames +
+                ", mdc='" + mdc + '\'' +
                 '}';
     }
 }
