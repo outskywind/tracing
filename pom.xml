@@ -39,6 +39,7 @@
         <zipkin.reporter.version>0.10.0</zipkin.reporter.version>
         <spring.version>4.3.8.RELEASE</spring.version>
         <servlet.version>3.1.0</servlet.version>
+        <dubbo.version>2.4.9</dubbo.version>
     </properties>
     <dependencyManagement>
         <dependencies>
