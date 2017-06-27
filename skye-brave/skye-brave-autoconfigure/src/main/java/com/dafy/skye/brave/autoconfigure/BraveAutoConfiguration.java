@@ -2,8 +2,8 @@ package com.dafy.skye.brave.autoconfigure;
 
 import com.github.kristofa.brave.Brave;
 import com.github.kristofa.brave.Sampler;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import com.google.common.base.Strings;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import zipkin.Component;
@@ -16,7 +16,14 @@ import zipkin.reporter.kafka10.KafkaSender;
 @Configuration
 public class BraveAutoConfiguration {
     @Bean
+    @ConditionalOnClass(Brave.class)
     public Brave brave(BraveConfigProperties configProperties){
+        if(Strings.isNullOrEmpty(configProperties.getServiceName())){
+            throw new IllegalStateException("Brave service name is empty");
+        }
+        if(Strings.isNullOrEmpty(configProperties.getKafkaServers())){
+            throw new IllegalStateException("Brave kafkaServers empty");
+        }
         Brave.Builder builder=new Brave.Builder(configProperties.getServiceName());
         builder.traceSampler(Sampler.create(configProperties.getSamplerRate()));
         KafkaSender kafkaSender=KafkaSender.create(configProperties.getKafkaServers());

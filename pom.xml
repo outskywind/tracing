@@ -37,6 +37,8 @@
         <brave.version>4.1.1</brave.version>
         <skye.version>1.0.0-SNAPSHOT</skye.version>
         <zipkin.reporter.version>0.10.0</zipkin.reporter.version>
+        <spring.version>4.3.8.RELEASE</spring.version>
+        <servlet.version>3.1.0</servlet.version>
     </properties>
     <dependencyManagement>
         <dependencies>

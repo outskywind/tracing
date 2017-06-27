@@ -9,7 +9,7 @@
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
-    <artifactId>skye-brave-dubbo-autoconfigure</artifactId>
+    <artifactId>skye-brave-autoconfigure</artifactId>
 
     <dependencies>
         <dependency>
@@ -18,16 +18,5 @@
             <version>${spring-boot.version}</version>
             <scope>provided</scope>
         </dependency>
-        <dependency>
-            <groupId>com.dafy.skye</groupId>
-            <artifactId>skye-brave-dubbo</artifactId>
-            <version>${skye.version}</version>
-            <scope>provided</scope>
-        </dependency>
-        <dependency>
-            <groupId>io.zipkin.reporter</groupId>
-            <artifactId>zipkin-sender-kafka10</artifactId>
-            <version>${zipkin.reporter.version}</version>
-        </dependency>
-    </dependencies>
+     </dependencies>
 </project>
