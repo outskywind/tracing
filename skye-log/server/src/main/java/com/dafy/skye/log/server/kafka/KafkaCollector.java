@@ -43,8 +43,9 @@ public class KafkaCollector implements CollectorComponent {
     @Override
     public void start() {
         if(!started.get()){
-            final int partition=kafkaCollectorConfig.getPartition();
+            final int partition=kafkaCollectorConfig.getParallel();
             threadPool=partition<=1?Executors.newSingleThreadExecutor():Executors.newFixedThreadPool(partition);
+            log.info("Start KafkaCollector ......");
             KafkaConsumer leaderConsumer=new KafkaConsumer(kafkaCollectorConfig.getProperties(),
                     new StringDeserializer(),new ByteArrayDeserializer());
             List<PartitionInfo> partitionInfos=leaderConsumer.partitionsFor(kafkaCollectorConfig.getTopic());

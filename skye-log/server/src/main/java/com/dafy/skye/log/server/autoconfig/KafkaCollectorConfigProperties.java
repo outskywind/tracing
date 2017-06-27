@@ -11,7 +11,7 @@ import java.util.Map;
 public class KafkaCollectorConfigProperties {
     private String topic;
     private String groupId;
-    private Integer partition;
+    private Integer parallel=2;
     private Long pollInterval=1000L;
     private Map<String,String> properties;
 
@@ -31,12 +31,16 @@ public class KafkaCollectorConfigProperties {
         this.groupId = groupId;
     }
 
-    public int getPartition() {
-        return partition;
+    public Integer getParallel() {
+        return parallel;
     }
 
-    public void setPartition(int partition) {
-        this.partition = partition;
+    public void setParallel(Integer parallel) {
+        this.parallel = parallel;
+    }
+
+    public void setPollInterval(Long pollInterval) {
+        this.pollInterval = pollInterval;
     }
 
     public Map<String, String> getProperties() {

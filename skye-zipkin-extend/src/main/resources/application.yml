@@ -122,7 +122,7 @@ skye.log.server:
   kafka:
     topic: skye-log
     groupId: skye-log
-    partition: 4
+    parallel: 2
     offset:
       type: redis
     properties:

@@ -14,7 +14,6 @@ import zipkin.server.EnableZipkinServer;
 @EnableAutoConfiguration
 @EnableZipkinServer
 @EnableSkyeLogServer
-@ComponentScan("com.dafy.skye.zipkin.extend")
 public class ZipkinExtendApplication {
     public static void main(String[] args) {
         SpringApplication application=new SpringApplication(ZipkinExtendApplication.class);

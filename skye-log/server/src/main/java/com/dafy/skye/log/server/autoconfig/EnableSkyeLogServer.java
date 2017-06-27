@@ -13,8 +13,7 @@ import java.lang.annotation.*;
 @Retention(RetentionPolicy.RUNTIME)
 @Documented
 @Import({
-        LogServerAutoConfiguration.class,LogQueryController.class
-}
+        LogServerAutoConfiguration.class,LogQueryController.class}
         )
 public @interface EnableSkyeLogServer {
 }
