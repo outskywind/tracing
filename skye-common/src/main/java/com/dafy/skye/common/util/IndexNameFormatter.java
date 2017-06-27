@@ -18,7 +18,6 @@ public abstract class IndexNameFormatter {
     abstract Builder toBuilder();
 
     private static final String DAILY_INDEX_FORMAT = "yyyy-MM-dd";
-    private static final TimeZone UTC = TimeZone.getTimeZone("UTC");
 
     public abstract String index();
 
@@ -40,7 +39,6 @@ public abstract class IndexNameFormatter {
                 @Override protected SimpleDateFormat initialValue() {
                     SimpleDateFormat result =
                             new SimpleDateFormat(DAILY_INDEX_FORMAT.replace('-', dateSeparator()));
-                    result.setTimeZone(TimeZone.getTimeZone("UTC"));
                     return result;
                 }
             }).autoBuild();
@@ -57,8 +55,8 @@ public abstract class IndexNameFormatter {
      * result will be 2016-11-30, 2016-12-*, 2017-01-01 and 2017-01-02.
      */
     public List<String> indexNamePatternsForRange(long beginMillis, long endMillis) {
-        GregorianCalendar current = midnightUTC(beginMillis);
-        GregorianCalendar end = midnightUTC(endMillis);
+        Calendar current = midnightUTC(beginMillis);
+        Calendar end = midnightUTC(endMillis);
         if (current.equals(end)) {
             return Collections.singletonList(indexNameForTimestamp(current.getTimeInMillis()));
         }
@@ -96,8 +94,8 @@ public abstract class IndexNameFormatter {
         return indices;
     }
 
-    public static GregorianCalendar midnightUTC(long epochMillis) {
-        GregorianCalendar result = new GregorianCalendar(UTC);
+    public static Calendar midnightUTC(long epochMillis) {
+        Calendar result = Calendar.getInstance();
         result.setTimeInMillis(epochMillis);
         return result;
     }

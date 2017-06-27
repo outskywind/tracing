@@ -63,12 +63,14 @@ public class LogKafkaAppender extends UnsynchronizedAppenderBase<ILoggingEvent> 
                     t.start();
                     super.start();
                 }
-                buildKafkaProducer();
             }
 
         }
     }
     private boolean buildKafkaProducer(){
+        if(kafkaProducer!=null){
+            return true;
+        }
         Properties props=new Properties();
         props.put("bootstrap.servers", kafkaAddress);
         props.put("acks", "all");
@@ -115,10 +117,7 @@ public class LogKafkaAppender extends UnsynchronizedAppenderBase<ILoggingEvent> 
     }
     @Override
     public void stop() {
-        if(this.isStarted()) {
-            kafkaProducer.close();
-            super.stop();
-        }
+        super.stop();
     }
     @Override
     protected void append(ILoggingEvent event) {

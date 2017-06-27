@@ -19,6 +19,7 @@ import org.elasticsearch.action.admin.indices.template.get.GetIndexTemplatesResp
 import org.elasticsearch.action.admin.indices.template.put.PutIndexTemplateRequestBuilder;
 import org.elasticsearch.action.admin.indices.template.put.PutIndexTemplateResponse;
 import org.elasticsearch.action.bulk.BulkRequestBuilder;
+import org.elasticsearch.action.bulk.BulkResponse;
 import org.elasticsearch.action.index.IndexRequestBuilder;
 import org.elasticsearch.action.index.IndexResponse;
 import org.elasticsearch.action.search.SearchRequestBuilder;
@@ -34,6 +35,9 @@ import org.elasticsearch.index.query.BoolQueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.index.query.TermsQueryBuilder;
 import org.elasticsearch.search.SearchHit;
+import org.elasticsearch.search.aggregations.AggregationBuilders;
+import org.elasticsearch.search.aggregations.Aggregations;
+import org.elasticsearch.search.aggregations.bucket.terms.Terms;
 import org.elasticsearch.search.sort.SortOrder;
 import org.elasticsearch.transport.client.PreBuiltTransportClient;
 import org.slf4j.Logger;
@@ -117,7 +121,8 @@ public class ElasticSearchStorage implements StorageComponent {
         indexRequestBuilder.setOpType(DocWriteRequest.OpType.CREATE);
         SkyeLogEntity entity=SkyeLogEntity.build(event);
         indexRequestBuilder.setVersionType(null);
-        indexRequestBuilder.setSource(JacksonConvert.toJsonString(entity),XContentType.JSON);
+        String source=JacksonConvert.toJsonString(entity);
+        indexRequestBuilder.setSource(source,XContentType.JSON);
         IndexResponse response=indexRequestBuilder.execute().actionGet();
     }
 
@@ -129,10 +134,12 @@ public class ElasticSearchStorage implements StorageComponent {
             IndexRequestBuilder indexRequestBuilder=transportClient.prepareIndex(index,esConfig.getType());
             indexRequestBuilder.setOpType(DocWriteRequest.OpType.INDEX);
             SkyeLogEntity entity=SkyeLogEntity.build(event);
-            indexRequestBuilder.setSource(JacksonConvert.toJsonString(entity),XContentType.JSON);
+            String source=JacksonConvert.toJsonString(entity);
+            indexRequestBuilder.setSource(source,XContentType.JSON);
             bulkRequestBuilder.add(indexRequestBuilder);
         }
-        bulkRequestBuilder.execute().actionGet();
+        BulkResponse responses=bulkRequestBuilder.execute().actionGet();
+        System.out.println(responses.toString());
     }
     @Override
     public LogQueryResult query(LogSearchRequest request) {
@@ -171,6 +178,7 @@ public class ElasticSearchStorage implements StorageComponent {
             }
         }
         searchRequestBuilder.setQuery(root);
+        searchRequestBuilder.setFrom(request.getFrom()).setSize(request.getPageSize());
         searchRequestBuilder.addSort("tsUuid", SortOrder.DESC);
         SearchResponse response=searchRequestBuilder.execute().actionGet();
         response.getTook();
@@ -189,7 +197,28 @@ public class ElasticSearchStorage implements StorageComponent {
 
     @Override
     public Set<String> getServices() {
-        return null;
+        long endTs=System.currentTimeMillis();
+        long startTs=System.currentTimeMillis()-esConfig.getDefaultLookback();
+        List<String> indices=indexNameFormatter.indexNamePatternsForRange(startTs,endTs);
+        String[] indicess=new String[indices.size()];
+        indices.toArray(indicess);
+        SearchRequestBuilder searchRequestBuilder=transportClient.prepareSearch(indicess)
+                .setIndicesOptions(DefaultOptions.defaultIndicesOptions());
+        searchRequestBuilder.addAggregation(AggregationBuilders.terms("service_terms")
+                .field("serviceName").size(200));
+        searchRequestBuilder.setSize(0);
+        SearchResponse response=searchRequestBuilder.execute().actionGet();
+        Aggregations aggregations=response.getAggregations();
+        Set<String> services=new HashSet<>();
+        if(aggregations!=null){
+            Terms terms=aggregations.get("service_terms");
+            for(Terms.Bucket bucket:terms.getBuckets()){
+                String service=bucket.getKeyAsString();
+                services.add(service);
+            }
+        }
+
+        return services;
     }
 
 }

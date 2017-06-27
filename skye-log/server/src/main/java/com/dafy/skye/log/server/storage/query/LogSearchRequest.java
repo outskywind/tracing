@@ -13,7 +13,8 @@ public class LogSearchRequest {
     public List<String> levels;
     public List<String> serviceNames;
     public String mdc;
-
+    public Integer pageIndex;
+    public Integer pageSize;
     public String getTraceId() {
         return traceId;
     }
@@ -70,6 +71,39 @@ public class LogSearchRequest {
         this.mdc = mdc;
     }
 
+    public Integer getPageIndex() {
+        return pageIndex;
+    }
+
+    public void setPageIndex(Integer pageIndex) {
+        this.pageIndex = pageIndex;
+    }
+
+    public Integer getPageSize() {
+        return pageSize;
+    }
+
+    public void setPageSize(Integer pageSize) {
+        this.pageSize = pageSize;
+    }
+    public int getFrom(){
+        if(pageIndex<=0){
+            pageIndex=1;
+        }
+        if(pageSize<=0){
+            pageSize=100;
+        }
+        return (pageIndex-1)*pageSize;
+    }
+    public int getTo(){
+        if(pageIndex<=0){
+            pageIndex=1;
+        }
+        if(pageSize<=0){
+            pageSize=100;
+        }
+        return pageIndex*pageSize;
+    }
     @Override
     public String toString() {
         return "LogSearchRequest{" +
@@ -80,6 +114,8 @@ public class LogSearchRequest {
                 ", levels=" + levels +
                 ", serviceNames=" + serviceNames +
                 ", mdc='" + mdc + '\'' +
+                ", pageIndex=" + pageIndex +
+                ", pageSize=" + pageSize +
                 '}';
     }
 }

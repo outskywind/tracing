@@ -226,7 +226,6 @@ public class ZipkinExtendServiceImpl implements ZipkinExtendService {
     @Override
     public SpanMetricsResult getSpansMetrics(TraceQueryRequest request) {
         TraceQueryRequest.Builder builder=request.newBuilder(request);
-        System.out.println(new Date(builder.build().endTs));
         SearchRequestBuilder requestBuilder= searchRequestBuilder(builder.build());
         requestBuilder.setSize(0);
         TermsAggregationBuilder spanNameTerms=AggregationBuilders.terms("span_name_terms")
@@ -299,6 +298,8 @@ public class ZipkinExtendServiceImpl implements ZipkinExtendService {
             requestBuilder.addSort(request.sortField,SortOrder.fromString(request.sortOrder));
         }
         requestBuilder.setSize(request.limit);
+        requestBuilder.setQuery(root);
+
         return requestBuilder;
     }
 

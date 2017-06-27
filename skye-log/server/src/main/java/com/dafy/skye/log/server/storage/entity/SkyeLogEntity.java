@@ -16,8 +16,7 @@ import java.util.UUID;
 public class SkyeLogEntity {
     private String tsUuid;
     private String traceId;
-    @JsonFormat(pattern="yyyy-MM-dd HH:mm:ss.SSS")
-    private Date timestamp;
+    private Long timestamp;
     private String serviceName;
     private String address;
     private String pid;
@@ -76,11 +75,11 @@ public class SkyeLogEntity {
         this.pid = pid;
     }
 
-    public Date getTimestamp() {
+    public Long getTimestamp() {
         return timestamp;
     }
 
-    public void setTimestamp(Date timestamp) {
+    public void setTimestamp(Long timestamp) {
         this.timestamp = timestamp;
     }
 
@@ -140,7 +139,7 @@ public class SkyeLogEntity {
         Random random=new Random();
         UUID uuid = new UUID(UUIDs.startOf(event.getTimeStamp()).getMostSignificantBits(), random.nextLong());
         entity.setTsUuid(uuid.toString());
-        entity.setTimestamp(new Date(event.getTimeStamp()));
+        entity.setTimestamp(event.getTimeStamp());
         entity.setServiceName(event.getServiceName());
         entity.setAddress(event.getAddress());
         entity.setPid(event.getPid());

@@ -6,6 +6,7 @@ import com.dafy.skye.log.server.collector.CollectorDelegate;
 import com.dafy.skye.log.server.kafka.offset.OffsetComponent;
 import com.dafy.skye.log.core.SkyeLogEventCodec;
 import org.apache.kafka.clients.consumer.*;
+import org.apache.kafka.common.PartitionInfo;
 import org.apache.kafka.common.TopicPartition;
 import org.apache.kafka.common.serialization.ByteArrayDeserializer;
 import org.apache.kafka.common.serialization.StringDeserializer;
@@ -25,7 +26,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 public class KafkaCollector implements CollectorComponent {
     private KafkaCollectorConfigProperties kafkaCollectorConfig;
     private CollectorDelegate delegate;
-    private List<KafkaConsumer<String,byte[]>> kafkaConsumers;
+    private List<KafkaConsumer<String,byte[]>> kafkaConsumers=new ArrayList<>();
     private ExecutorService threadPool;
     //消费指针管理组件
     private OffsetComponent offsetComponent;
@@ -44,13 +45,18 @@ public class KafkaCollector implements CollectorComponent {
         if(!started.get()){
             final int partition=kafkaCollectorConfig.getPartition();
             threadPool=partition<=1?Executors.newSingleThreadExecutor():Executors.newFixedThreadPool(partition);
-            for(int i=0;i<partition;i++){
-                KafkaConsumer kafkaConsumer=new KafkaConsumer(kafkaCollectorConfig.getProperties(),
-                        new StringDeserializer(),new ByteArrayDeserializer());
+            KafkaConsumer leaderConsumer=new KafkaConsumer(kafkaCollectorConfig.getProperties(),
+                    new StringDeserializer(),new ByteArrayDeserializer());
+            List<PartitionInfo> partitionInfos=leaderConsumer.partitionsFor(kafkaCollectorConfig.getTopic());
+            for(PartitionInfo info:partitionInfos){
                 TopicPartition topicPartition=new TopicPartition(
-                        kafkaCollectorConfig.getTopic(),i);
-                kafkaConsumer.assign(Collections.singleton(topicPartition));
-                threadPool.execute(buildTask(topicPartition,kafkaConsumer));
+                        info.topic(),info.partition());
+                KafkaConsumer childConsumer=new KafkaConsumer(kafkaCollectorConfig.getProperties(),
+                        new StringDeserializer(),new ByteArrayDeserializer());
+                childConsumer.assign(Collections.singleton(topicPartition));
+                Runnable task=buildTask(topicPartition,childConsumer);
+                threadPool.execute(task);
+                kafkaConsumers.add(childConsumer);
             }
             started.set(true);
             log.info("KafkaCollector started:config={}",this.kafkaCollectorConfig);

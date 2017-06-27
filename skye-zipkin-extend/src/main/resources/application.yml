@@ -127,7 +127,7 @@ skye.log.server:
       type: redis
     properties:
       #kafka 地址
-      bootstrap.servers: kafka1.dafy.com:9092
+      bootstrap.servers: kafka1.base.dafy.com:9092
       #zookeeper 地址
       zookeeper.connect: zookeeper1.dafy.com:2181
       #zookeeper 链接超时时间
