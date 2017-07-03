@@ -3,6 +3,7 @@ package com.dafy.skye.zipkin.extend.controller;
 import com.dafy.skye.zipkin.extend.dto.*;
 import com.dafy.skye.zipkin.extend.service.ZipkinExtendService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -37,13 +38,12 @@ public class TraceController {
     Set<String> getSpanNames(@RequestBody SpanNameQueryRequest request){
         return zipkinExtendService.getSpans(request);
     }
-
     /**
      * span调用时间序列图
      * @param request
      * @return
      */
-    @RequestMapping("/spans/series")
+    @RequestMapping("/span/series")
     SpanTimeSeriesResult getSpanTimeSeries(@RequestBody TraceQueryRequest request){
         return zipkinExtendService.getMultiSpansTimeSeries(request);
     }

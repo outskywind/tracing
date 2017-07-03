@@ -6,6 +6,7 @@ import com.dafy.skye.common.util.IntervalTimeUnit;
 import com.dafy.skye.common.util.TimestampRange;
 import com.dafy.skye.zipkin.extend.config.ZipkinExtendESConfig;
 import com.dafy.skye.zipkin.extend.dto.*;
+import com.dafy.skye.zipkin.extend.util.TimeUtil;
 import com.google.common.base.Strings;
 import org.apache.lucene.search.join.ScoreMode;
 import org.elasticsearch.action.search.MultiSearchRequestBuilder;
@@ -26,7 +27,6 @@ import org.elasticsearch.search.aggregations.bucket.nested.InternalNested;
 import org.elasticsearch.search.aggregations.bucket.terms.StringTerms;
 import org.elasticsearch.search.aggregations.bucket.terms.Terms;
 import org.elasticsearch.search.aggregations.bucket.terms.TermsAggregationBuilder;
-import org.elasticsearch.search.aggregations.pipeline.InternalSimpleValue;
 import org.elasticsearch.search.aggregations.pipeline.PipelineAggregatorBuilders;
 import org.elasticsearch.search.aggregations.pipeline.bucketmetrics.stats.InternalStatsBucket;
 import org.elasticsearch.search.aggregations.pipeline.bucketmetrics.stats.StatsBucket;
@@ -44,6 +44,7 @@ import javax.annotation.PostConstruct;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.*;
+import java.util.concurrent.TimeUnit;
 
 /**
  * Created by Caedmon on 2017/6/15.
@@ -104,6 +105,7 @@ public class ZipkinExtendServiceImpl implements ZipkinExtendService {
                     QueryBuilders.termsQuery("annotations.endpoint.serviceName",request.services),
                     ScoreMode.None));
         }
+        esRequest.setQuery(root);
         esRequest.addAggregation(AggregationBuilders.terms("span_names").field("name"));
         SearchResponse response=esRequest.execute().actionGet();
         Terms terms=response.getAggregations().get("span_names");
@@ -209,10 +211,17 @@ public class ZipkinExtendServiceImpl implements ZipkinExtendService {
             Aggregations aggregations=itemResponse.getAggregations();
             if(aggregations!=null){
                 InternalStatsBucket statsBucket=aggregations.get("trace_duration_stats");
-                statsBuilder.avgDuration(statsBucket.getAvg())
-                        .maxDuration(statsBucket.getMax())
-                        .minDuration(statsBucket.getMin())
+                if(statsBucket.getMax()<=0){
+                    System.out.println();
+                }
+                statsBuilder.maxDuration(TimeUtil.microToMills(statsBucket.getMax()))
+                        .minDuration(TimeUtil.microToMills(statsBucket.getMin()))
                         .count(statsBucket.getCount());
+                if(statsBucket.getSum()==0){
+                    statsBuilder.avgDuration(0);
+                }else {
+                    statsBuilder.avgDuration(TimeUtil.microToMills(statsBucket.getAvg()));
+                }
             }else{
                 statsBuilder.avgDuration(0).maxDuration(0)
                         .minDuration(0).count(0);
@@ -258,16 +267,16 @@ public class ZipkinExtendServiceImpl implements ZipkinExtendService {
                 String spanName=termsBucket.getKeyAsString();
                 spanMetrics.spanName(spanName);
                 StatsBucket statsBucket=termsBucket.getAggregations().get("span_name_stats");
-                spanMetrics.avgDuration(statsBucket.getAvg())
-                        .maxDuration(statsBucket.getMax())
-                        .minDuration(statsBucket.getMin())
-                        .sumDuration(statsBucket.getSum())
+                spanMetrics.avgDuration(TimeUtil.microToMills(statsBucket.getAvg()))
+                        .maxDuration(TimeUtil.microToMills(statsBucket.getMax()))
+                        .minDuration(TimeUtil.microToMills(statsBucket.getMin()))
+                        .sumDuration(TimeUtil.microToMills(statsBucket.getSum()))
                         .count(statsBucket.getCount());
                 stats.add(spanMetrics.build());
             }
         }
         SpanMetricsResult result=new SpanMetricsResult();
-        result.setMetrics(stats);
+        result.setData(stats);
         result.setTook(took);
         return result;
     }
@@ -328,7 +337,7 @@ public class ZipkinExtendServiceImpl implements ZipkinExtendService {
             sereis.add(spanTimeSeriesItem);
             result.addTook(spanTimeSeriesItem.getTook());
         }
-        result.setSeriesResult(sereis);
+        result.setData(sereis);
         result.setSuccess(true);
         return result;
     }
@@ -383,7 +392,12 @@ public class ZipkinExtendServiceImpl implements ZipkinExtendService {
             Aggregations aggregations=itemResponse.getAggregations();
             if(aggregations!=null){
                 InternalStatsBucket spanAvgDuration=aggregations.get("span_duration_stats");
-                statsBuilder.avgDuration(spanAvgDuration.getAvg()).count(spanAvgDuration.getCount());
+                if(spanAvgDuration.getSum()>0){
+                    statsBuilder.avgDuration(TimeUtil.microToMills(spanAvgDuration.getAvg()));
+                }else{
+                    statsBuilder.avgDuration(0L);
+                }
+                statsBuilder.count(spanAvgDuration.getCount());
             }else{
                 statsBuilder.avgDuration(0);
             }

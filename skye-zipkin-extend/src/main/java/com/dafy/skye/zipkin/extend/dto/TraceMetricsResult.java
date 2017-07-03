@@ -18,44 +18,20 @@ public class TraceMetricsResult extends QueryResult{
         this.metrics = metrics;
     }
     public  static class TraceMetrics {
-        private final long startTs;
-        private final long endTs;
-        private final long count;
-        private final double avgDuration;
-        private final  double maxDuration;
-        private final double minDuration;
+        private long startTs;
+        private long endTs;
+        private long count;
+        private long avgDuration;
+        private long maxDuration;
+        private long minDuration;
 
         private TraceMetrics(Builder builder) {
-            startTs = builder.startTs;
-            endTs = builder.endTs;
-            count = builder.count;
-            avgDuration = builder.avgDuration;
-            maxDuration = builder.maxDuration;
-            minDuration = builder.minDuration;
-        }
-
-        public long getStartTs() {
-            return startTs;
-        }
-
-        public long getEndTs() {
-            return endTs;
-        }
-
-        public long getCount() {
-            return count;
-        }
-
-        public double getAvgDuration() {
-            return avgDuration;
-        }
-
-        public double getMaxDuration() {
-            return maxDuration;
-        }
-
-        public double getMinDuration() {
-            return minDuration;
+            setStartTs(builder.startTs);
+            setEndTs(builder.endTs);
+            setCount(builder.count);
+            setAvgDuration(builder.avgDuration);
+            setMaxDuration(builder.maxDuration);
+            setMinDuration(builder.minDuration);
         }
 
         public static Builder newBuilder() {
@@ -72,13 +48,62 @@ public class TraceMetricsResult extends QueryResult{
             builder.minDuration = copy.minDuration;
             return builder;
         }
+
+        public long getStartTs() {
+            return startTs;
+        }
+
+        public void setStartTs(long startTs) {
+            this.startTs = startTs;
+        }
+
+        public long getEndTs() {
+            return endTs;
+        }
+
+        public void setEndTs(long endTs) {
+            this.endTs = endTs;
+        }
+
+        public long getCount() {
+            return count;
+        }
+
+        public void setCount(long count) {
+            this.count = count;
+        }
+
+        public long getAvgDuration() {
+            return avgDuration;
+        }
+
+        public void setAvgDuration(long avgDuration) {
+            this.avgDuration = avgDuration;
+        }
+
+        public long getMaxDuration() {
+            return maxDuration;
+        }
+
+        public void setMaxDuration(long maxDuration) {
+            this.maxDuration = maxDuration;
+        }
+
+        public long getMinDuration() {
+            return minDuration;
+        }
+
+        public void setMinDuration(long minDuration) {
+            this.minDuration = minDuration;
+        }
+
         public static final class Builder {
             private long startTs;
             private long endTs;
             private long count;
-            private double avgDuration;
-            private double maxDuration;
-            private double minDuration;
+            private long avgDuration;
+            private long maxDuration;
+            private long minDuration;
 
             private Builder() {
             }
@@ -98,17 +123,17 @@ public class TraceMetricsResult extends QueryResult{
                 return this;
             }
 
-            public Builder avgDuration(double val) {
+            public Builder avgDuration(long val) {
                 avgDuration = val;
                 return this;
             }
 
-            public Builder maxDuration(double val) {
+            public Builder maxDuration(long val) {
                 maxDuration = val;
                 return this;
             }
 
-            public Builder minDuration(double val) {
+            public Builder minDuration(long val) {
                 minDuration = val;
                 return this;
             }

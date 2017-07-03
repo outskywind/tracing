@@ -2,33 +2,34 @@ package com.dafy.skye.zipkin.extend.dto;
 
 import com.dafy.skye.common.query.QueryResult;
 
-import java.util.Map;
-import java.util.TreeMap;
 import java.util.TreeSet;
 
 /**
  * Created by Caedmon on 2017/6/21.
  */
 public class SpanMetricsResult extends QueryResult{
-    private TreeSet<SpanMetrics> metrics =new TreeSet<>();
+    private TreeSet<SpanMetrics> data =new TreeSet<>();
 
-    public TreeSet<SpanMetrics> getMetrics() {
-        return metrics;
+    public TreeSet<SpanMetrics> getData() {
+        return data;
     }
 
-    public void setMetrics(TreeSet<SpanMetrics> metrics) {
-        this.metrics = metrics;
+    public void setData(TreeSet<SpanMetrics> data) {
+        this.data = data;
     }
 
     public static class SpanMetrics implements Comparable<SpanMetrics>{
         private String spanName;
-        private double avgDuration;
-        private double minDuration;
-        private double maxDuration;
-        private double sumDuration;
+        private long avgDuration;
+        private long minDuration;
+        private long maxDuration;
+        private long sumDuration;
         private long count;
         private long startTs;
         private long endTs;
+        public SpanMetrics(){
+
+        }
 
         private SpanMetrics(Builder builder) {
             setSpanName(builder.spanName);
@@ -37,26 +38,8 @@ public class SpanMetricsResult extends QueryResult{
             setMaxDuration(builder.maxDuration);
             setSumDuration(builder.sumDuration);
             setCount(builder.count);
-            startTs = builder.startTs;
-            endTs = builder.endTs;
-        }
-
-        @Override
-        public int compareTo(SpanMetrics o) {
-            double result=o.avgDuration-this.avgDuration;
-            if(result==0){
-                result=o.sumDuration-this.sumDuration;
-                if(result==0){
-                    result=o.count-this.count;
-                }
-            }
-            if(result<0){
-                return -1;
-            }else if(result==0){
-                return 0;
-            }else{
-                return 1;
-            }
+            setStartTs(builder.startTs);
+            setEndTs(builder.endTs);
         }
 
         public static Builder newBuilder() {
@@ -84,35 +67,35 @@ public class SpanMetricsResult extends QueryResult{
             this.spanName = spanName;
         }
 
-        public double getAvgDuration() {
+        public long getAvgDuration() {
             return avgDuration;
         }
 
-        public void setAvgDuration(double avgDuration) {
+        public void setAvgDuration(long avgDuration) {
             this.avgDuration = avgDuration;
         }
 
-        public double getMinDuration() {
+        public long getMinDuration() {
             return minDuration;
         }
 
-        public void setMinDuration(double minDuration) {
+        public void setMinDuration(long minDuration) {
             this.minDuration = minDuration;
         }
 
-        public double getMaxDuration() {
+        public long getMaxDuration() {
             return maxDuration;
         }
 
-        public void setMaxDuration(double maxDuration) {
+        public void setMaxDuration(long maxDuration) {
             this.maxDuration = maxDuration;
         }
 
-        public double getSumDuration() {
+        public long getSumDuration() {
             return sumDuration;
         }
 
-        public void setSumDuration(double sumDuration) {
+        public void setSumDuration(long sumDuration) {
             this.sumDuration = sumDuration;
         }
 
@@ -140,12 +123,30 @@ public class SpanMetricsResult extends QueryResult{
             this.endTs = endTs;
         }
 
+        @Override
+        public int compareTo(SpanMetrics o) {
+            long result=o.avgDuration-this.avgDuration;
+            if(result==0){
+                result=o.sumDuration-this.sumDuration;
+                if(result==0){
+                    result=o.count-this.count;
+                }
+            }
+            if(result<0){
+                return -1;
+            }else if(result==0){
+                return 0;
+            }else{
+                return 1;
+            }
+        }
+
         public static final class Builder {
             private String spanName;
-            private double avgDuration;
-            private double minDuration;
-            private double maxDuration;
-            private double sumDuration;
+            private long avgDuration;
+            private long minDuration;
+            private long maxDuration;
+            private long sumDuration;
             private long count;
             private long startTs;
             private long endTs;
@@ -158,22 +159,22 @@ public class SpanMetricsResult extends QueryResult{
                 return this;
             }
 
-            public Builder avgDuration(double val) {
+            public Builder avgDuration(long val) {
                 avgDuration = val;
                 return this;
             }
 
-            public Builder minDuration(double val) {
+            public Builder minDuration(long val) {
                 minDuration = val;
                 return this;
             }
 
-            public Builder maxDuration(double val) {
+            public Builder maxDuration(long val) {
                 maxDuration = val;
                 return this;
             }
 
-            public Builder sumDuration(double val) {
+            public Builder sumDuration(long val) {
                 sumDuration = val;
                 return this;
             }

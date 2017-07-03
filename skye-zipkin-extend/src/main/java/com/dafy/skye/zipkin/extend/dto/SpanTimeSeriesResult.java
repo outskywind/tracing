@@ -9,9 +9,9 @@ import java.util.List;
  */
 public class SpanTimeSeriesResult extends QueryResult {
     /**
-     * {"seriesResult":[{"spanName":"",series:[{start:1,end:2,avgDuration:12345.9}]}]}
+     * {"data":[{"spanName":"",series:[{start:1,end:2,avgDuration:12345.9}]}]}
      */
-    private List<SpanTimeSeries> seriesResult;
+    private List<SpanTimeSeries> data;
 
     public static class SpanTimeSeries{
         private String spanName;
@@ -41,12 +41,12 @@ public class SpanTimeSeriesResult extends QueryResult {
         }
     }
 
-    public List<SpanTimeSeries> getSeriesResult() {
-        return seriesResult;
+    public List<SpanTimeSeries> getData() {
+        return data;
     }
 
-    public void setSeriesResult(List<SpanTimeSeries> seriesResult) {
-        this.seriesResult = seriesResult;
+    public void setData(List<SpanTimeSeries> data) {
+        this.data = data;
     }
 
     public void addTook(long took){
