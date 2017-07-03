@@ -26,6 +26,7 @@ import org.elasticsearch.search.aggregations.bucket.nested.InternalNested;
 import org.elasticsearch.search.aggregations.bucket.terms.StringTerms;
 import org.elasticsearch.search.aggregations.bucket.terms.Terms;
 import org.elasticsearch.search.aggregations.bucket.terms.TermsAggregationBuilder;
+import org.elasticsearch.search.aggregations.pipeline.InternalSimpleValue;
 import org.elasticsearch.search.aggregations.pipeline.PipelineAggregatorBuilders;
 import org.elasticsearch.search.aggregations.pipeline.bucketmetrics.stats.InternalStatsBucket;
 import org.elasticsearch.search.aggregations.pipeline.bucketmetrics.stats.StatsBucket;
@@ -91,6 +92,7 @@ public class ZipkinExtendServiceImpl implements ZipkinExtendService {
 
     @Override
     public Set<String> getSpans(SpanNameQueryRequest request) {
+        request.checkAndSetDefault();
         String[] indices=indices(request.endTs,request.lookback);
         SearchRequestBuilder esRequest=transportClient.prepareSearch(indices)
                 .setIndicesOptions(DefaultOptions.defaultIndicesOptions());
@@ -225,6 +227,7 @@ public class ZipkinExtendServiceImpl implements ZipkinExtendService {
 
     @Override
     public SpanMetricsResult getSpansMetrics(TraceQueryRequest request) {
+        request.checkAndSetDefault();
         TraceQueryRequest.Builder builder=request.newBuilder(request);
         SearchRequestBuilder requestBuilder= searchRequestBuilder(builder.build());
         requestBuilder.setSize(0);
@@ -302,5 +305,96 @@ public class ZipkinExtendServiceImpl implements ZipkinExtendService {
 
         return requestBuilder;
     }
+
+
+    /**
+     * 批量统计
+     * @param request
+     * @return
+     */
+    @Override
+    public SpanTimeSeriesResult getMultiSpansTimeSeries(TraceQueryRequest request){
+        request.checkAndSetDefault();
+        TraceQueryRequest.Builder builder = request.newBuilder(request);
+        SpanTimeSeriesResult result = new SpanTimeSeriesResult();
+        //没有传指定的spans时，返回为空
+        if(request.getSpans()==null || request.getSpans().isEmpty()){
+            return null;
+        }
+        List<SpanTimeSeriesResult.SpanTimeSeries> sereis = new ArrayList<SpanTimeSeriesResult.SpanTimeSeries>();
+        for (String span:request.getSpans()){
+            builder.spans(Arrays.asList(span));
+            SpanTimeSeriesResult.SpanTimeSeries spanTimeSeriesItem = getSpanTimeSeries(builder.build());
+            sereis.add(spanTimeSeriesItem);
+            result.addTook(spanTimeSeriesItem.getTook());
+        }
+        result.setSeriesResult(sereis);
+        result.setSuccess(true);
+        return result;
+    }
+
+
+    /**
+     * 按照选择的spanName查询时间段内的分段统计平均响应时间
+     * @param request
+     * @return
+     */
+    public SpanTimeSeriesResult.SpanTimeSeries getSpanTimeSeries(TraceQueryRequest request){
+        checkAndSetDefault(request);
+
+        MultiSearchRequestBuilder multiSearch=transportClient.prepareMultiSearch()
+                .setIndicesOptions(DefaultOptions.defaultIndicesOptions());
+        long itemStartTs=request.endTs-request.lookback;
+        long itemEndTs;
+        List<TimestampRange> ranges=new ArrayList<>();
+        do {
+            final long itemLookback=request.interval*request.intervalUnit.getMills();
+            itemEndTs=itemStartTs+itemLookback;
+            TraceQueryRequest.Builder builder=request.newBuilder(request);
+            builder.endTs(itemStartTs+itemLookback).lookback(itemLookback);
+            SearchRequestBuilder requestBuilder= searchRequestBuilder(builder.build());
+            requestBuilder.setSize(0);
+            requestBuilder.addAggregation(AggregationBuilders.terms("span_terms")
+                    .field("id")
+                    .subAggregation(AggregationBuilders.max("span_duration")
+                            .field("duration")));
+            requestBuilder.addAggregation(PipelineAggregatorBuilders.
+                    statsBucket("span_duration_stats","span_terms>span_duration"));
+            multiSearch.add(requestBuilder);
+            ranges.add(new TimestampRange(itemStartTs,itemEndTs));
+            itemStartTs=itemEndTs;
+        }while (itemEndTs<=request.endTs);
+        MultiSearchResponse response=multiSearch.execute().actionGet();
+        MultiSearchResponse.Item[] items=response.getResponses();
+        List<SpanMetricsResult.SpanMetrics> stats=new ArrayList<>(items.length);
+        long totalTook=0;
+        for(int i=0;i<items.length;i++){
+            MultiSearchResponse.Item item=items[i];
+            SpanMetricsResult.SpanMetrics.Builder statsBuilder= SpanMetricsResult.SpanMetrics.newBuilder();
+            statsBuilder.startTs(ranges.get(i).startTs)
+                    .endTs(ranges.get(i).endTs);
+            SearchResponse itemResponse=item.getResponse();
+            //响应时间
+            if(itemResponse==null||itemResponse.getTook()==null){
+                System.out.println(itemResponse);
+            }
+            long itemTook=itemResponse.getTook().getMillis();
+            totalTook+=itemTook;
+            Aggregations aggregations=itemResponse.getAggregations();
+            if(aggregations!=null){
+                InternalStatsBucket spanAvgDuration=aggregations.get("span_duration_stats");
+                statsBuilder.avgDuration(spanAvgDuration.getAvg()).count(spanAvgDuration.getCount());
+            }else{
+                statsBuilder.avgDuration(0);
+            }
+            stats.add(statsBuilder.build());
+        }
+        SpanTimeSeriesResult.SpanTimeSeries result=new SpanTimeSeriesResult.SpanTimeSeries();
+        result.setSeries(stats);
+        result.setTook(totalTook);
+        result.setSpanName(request.getSpans().get(0));
+        return result;
+    }
+
 
 }

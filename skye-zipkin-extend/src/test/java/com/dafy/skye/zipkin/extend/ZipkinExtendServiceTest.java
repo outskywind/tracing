@@ -10,6 +10,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
+import java.util.Arrays;
 import java.util.Base64;
 import java.util.Set;
 
@@ -55,6 +56,18 @@ public class ZipkinExtendServiceTest {
         SpanMetricsResult result=zipkinExtendService.getSpansMetrics(request);
         System.out.println(JacksonConvert.toPrettyString(result));
     }
+
+    @Test
+    public void testSpanTimeSeries(){
+        TraceQueryRequest request=TraceQueryRequest.newBuilder()
+                .lookback(lookback())
+                .endTs(1498486059308L).spans(Arrays.asList("gatewayprovider.start","officeprovider.startwork")).
+                        build();
+        SpanTimeSeriesResult result=zipkinExtendService.getMultiSpansTimeSeries(request);
+        System.out.println(JacksonConvert.toPrettyString(result));
+    }
+
+
     public static void main(String[] args) {
         String s=new String(Base64.getDecoder().decode("c3VjY2Vzcw=="));
         System.out.println(s);

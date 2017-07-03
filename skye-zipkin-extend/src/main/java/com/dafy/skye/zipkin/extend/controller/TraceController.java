@@ -37,4 +37,14 @@ public class TraceController {
     Set<String> getSpanNames(@RequestBody SpanNameQueryRequest request){
         return zipkinExtendService.getSpans(request);
     }
+
+    /**
+     * span调用时间序列图
+     * @param request
+     * @return
+     */
+    @RequestMapping("/spans/series")
+    SpanTimeSeriesResult getSpanTimeSeries(@RequestBody TraceQueryRequest request){
+        return zipkinExtendService.getMultiSpansTimeSeries(request);
+    }
 }

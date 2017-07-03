@@ -20,6 +20,8 @@ public interface ZipkinExtendService {
 
     SpanMetricsResult getSpansMetrics(TraceQueryRequest request);
 
+    SpanTimeSeriesResult getMultiSpansTimeSeries(TraceQueryRequest request);
+
     //Service被调用次数
     //接口成功失败
 

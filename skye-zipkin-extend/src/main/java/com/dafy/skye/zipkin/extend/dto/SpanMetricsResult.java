@@ -124,6 +124,22 @@ public class SpanMetricsResult extends QueryResult{
             this.count = count;
         }
 
+        public long getStartTs() {
+            return startTs;
+        }
+
+        public void setStartTs(long startTs) {
+            this.startTs = startTs;
+        }
+
+        public long getEndTs() {
+            return endTs;
+        }
+
+        public void setEndTs(long endTs) {
+            this.endTs = endTs;
+        }
+
         public static final class Builder {
             private String spanName;
             private double avgDuration;
