@@ -84,7 +84,7 @@ public class ZipkinExtendServiceImpl implements ZipkinExtendService {
     }
     void checkAndSetDefault(TraceQueryRequest request){
         if(request.interval==null){
-            request.interval=100;
+            request.interval=1;
         }
         if(request.intervalUnit==null){
             request.intervalUnit= IntervalTimeUnit.HOUR;

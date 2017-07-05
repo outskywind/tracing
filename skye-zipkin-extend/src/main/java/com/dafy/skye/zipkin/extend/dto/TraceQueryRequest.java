@@ -1,6 +1,8 @@
 package com.dafy.skye.zipkin.extend.dto;
 
 import com.dafy.skye.common.util.IntervalTimeUnit;
+import com.dafy.skye.common.util.TimeUnitCast;
+import org.springframework.util.StringUtils;
 
 import java.util.*;
 
@@ -19,6 +21,8 @@ public class TraceQueryRequest extends TimeBaseQueryRequest{
     public int limit;
     public String sortField="timestamp_millis";
     public String sortOrder="desc";
+
+    public String timeInterval;
 
     public TraceQueryRequest() {
     }
@@ -147,6 +151,21 @@ public class TraceQueryRequest extends TimeBaseQueryRequest{
 
     public void setSortOrder(String sortOrder) {
         this.sortOrder = sortOrder;
+    }
+
+    public String getTimeInterval() {
+        return timeInterval;
+    }
+
+    public void setTimeInterval(String timeInterval) {
+        this.timeInterval = timeInterval;
+        //parse to Integer
+        if(StringUtils.hasText(timeInterval)){
+            String time=timeInterval.substring(0,timeInterval.length()-1);
+            String timeUnit=timeInterval.substring(timeInterval.length()-1);
+            this.interval = Integer.parseInt(time);
+            this.intervalUnit = TimeUnitCast.cast(timeUnit);
+        }
     }
 
     public static final class Builder {

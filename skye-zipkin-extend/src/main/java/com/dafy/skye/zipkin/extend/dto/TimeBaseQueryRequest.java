@@ -1,5 +1,9 @@
 package com.dafy.skye.zipkin.extend.dto;
 
+import java.util.HashMap;
+import java.util.Map;
+import java.util.concurrent.TimeUnit;
+
 /**
  * Created by Caedmon on 2017/6/24.
  */
