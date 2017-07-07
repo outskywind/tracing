@@ -26,7 +26,7 @@ public enum IntervalTimeUnit {
     public long getMills(){
         switch (this){
             case MINUTES:
-                return 600000;
+                return 60000;
             case HOUR:
                 return 3600000;
             case DAY:
