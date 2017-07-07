@@ -8,6 +8,7 @@ import com.dafy.skye.zipkin.extend.config.ZipkinExtendESConfig;
 import com.dafy.skye.zipkin.extend.dto.*;
 import com.dafy.skye.zipkin.extend.util.TimeUtil;
 import com.google.common.base.Strings;
+import io.netty.util.internal.StringUtil;
 import org.apache.lucene.search.join.ScoreMode;
 import org.elasticsearch.action.search.MultiSearchRequestBuilder;
 import org.elasticsearch.action.search.MultiSearchResponse;
@@ -23,7 +24,10 @@ import org.elasticsearch.search.SearchHit;
 import org.elasticsearch.search.aggregations.AggregationBuilder;
 import org.elasticsearch.search.aggregations.AggregationBuilders;
 import org.elasticsearch.search.aggregations.Aggregations;
+import org.elasticsearch.search.aggregations.bucket.filter.Filter;
+import org.elasticsearch.search.aggregations.bucket.filters.FiltersAggregator;
 import org.elasticsearch.search.aggregations.bucket.nested.InternalNested;
+import org.elasticsearch.search.aggregations.bucket.nested.Nested;
 import org.elasticsearch.search.aggregations.bucket.terms.StringTerms;
 import org.elasticsearch.search.aggregations.bucket.terms.Terms;
 import org.elasticsearch.search.aggregations.bucket.terms.TermsAggregationBuilder;
@@ -36,6 +40,7 @@ import org.elasticsearch.transport.client.PreBuiltTransportClient;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
+import org.springframework.util.StringUtils;
 import zipkin.Codec;
 import zipkin.Span;
 import zipkin.internal.GroupByTraceId;
@@ -149,7 +154,7 @@ public class ZipkinExtendServiceImpl implements ZipkinExtendService {
     }
     public TraceQueryResult getTraces(TraceQueryRequest request){
         SearchRequestBuilder search= searchRequestBuilder(request);
-        AggregationBuilders.terms("trace_terms").size(request.limit);
+        AggregationBuilders.terms("trace_terms").size(100);
         SearchResponse response=search.execute().actionGet();
         SearchHit[] hits=response.getHits().getHits();
         List<Span> spans=new LinkedList<>();
@@ -185,9 +190,14 @@ public class ZipkinExtendServiceImpl implements ZipkinExtendService {
             requestBuilder.addAggregation(AggregationBuilders.terms("trace_terms")
                     .field("traceId")
                     .subAggregation(AggregationBuilders.max("trace_duration")
-                            .field("duration")));
+                            .field("duration"))
+                    //成功和异常的统计,在es里是key，value列表
+                    .subAggregation(AggregationBuilders.nested("ba","binaryAnnotations").subAggregation(AggregationBuilders.terms("call_status").field("binaryAnnotations.key"))
+                                    .subAggregation( AggregationBuilders
+                                            .filter("success",QueryBuilders.termQuery("binaryAnnotations.value", "success")))));
             requestBuilder.addAggregation(PipelineAggregatorBuilders.
                     statsBucket("trace_duration_stats","trace_terms>trace_duration"));
+
             multiSearch.add(requestBuilder);
             ranges.add(new TimestampRange(itemStartTs,itemEndTs));
             itemStartTs=itemEndTs;
@@ -209,6 +219,10 @@ public class ZipkinExtendServiceImpl implements ZipkinExtendService {
             long itemTook=itemResponse.getTook().getMillis();
             totalTook+=itemTook;
             Aggregations aggregations=itemResponse.getAggregations();
+            //tracscount,这3个统计值返回到前端列表
+            long tracesCount = 0;
+            long exceptionsCount = 0;
+            long successCount = 0;
             if(aggregations!=null){
                 InternalStatsBucket statsBucket=aggregations.get("trace_duration_stats");
                 if(statsBucket.getMax()<=0){
@@ -222,11 +236,58 @@ public class ZipkinExtendServiceImpl implements ZipkinExtendService {
                 }else {
                     statsBuilder.avgDuration(TimeUtil.microToMills(statsBucket.getAvg()));
                 }
+                //调用成功，异常统计
+                Terms traces = aggregations.get("trace_terms");
+                //tracscount,这3个统计值返回到前端列表
+                tracesCount = traces.getBuckets().size();
+                //----
+                for(int ik=0;ik<tracesCount;ik++){
+                    Terms.Bucket bucket  = traces.getBuckets().get(ik);
+                    //System.out.print(bucket.getKey());
+                    //这里 cscr 与 ss sr 因为已经按照service区分了，所以这2个span不会在一个桶
+                    //可以认为 一个桶里的文档数就是span数
+                    long spans_in_trace = bucket.getDocCount();
+                    Nested ba = bucket.getAggregations().get("ba");
+                    //处理Exceptiontong统计
+                    Terms call_status_in_traces  =  ba.getAggregations().get("call_status");
+                    int exception_for_the_trace = 0;
+                    int successCount_for_the_trace = 0;
+                    int adjust_result_sssr =  0;
+                    if(call_status_in_traces.getBuckets()!=null){
+                        for(Terms.Bucket bucket1:call_status_in_traces.getBuckets()){
+                            String status = (String)bucket1.getKey();
+                            if("exception".equals(status)){
+                                exception_for_the_trace = 1;
+                            }
+                            //之前的sssr没有status,只有result
+                            else if("result".equals(status)){
+                                adjust_result_sssr+=bucket1.getDocCount();
+                            }
+                        }
+                    }
+                    //处理success统计 spans_in_trace=success数才认为是整个trace成功
+                    Filter filter =  ba.getAggregations().get("success");
+                    if(filter.getDocCount()+adjust_result_sssr>=spans_in_trace){
+                        successCount_for_the_trace = 1;
+                        //System.out.println(" success");
+                    }
+                    else{
+                        //System.out.println(" failed");
+                    }
+                    //
+                    //统计each trace in this duration最终结果计数
+                    exceptionsCount+=exception_for_the_trace;
+                    successCount+=successCount_for_the_trace;
+                }
             }else{
                 statsBuilder.avgDuration(0).maxDuration(0)
                         .minDuration(0).count(0);
             }
-            stats.add(statsBuilder.build());
+            TraceMetricsResult.TraceMetrics tm = statsBuilder.build();
+            tm.setTraceCount(tracesCount);
+            tm.setExceptionCount(exceptionsCount);
+            tm.setSuccessCount(successCount);
+            stats.add(tm);
         }
         TraceMetricsResult result=new TraceMetricsResult();
         result.setMetrics(stats);

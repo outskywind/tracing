@@ -26,6 +26,8 @@ public class DubboClientRequestAdapter implements ClientRequestAdapter {
     public String getSpanName() {
         return DubboBraveHelper.getCurrentSpanName();
     }
+
+    @Override
     public void addSpanIdToRequest(SpanId spanId) {
         MDC.put(Constants.MDC_TRACE_ID_KEY,spanId.traceIdString());
         String application = RpcContext.getContext().getUrl().getParameter("application");

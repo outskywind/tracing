@@ -24,6 +24,9 @@ public class TraceMetricsResult extends QueryResult{
         private long avgDuration;
         private long maxDuration;
         private long minDuration;
+        private long traceCount;
+        private long exceptionCount;
+        private long successCount;
 
         private TraceMetrics(Builder builder) {
             setStartTs(builder.startTs);
@@ -97,6 +100,32 @@ public class TraceMetricsResult extends QueryResult{
             this.minDuration = minDuration;
         }
 
+        public long getTraceCount() {
+            return traceCount;
+        }
+
+        public void setTraceCount(long traceCount) {
+            this.traceCount = traceCount;
+        }
+
+        public long getExceptionCount() {
+            return exceptionCount;
+        }
+
+        public void setExceptionCount(long exceptionCount) {
+            this.exceptionCount = exceptionCount;
+        }
+
+        public long getSuccessCount() {
+            return successCount;
+        }
+
+        public void setSuccessCount(long successCount) {
+            this.successCount = successCount;
+        }
+
+        //--------------------------------------------------------------------
+
         public static final class Builder {
             private long startTs;
             private long endTs;
@@ -137,6 +166,8 @@ public class TraceMetricsResult extends QueryResult{
                 minDuration = val;
                 return this;
             }
+
+
 
             public TraceMetrics build() {
                 return new TraceMetrics(this);

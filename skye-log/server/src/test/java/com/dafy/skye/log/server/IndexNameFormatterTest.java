@@ -11,6 +11,6 @@ public class IndexNameFormatterTest {
     public void testIndexName(){
         IndexNameFormatter.Builder builder=IndexNameFormatter.builder();
         builder.index("test");
-        System.out.println(builder.build().indexNameForTimestamp(System.currentTimeMillis()));
+        //System.out.println(builder.build().indexNameForTimestamp(System.currentTimeMillis()));
     }
 }
