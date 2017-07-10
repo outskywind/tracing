@@ -28,6 +28,9 @@ public class ESIndexCloseJob implements SimpleJob{
     @Value("${zipkin.storage.elasticsearch.index}-")
     private String indexPrefix;
 
+    @Value("${elasticjob.indexOpenDay}")
+    private int indexOpenDay;
+
     @Override
     public void execute(ShardingContext shardingContext) {
         //do it
@@ -48,13 +51,13 @@ public class ESIndexCloseJob implements SimpleJob{
                     cl.setTime(d);
 
                     Date now = new Date(System.currentTimeMillis());
-                    Calendar last7Day = Calendar.getInstance();
-                    last7Day.setTime(now);
-                    last7Day.set(Calendar.HOUR_OF_DAY,0);
-                    last7Day.set(Calendar.MINUTE,0);
-                    last7Day.set(Calendar.SECOND,0);
-                    last7Day.add(Calendar.DAY_OF_MONTH,-8);
-                    if(cl.compareTo(last7Day)<0){
+                    Calendar lastOpenDay = Calendar.getInstance();
+                    lastOpenDay.setTime(now);
+                    lastOpenDay.set(Calendar.HOUR_OF_DAY,0);
+                    lastOpenDay.set(Calendar.MINUTE,0);
+                    lastOpenDay.set(Calendar.SECOND,0);
+                    lastOpenDay.add(Calendar.DAY_OF_MONTH,-indexOpenDay-1);
+                    if(cl.compareTo(lastOpenDay)<0){
                         closeIndecies.add(index);
                     }
                 }

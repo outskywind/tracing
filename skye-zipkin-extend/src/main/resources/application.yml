@@ -153,3 +153,4 @@ elasticjob:
         initial-size: 5
         test-on-borrow: true
         validation-query: SELECT 1
+  indexOpenDay: 7
