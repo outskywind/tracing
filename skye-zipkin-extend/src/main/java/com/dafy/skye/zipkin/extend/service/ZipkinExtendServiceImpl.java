@@ -59,18 +59,10 @@ public class ZipkinExtendServiceImpl implements ZipkinExtendService {
     @Autowired
     private ZipkinExtendESConfig zipkinExtendESConfig;
     private IndexNameFormatter indexNameFormatter;
+    @Autowired
     private TransportClient transportClient;
     @PostConstruct
     public void init() throws UnknownHostException{
-        Settings settings = Settings.builder()
-                .put("cluster.name", zipkinExtendESConfig.getClusterName()).build();
-        this.transportClient= new PreBuiltTransportClient(settings);
-        for(String host: zipkinExtendESConfig.getTransportHosts()){
-            String[] array=host.split(":");
-            this.transportClient
-                        .addTransportAddress(new InetSocketTransportAddress(
-                                InetAddress.getByName(array[0]), Integer.parseInt(array[1])));
-        }
         IndexNameFormatter.Builder formatterBuilder=IndexNameFormatter.builder();
         formatterBuilder.dateSeparator('-');
         final String index=zipkinExtendESConfig.getZipkinESStorageProperties().getIndex();
@@ -226,7 +218,7 @@ public class ZipkinExtendServiceImpl implements ZipkinExtendService {
             if(aggregations!=null){
                 InternalStatsBucket statsBucket=aggregations.get("trace_duration_stats");
                 if(statsBucket.getMax()<=0){
-                    System.out.println();
+                    //System.out.println();
                 }
                 statsBuilder.maxDuration(TimeUtil.microToMills(statsBucket.getMax()))
                         .minDuration(TimeUtil.microToMills(statsBucket.getMin()))
@@ -270,9 +262,6 @@ public class ZipkinExtendServiceImpl implements ZipkinExtendService {
                     if(filter.getDocCount()+adjust_result_sssr>=spans_in_trace){
                         successCount_for_the_trace = 1;
                         //System.out.println(" success");
-                    }
-                    else{
-                        //System.out.println(" failed");
                     }
                     //
                     //统计each trace in this duration最终结果计数

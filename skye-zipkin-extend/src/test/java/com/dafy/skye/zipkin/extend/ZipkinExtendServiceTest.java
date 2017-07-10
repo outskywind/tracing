@@ -3,16 +3,17 @@ package com.dafy.skye.zipkin.extend;
 import com.dafy.skye.common.util.IntervalTimeUnit;
 import com.dafy.skye.common.util.JacksonConvert;
 import com.dafy.skye.zipkin.extend.dto.*;
+import com.dafy.skye.zipkin.extend.job.ESIndexCloseJob;
 import com.dafy.skye.zipkin.extend.service.ZipkinExtendServiceImpl;
+import com.dangdang.ddframe.job.api.ShardingContext;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
-import java.util.Arrays;
-import java.util.Base64;
-import java.util.Set;
+import java.text.SimpleDateFormat;
+import java.util.*;
 
 /**
  * Created by Caedmon on 2017/6/18.
@@ -23,6 +24,9 @@ public class ZipkinExtendServiceTest {
 
     @Autowired
     private ZipkinExtendServiceImpl zipkinExtendService;
+
+    @Autowired
+    ESIndexCloseJob job;
     @Test
     public void testGetServiceNames(){
         ServiceNameQueryRequest request=new ServiceNameQueryRequest();
@@ -77,5 +81,19 @@ public class ZipkinExtendServiceTest {
     }
     static long endTs(){
         return System.currentTimeMillis();
+    }
+
+    @Test
+    public void testD() throws  Exception{
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+        Date d = sdf.parse("2017-07-10");
+        Calendar cl = Calendar.getInstance();
+        cl.setTime(d);
+        System.out.println(cl.getTime());
+    }
+
+    @Test
+    public void TestESIndexCloseJob(){
+        job.execute(null);
     }
 }

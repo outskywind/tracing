@@ -135,3 +135,21 @@ skye.log.server:
       #是否自动ack
       enable.auto.commit: false
 
+elasticjob:
+  regCenter:
+    namespace: elastic-search-index-close
+    serverList: zookeeper1.dafy.com:2181
+  simpleJob:
+    cron: 0 30 0 * * ?
+    shardingTotalCount: 1    #最小值为1
+    shardingItemParameters:   #不能大于shardingTotalCount
+  datasource:
+        url: jdbc:mysql://10.8.15.15:3306/elasticjobevent?useUnicode=true&characterEncoding=utf-8&verifyServerCertificate=false&useSSL=false&requireSSL=false
+        driver-class-name: com.mysql.jdbc.Driver
+        username: dafy
+        password:
+        max-active: 10
+        min-idle: 5
+        initial-size: 5
+        test-on-borrow: true
+        validation-query: SELECT 1
