@@ -105,6 +105,10 @@ public class ZipkinExtendServiceImpl implements ZipkinExtendService {
         esRequest.setQuery(root);
         esRequest.addAggregation(AggregationBuilders.terms("span_names").field("name"));
         SearchResponse response=esRequest.execute().actionGet();
+        //
+        if(response.getAggregations()==null){
+            return null;
+        }
         Terms terms=response.getAggregations().get("span_names");
         Set<String> spanNames=new HashSet<>();
         for(Terms.Bucket bucket:terms.getBuckets()){
@@ -129,6 +133,10 @@ public class ZipkinExtendServiceImpl implements ZipkinExtendService {
                         .field("annotations.endpoint.serviceName")));
         rootQueryBuilder.filter(timeRangeQuery(request.endTs,request.lookback));
         SearchResponse response=searchRequestBuilder.execute().actionGet();
+        //
+        if(response.getAggregations()==null){
+            return null;
+        }
         InternalNested binaryAggregationNested=response.getAggregations().get("binaryAnnotations");
         InternalNested annotationsNested=response.getAggregations().get("annotations");
         Terms binaryTerms=binaryAggregationNested.getAggregations().get("service_names");
@@ -146,7 +154,7 @@ public class ZipkinExtendServiceImpl implements ZipkinExtendService {
     }
     public TraceQueryResult getTraces(TraceQueryRequest request){
         SearchRequestBuilder search= searchRequestBuilder(request);
-        AggregationBuilders.terms("trace_terms").size(100);
+        //AggregationBuilders.terms("trace_terms").size(10000);
         SearchResponse response=search.execute().actionGet();
         SearchHit[] hits=response.getHits().getHits();
         List<Span> spans=new LinkedList<>();
@@ -179,14 +187,13 @@ public class ZipkinExtendServiceImpl implements ZipkinExtendService {
             builder.endTs(itemStartTs+itemLookback).lookback(itemLookback);
             SearchRequestBuilder requestBuilder= searchRequestBuilder(builder.build());
             requestBuilder.setSize(0);
-            requestBuilder.addAggregation(AggregationBuilders.terms("trace_terms")
+            requestBuilder.addAggregation(AggregationBuilders.terms("trace_terms").size(zipkinExtendESConfig.getBucketsSize())
                     .field("traceId")
                     .subAggregation(AggregationBuilders.max("trace_duration")
                             .field("duration"))
                     //成功和异常的统计,在es里是key，value列表
-                    .subAggregation(AggregationBuilders.nested("ba","binaryAnnotations").subAggregation(AggregationBuilders.terms("call_status").field("binaryAnnotations.key"))
-                                    .subAggregation( AggregationBuilders
-                                            .filter("success",QueryBuilders.termQuery("binaryAnnotations.value", "success")))));
+                    .subAggregation(AggregationBuilders.nested("ba","binaryAnnotations").subAggregation(AggregationBuilders.terms("call_status").size(zipkinExtendESConfig.getBucketsSize()).field("binaryAnnotations.key"))
+                                    .subAggregation(AggregationBuilders.terms("call_result").size(zipkinExtendESConfig.getBucketsSize()).field("binaryAnnotations.value"))));
             requestBuilder.addAggregation(PipelineAggregatorBuilders.
                     statsBucket("trace_duration_stats","trace_terms>trace_duration"));
 
@@ -257,11 +264,24 @@ public class ZipkinExtendServiceImpl implements ZipkinExtendService {
                             }
                         }
                     }
-                    //处理success统计 spans_in_trace=success数才认为是整个trace成功
-                    Filter filter =  ba.getAggregations().get("success");
-                    if(filter.getDocCount()+adjust_result_sssr>=spans_in_trace){
-                        successCount_for_the_trace = 1;
-                        //System.out.println(" success");
+                    //处理 success+http200 桶的文档个数之和==spances 总数
+                    Terms call_result_in_traces =  ba.getAggregations().get("call_result");
+                    long success_spans_for_the_trace=0;
+                    if(call_result_in_traces.getBuckets()!=null){
+                        for(Terms.Bucket bucket1:call_result_in_traces.getBuckets()){
+                            String status = (String)bucket1.getKey();
+                            if("success".equals(status)){
+                                success_spans_for_the_trace+=bucket1.getDocCount();
+                            }
+                            //之前的sssr没有status,只有result
+                            if("200".equals(status)){
+                                success_spans_for_the_trace+=bucket1.getDocCount();
+                            }
+                        }
+                    }
+                    //注意加上adjust_result_sssr
+                    if(success_spans_for_the_trace+adjust_result_sssr>=spans_in_trace){
+                        successCount_for_the_trace=1;
                     }
                     //
                     //统计each trace in this duration最终结果计数
@@ -290,9 +310,9 @@ public class ZipkinExtendServiceImpl implements ZipkinExtendService {
         TraceQueryRequest.Builder builder=request.newBuilder(request);
         SearchRequestBuilder requestBuilder= searchRequestBuilder(builder.build());
         requestBuilder.setSize(0);
-        TermsAggregationBuilder spanNameTerms=AggregationBuilders.terms("span_name_terms")
+        TermsAggregationBuilder spanNameTerms=AggregationBuilders.terms("span_name_terms").size(zipkinExtendESConfig.getBucketsSize())
                 .field("name");
-        TermsAggregationBuilder spanIdTerms=AggregationBuilders.terms("span_id_terms")
+        TermsAggregationBuilder spanIdTerms=AggregationBuilders.terms("span_id_terms").size(zipkinExtendESConfig.getBucketsSize())
                 .field("id");
         spanNameTerms.subAggregation(spanIdTerms);
         AggregationBuilder spanDuration=AggregationBuilders.max("span_duration").field("duration");

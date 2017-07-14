@@ -14,6 +14,9 @@ import org.slf4j.LoggerFactory;
         group = "consumer"
 )
 public class DubboBraveConsumerFilter implements Filter{
+
+    private boolean skye_tracing;
+
     private volatile Brave brave;
     private static final Logger log= LoggerFactory.getLogger(DubboBraveConsumerFilter.class);
     public Result invoke(Invoker<?> invoker, Invocation invocation) throws RpcException {

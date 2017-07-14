@@ -19,6 +19,9 @@ public class ZipkinExtendESConfig {
     private String type;
     private String clusterName;
     private Long defaultLookback=604800000L;
+    //terms聚合时返回的前10000个结果
+    private int bucketsSize=10000;
+
     public ZipkinElasticsearchHttpStorageProperties getZipkinESStorageProperties() {
         return zipkinESStorageProperties;
     }
@@ -57,5 +60,13 @@ public class ZipkinExtendESConfig {
 
     public void setDefaultLookback(Long defaultLookback) {
         this.defaultLookback = defaultLookback;
+    }
+
+    public int getBucketsSize() {
+        return bucketsSize;
+    }
+
+    public void setBucketsSize(int bucketsSize) {
+        this.bucketsSize = bucketsSize;
     }
 }

@@ -11,6 +11,7 @@
 
     <artifactId>skye-zipkin-extend</artifactId>
     <dependencies>
+        <!--  zipkin 查询界面  -->
         <dependency>
             <groupId>io.zipkin.java</groupId>
             <artifactId>zipkin-server</artifactId>
@@ -21,7 +22,8 @@
             <artifactId>zipkin-autoconfigure-ui</artifactId>
             <version>${zipkin.version}</version>
         </dependency>
-
+        <!--  zipkin 查询界面  end -->
+        <!-- zipkin 收集kafka ,存储到 es -->
         <dependency>
             <groupId>io.zipkin.java</groupId>
             <artifactId>zipkin-autoconfigure-storage-elasticsearch-http</artifactId>
@@ -32,6 +34,7 @@
             <artifactId>zipkin-autoconfigure-collector-kafka</artifactId>
             <version>${zipkin.version}</version>
         </dependency>
+        <!-- zipkin 收集kafka ,存储到 es end -->
         <dependency>
             <groupId>io.zipkin.brave</groupId>
             <artifactId>brave-core</artifactId>
@@ -68,11 +71,11 @@
             <version>4.3.8.RELEASE</version>
             <scope>test</scope>
         </dependency>
-        <dependency>
+        <!--<dependency>
             <groupId>com.dafy.skye</groupId>
             <artifactId>skye-log-server</artifactId>
             <version>1.0.0-SNAPSHOT</version>
-        </dependency>
+        </dependency>-->
         <!--  job分布式任务 -->
         <dependency>
             <groupId>com.dafy.spring-boot</groupId>
@@ -100,7 +103,7 @@
             <artifactId>spring-boot-starter-jdbc</artifactId>
             <version>1.4.0.RELEASE</version>
         </dependency>
-
+        <!--  job分布式任务 end -->
     </dependencies>
 
 </project>

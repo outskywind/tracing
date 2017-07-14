@@ -18,7 +18,7 @@ public class SimpleBraveTracingInterceptor extends HandlerInterceptorAdapter{
         this.brave=brave;
     }
     @Override
-    public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
+    public boolean preHandle(final HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
         HttpServerRequest serverRequest=new HttpServerRequest() {
             @Override
             public String getHttpHeaderValue(String s) {
@@ -45,7 +45,7 @@ public class SimpleBraveTracingInterceptor extends HandlerInterceptorAdapter{
     }
 
     @Override
-    public void afterCompletion(HttpServletRequest request, HttpServletResponse response, Object handler, Exception ex) throws Exception {
+    public void afterCompletion(HttpServletRequest request, final HttpServletResponse response, Object handler, Exception ex) throws Exception {
         ServerResponseInterceptor serverResponseInterceptor = this.brave.serverResponseInterceptor();
         serverResponseInterceptor.handle(new HttpServerResponseAdapter(new HttpResponse() {
             @Override

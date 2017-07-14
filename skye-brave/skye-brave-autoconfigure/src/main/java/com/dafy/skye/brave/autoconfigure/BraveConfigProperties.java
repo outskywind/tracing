@@ -1,11 +1,14 @@
 package com.dafy.skye.brave.autoconfigure;
 
+import com.github.kristofa.brave.Sampler;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 
 /**
  * Created by Caedmon on 2017/6/27.
  */
 @ConfigurationProperties("skye.brave")
+@ConditionalOnProperty(prefix="skye.brave",name={"serviceName","kafkaServers"},matchIfMissing = false)
 public class BraveConfigProperties {
     private String serviceName;
     private Float samplerRate;

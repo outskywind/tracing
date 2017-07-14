@@ -84,7 +84,10 @@ public class LogKafkaAppender extends UnsynchronizedAppenderBase<ILoggingEvent> 
         try{
             kafkaProducer.partitionsFor(this.kafkaTopic);
         }catch (Throwable e){
-            this.addError("KafkaProducer init error ",e);
+            //spring-boot-logging 检查 status 是否有错误，这会导致失败,spring 启动时抛出异常，启动失败
+            //但这不是我们想要的，如果kafka appender失败，那么append不记录
+            //this.addError("KafkaProducer init error ",e);
+            e.printStackTrace();
             return false;
         }
 
@@ -121,6 +124,7 @@ public class LogKafkaAppender extends UnsynchronizedAppenderBase<ILoggingEvent> 
     }
     @Override
     protected void append(ILoggingEvent event) {
+        //kafka 连接失败，就不会appender发送记录
         if(event != null && this.isStarted()) {
             try {
                 if(includeCallerData){
