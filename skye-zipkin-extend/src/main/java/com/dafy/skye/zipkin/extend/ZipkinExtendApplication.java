@@ -4,7 +4,6 @@ import com.dafy.setcd.spring.boot.autoconfigure.SetcdPropertySource;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.context.annotation.ComponentScan;
 import zipkin.server.EnableZipkinServer;
 
 /**

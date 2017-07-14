@@ -13,18 +13,14 @@
     <properties>
 
     </properties>
-    <dependencyManagement>
-        <dependencies>
-            <dependency>
-                <groupId>org.springframework.boot</groupId>
-                <artifactId>spring-boot-dependencies</artifactId>
-                <version>${spring-boot.version}</version>
-                <scope>import</scope>
-                <type>pom</type>
-            </dependency>
-        </dependencies>
-    </dependencyManagement>
     <dependencies>
+        <!--  因为引入spring-boot-denpendencies 的方式，如果有多个子项目引入相同的依赖，就会最终用回spring-boot定义的
+         无法覆盖 -->
+        <dependency>
+            <groupId>org.elasticsearch</groupId>
+            <artifactId>elasticsearch</artifactId>
+            <version>5.4.1</version>
+        </dependency>
         <dependency>
             <groupId>com.dafy.skye</groupId>
             <artifactId>skye-log-server</artifactId>
