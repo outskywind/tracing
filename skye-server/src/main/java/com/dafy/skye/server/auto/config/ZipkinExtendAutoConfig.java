@@ -15,7 +15,7 @@ import zipkin.autoconfigure.storage.elasticsearch.http.ZipkinElasticsearchHttpSt
  */
 @Configuration
 //当配置为@ConfigurationProperties时，要被注入bean时，如果是第三方jar包的话，因为不被扫描到，所以只能指定class
-@EnableConfigurationProperties({ZipkinExtendESConfig.class})
+@EnableConfigurationProperties({ZipkinExtendESConfig.class,ZipkinElasticsearchHttpStorageProperties.class})
 public class ZipkinExtendAutoConfig {
 
     @Bean
