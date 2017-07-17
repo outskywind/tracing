@@ -3,10 +3,7 @@ package com.dafy.skye.zipkin.extend.controller;
 import com.dafy.skye.zipkin.extend.dto.*;
 import com.dafy.skye.zipkin.extend.service.ZipkinExtendService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.Set;
 
@@ -14,9 +11,9 @@ import java.util.Set;
  * Created by Caedmon on 2017/6/21.
  */
 @RestController
-@RequestMapping("/api/v1/trace")
+@RequestMapping(value="/api/v1/trace", method = RequestMethod.POST)
 public class TraceController {
-    @Autowired
+
     ZipkinExtendService zipkinExtendService;
     @RequestMapping("/metrics")
     TraceMetricsResult getTraceMetrics(@RequestBody  TraceQueryRequest request){
@@ -46,5 +43,14 @@ public class TraceController {
     @RequestMapping("/span/series")
     SpanTimeSeriesResult getSpanTimeSeries(@RequestBody TraceQueryRequest request){
         return zipkinExtendService.getMultiSpansTimeSeries(request);
+    }
+
+    public ZipkinExtendService getZipkinExtendService() {
+        return zipkinExtendService;
+    }
+
+    @Autowired
+    public void setZipkinExtendService(ZipkinExtendService zipkinExtendService) {
+        this.zipkinExtendService = zipkinExtendService;
     }
 }

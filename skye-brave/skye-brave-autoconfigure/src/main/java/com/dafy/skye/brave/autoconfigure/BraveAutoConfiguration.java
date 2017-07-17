@@ -3,8 +3,10 @@ package com.dafy.skye.brave.autoconfigure;
 import com.github.kristofa.brave.Brave;
 import com.github.kristofa.brave.Sampler;
 import com.google.common.base.Strings;
+import org.springframework.boot.autoconfigure.AutoConfigureAfter;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -16,11 +18,16 @@ import zipkin.reporter.kafka10.KafkaSender;
  * Created by Caedmon on 2017/6/26.
  */
 @Configuration
-@EnableConfigurationProperties(BraveConfigProperties.class)
+//the problem is
+@ConditionalOnProperty(prefix="skye.brave",name={"serviceName","kafkaServers"})
+@EnableConfigurationProperties({BraveConfigProperties.class})
 public class BraveAutoConfiguration {
+
     @Bean
     @ConditionalOnClass(Brave.class)
-    @ConditionalOnBean(BraveConfigProperties.class)
+    //因为 @ConfigurationPorperties 使用Registrar的机制，这里会无法生效
+    //因为spring 先处理加载完 BeanMethod 的信息，再加载Registrar的Bean信息
+    //@ConditionalOnBean(BraveConfigProperties.class)
     public Brave brave(BraveConfigProperties configProperties){
         if(Strings.isNullOrEmpty(configProperties.getServiceName())){
             throw new IllegalStateException("Brave service name is empty");

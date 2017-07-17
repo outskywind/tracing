@@ -43,6 +43,7 @@ import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 import zipkin.Codec;
 import zipkin.Span;
+import zipkin.autoconfigure.storage.elasticsearch.http.ZipkinElasticsearchHttpStorageProperties;
 import zipkin.internal.GroupByTraceId;
 
 import javax.annotation.PostConstruct;
@@ -58,6 +59,9 @@ import java.util.concurrent.TimeUnit;
 public class ZipkinExtendServiceImpl implements ZipkinExtendService {
     @Autowired
     private ZipkinExtendESConfig zipkinExtendESConfig;
+    @Autowired
+    private ZipkinElasticsearchHttpStorageProperties zipkinESStorageProperties;
+
     private IndexNameFormatter indexNameFormatter;
     @Autowired
     private TransportClient transportClient;
@@ -65,7 +69,7 @@ public class ZipkinExtendServiceImpl implements ZipkinExtendService {
     public void init() throws UnknownHostException{
         IndexNameFormatter.Builder formatterBuilder=IndexNameFormatter.builder();
         formatterBuilder.dateSeparator('-');
-        final String index=zipkinExtendESConfig.getZipkinESStorageProperties().getIndex();
+        final String index=zipkinESStorageProperties.getIndex();
         this.indexNameFormatter=formatterBuilder.index(index).build();
     }
     String[] indices(long endTs,long lookup){
@@ -214,6 +218,7 @@ public class ZipkinExtendServiceImpl implements ZipkinExtendService {
             //响应时间
             if(itemResponse==null||itemResponse.getTook()==null){
                 System.out.println(itemResponse);
+                continue;
             }
             long itemTook=itemResponse.getTook().getMillis();
             totalTook+=itemTook;
@@ -480,5 +485,27 @@ public class ZipkinExtendServiceImpl implements ZipkinExtendService {
         return result;
     }
 
+    public ZipkinExtendESConfig getZipkinExtendESConfig() {
+        return zipkinExtendESConfig;
+    }
 
+    public void setZipkinExtendESConfig(ZipkinExtendESConfig zipkinExtendESConfig) {
+        this.zipkinExtendESConfig = zipkinExtendESConfig;
+    }
+
+    public ZipkinElasticsearchHttpStorageProperties getZipkinESStorageProperties() {
+        return zipkinESStorageProperties;
+    }
+
+    public void setZipkinESStorageProperties(ZipkinElasticsearchHttpStorageProperties zipkinESStorageProperties) {
+        this.zipkinESStorageProperties = zipkinESStorageProperties;
+    }
+
+    public TransportClient getTransportClient() {
+        return transportClient;
+    }
+
+    public void setTransportClient(TransportClient transportClient) {
+        this.transportClient = transportClient;
+    }
 }
