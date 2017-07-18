@@ -1,2 +1,2 @@
 # 接入请查看wiki
-http://gitlab.ipo.com/base/skye/wikis/home
+[接入指南](http://gitlab.ipo.com/base/skye/wikis/home)
