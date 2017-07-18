@@ -21,7 +21,7 @@ import zipkin.reporter.kafka10.KafkaSender;
  */
 @Configuration
 //the problem is
-@ConditionalOnProperty(prefix="skye.brave",name={"serviceName","kafkaServers"})
+//@ConditionalOnProperty(prefix="skye.brave")
 @EnableConfigurationProperties({BraveConfigProperties.class})
 public class BraveAutoConfiguration {
 
