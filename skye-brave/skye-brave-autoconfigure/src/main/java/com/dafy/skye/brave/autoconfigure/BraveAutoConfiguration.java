@@ -41,9 +41,10 @@ public class BraveAutoConfiguration {
         //
         if(configProperties.getSamplerRate()!=null){
             builder.traceSampler(Sampler.create(configProperties.getSamplerRate()));
+        }else{
+            //默认监控统计全部数据
+            builder.traceSampler(Sampler.ALWAYS_SAMPLE);
         }
-        //默认监控统计全部数据
-        builder.traceSampler(Sampler.ALWAYS_SAMPLE);
         KafkaSender kafkaSender=KafkaSender.create(configProperties.getKafkaServers());
         Component.CheckResult checkResult=kafkaSender.check();
         if(!checkResult.ok){
