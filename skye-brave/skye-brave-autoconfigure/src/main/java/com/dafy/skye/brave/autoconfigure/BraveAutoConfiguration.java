@@ -1,5 +1,6 @@
 package com.dafy.skye.brave.autoconfigure;
 
+import com.dafy.skye.brave.spring.mvc.SimpleBraveTracingInterceptor;
 import com.github.kristofa.brave.Brave;
 import com.github.kristofa.brave.Sampler;
 import com.google.common.base.Strings;
@@ -10,6 +11,7 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.web.servlet.handler.HandlerInterceptorAdapter;
 import zipkin.Component;
 import zipkin.reporter.AsyncReporter;
 import zipkin.reporter.kafka10.KafkaSender;
@@ -50,5 +52,13 @@ public class BraveAutoConfiguration {
         AsyncReporter.Builder reporter= AsyncReporter.builder(kafkaSender);
         builder.reporter(reporter.build());
         return builder.build();
+    }
+
+
+    @Bean
+    @ConditionalOnClass({HandlerInterceptorAdapter.class})
+    public SimpleBraveTracingInterceptor simpleBraveTracingInterceptor(Brave brave){
+        SimpleBraveTracingInterceptor interceptor = new SimpleBraveTracingInterceptor(brave);
+        return interceptor;
     }
 }

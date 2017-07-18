@@ -18,5 +18,25 @@
             <version>${spring-boot.version}</version>
             <scope>provided</scope>
         </dependency>
-     </dependencies>
+        <!-- springmvc 调用  -->
+        <dependency>
+            <groupId>com.dafy.skye</groupId>
+            <artifactId>skye-brave-springmvc</artifactId>
+            <version>1.0.0-SNAPSHOT</version>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-webmvc</artifactId>
+            <version>${spring.version}</version>
+            <scope>provided</scope>
+        </dependency>
+
+        <!-- dubbo调用 -->
+        <dependency>
+            <groupId>com.dafy.skye</groupId>
+            <artifactId>skye-brave-dubbo</artifactId>
+            <version>1.0.0-SNAPSHOT</version>
+        </dependency>
+
+    </dependencies>
 </project>

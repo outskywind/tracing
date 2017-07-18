@@ -3,6 +3,7 @@ package com.dafy.skye.brave.spring.mvc;
 import com.github.kristofa.brave.Brave;
 import com.github.kristofa.brave.ServerResponseInterceptor;
 import com.github.kristofa.brave.http.*;
+import org.springframework.stereotype.Component;
 import org.springframework.web.servlet.handler.HandlerInterceptorAdapter;
 
 import javax.servlet.http.HttpServletRequest;
@@ -54,4 +55,13 @@ public class SimpleBraveTracingInterceptor extends HandlerInterceptorAdapter{
             }
         }));
     }
+
+    public Brave getBrave() {
+        return brave;
+    }
+
+    public void setBrave(Brave brave) {
+        this.brave = brave;
+    }
+
 }
