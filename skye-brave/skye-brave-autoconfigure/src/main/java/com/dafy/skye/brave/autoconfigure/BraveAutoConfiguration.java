@@ -11,6 +11,7 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.web.servlet.handler.HandlerInterceptorAdapter;
 import zipkin.Component;
 import zipkin.reporter.AsyncReporter;
@@ -27,15 +28,18 @@ public class BraveAutoConfiguration {
 
     @Bean
     @ConditionalOnClass(Brave.class)
+    @Lazy
     //因为 @ConfigurationPorperties 使用Registrar的机制，这里会无法生效
     //因为spring 先处理加载完 BeanMethod 的信息，再加载Registrar的Bean信息
     //@ConditionalOnBean(BraveConfigProperties.class)
     public Brave brave(BraveConfigProperties configProperties){
         if(Strings.isNullOrEmpty(configProperties.getServiceName())){
-            throw new IllegalStateException("Brave service name is empty");
+            System.out.println("Brave service name is empty");
+            return null;
         }
         if(Strings.isNullOrEmpty(configProperties.getKafkaServers())){
-            throw new IllegalStateException("Brave kafkaServers empty");
+            System.out.println("Brave kafkaServers empty");
+            return null;
         }
         Brave.Builder builder=new Brave.Builder(configProperties.getServiceName());
         //

@@ -20,20 +20,25 @@ public class DubboBraveConsumerFilter implements Filter{
     private volatile Brave brave;
     private static final Logger log= LoggerFactory.getLogger(DubboBraveConsumerFilter.class);
     public Result invoke(Invoker<?> invoker, Invocation invocation) throws RpcException {
-        ClientRequestInterceptor clientRequestInterceptor=brave.clientRequestInterceptor();
-        ClientResponseInterceptor clientResponseInterceptor=brave.clientResponseInterceptor();
-        ClientSpanThreadBinder clientSpanThreadBinder=brave.clientSpanThreadBinder();
-        clientRequestInterceptor.handle(new DubboClientRequestAdapter(invoker,invocation));
-        try{
-            Result result = invoker.invoke(invocation);
-            clientResponseInterceptor.handle(new DubboClientResponseAdapter(result));
-            return result;
-        }catch (Throwable ex){
-            clientResponseInterceptor.handle(new DubboClientResponseAdapter(ex));
-            throw  new RpcException(ex);
-        }finally {
-            //不能在client response后清除掉local span
-            clientSpanThreadBinder.setCurrentSpan(null);
+        if(brave==null){
+            //由于客户端没有正确配置监控信息，将不会拦截统计调用链上报
+            return invoker.invoke(invocation);
+        } else{
+            ClientRequestInterceptor clientRequestInterceptor=brave.clientRequestInterceptor();
+            ClientResponseInterceptor clientResponseInterceptor=brave.clientResponseInterceptor();
+            ClientSpanThreadBinder clientSpanThreadBinder=brave.clientSpanThreadBinder();
+            clientRequestInterceptor.handle(new DubboClientRequestAdapter(invoker,invocation));
+            try{
+                Result result = invoker.invoke(invocation);
+                clientResponseInterceptor.handle(new DubboClientResponseAdapter(result));
+                return result;
+            }catch (Throwable ex){
+                clientResponseInterceptor.handle(new DubboClientResponseAdapter(ex));
+                throw  new RpcException(ex);
+            }finally {
+                //不能在client response后清除掉local span
+                clientSpanThreadBinder.setCurrentSpan(null);
+            }
         }
     }
 
