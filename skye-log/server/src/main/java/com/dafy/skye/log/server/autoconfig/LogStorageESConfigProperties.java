@@ -8,7 +8,7 @@ import java.util.List;
 /**
  * Created by Caedmon on 2017/4/26.
  */
-@ConfigurationProperties("skye.log.storage.elasticsearch")
+@ConfigurationProperties("skye.log.server.storage.elasticsearch")
 public class LogStorageESConfigProperties {
     //ES节点地址
     private List<String> transportHosts = Lists.newArrayList("10.8.15.79:9300");
