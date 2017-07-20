@@ -11,7 +11,7 @@ import java.util.List;
 @ConfigurationProperties("skye.log.server.storage.elasticsearch")
 public class LogStorageESConfigProperties {
     //ES节点地址
-    private List<String> transportHosts = Lists.newArrayList("10.8.15.79:9300");
+    private List<String> transportHosts ;
     //索引前缀,实际是按天存储
     private String index ="skye";
     private String type ="skye-log";
