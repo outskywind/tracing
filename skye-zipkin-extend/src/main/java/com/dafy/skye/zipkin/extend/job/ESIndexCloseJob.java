@@ -25,8 +25,8 @@ public class ESIndexCloseJob implements SimpleJob{
     @Autowired
     private TransportClient transportClient;
 
-    @Value("${zipkin.storage.elasticsearch.index}-")
-    private String indexPrefix;
+    @Value("${zipkin.storage.elasticsearch.index}")
+    private List<String> indexPrefix;
 
     @Value("${elasticjob.indexOpenDay}")
     private int indexOpenDay;
@@ -43,8 +43,9 @@ public class ESIndexCloseJob implements SimpleJob{
             List<String> closeIndecies = new ArrayList<String>();
             for(String index: indecies){
                 //获取超过7天之前的日志索引
-                if(index.startsWith(indexPrefix)){
-                    String date = index.substring(indexPrefix.length());
+                String prefix = null;
+                if((prefix = matches(index,indexPrefix))!=null){
+                    String date = index.substring(prefix.length());
                     SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
                     Date d = sdf.parse(date);
                     Calendar cl = Calendar.getInstance();
@@ -68,5 +69,15 @@ public class ESIndexCloseJob implements SimpleJob{
         } catch (Exception e) {
             e.printStackTrace();
         }
+    }
+
+    private String matches(String index , List<String> indexPrefix){
+        //获取超过7天之前的日志索引
+        for(String prefix: indexPrefix){
+            if(index.startsWith(prefix)){
+                return prefix;
+            }
+        }
+        return null;
     }
 }
