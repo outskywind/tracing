@@ -112,7 +112,9 @@ public class KafkaCollector implements CollectorComponent {
                                 list.add(content);
                             }
                         }
-                        KafkaCollector.this.delegate.acceptEvents(list, SkyeLogEventCodec.DEFAULT);
+                        //保存到es ，如果全部失败，没有一个成功的，说明是服务端问题，那么不要更新offset
+                        //如果有一个成功的，就直接跳过这些记录，丢弃掉失败的
+                        if(!KafkaCollector.this.delegate.acceptEvents(list, SkyeLogEventCodec.DEFAULT)) continue;
                         //最后消费的offset如果大于当前offset则更新缓存并提交
                         if(lastOffset>=currentOffset){
                             currentOffset=lastOffset;

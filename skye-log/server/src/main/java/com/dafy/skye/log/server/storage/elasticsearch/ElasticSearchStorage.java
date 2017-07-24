@@ -18,6 +18,7 @@ import org.elasticsearch.action.admin.indices.template.get.GetIndexTemplatesRequ
 import org.elasticsearch.action.admin.indices.template.get.GetIndexTemplatesResponse;
 import org.elasticsearch.action.admin.indices.template.put.PutIndexTemplateRequestBuilder;
 import org.elasticsearch.action.admin.indices.template.put.PutIndexTemplateResponse;
+import org.elasticsearch.action.bulk.BulkItemResponse;
 import org.elasticsearch.action.bulk.BulkRequestBuilder;
 import org.elasticsearch.action.bulk.BulkResponse;
 import org.elasticsearch.action.index.IndexRequestBuilder;
@@ -139,7 +140,17 @@ public class ElasticSearchStorage implements StorageComponent {
             bulkRequestBuilder.add(indexRequestBuilder);
         }
         BulkResponse responses=bulkRequestBuilder.execute().actionGet();
-        System.out.println(responses.toString());
+        //全部失败,将不会更新kafka的offset，表明很可能是es服务问题
+        if(responses.hasFailures()){
+            log.warn("Message save to es has failures");
+            for (int i = 0; i < responses.getItems().length; i++) {
+                BulkItemResponse response = responses.getItems()[i];
+                if (!response.isFailed()) {
+                    return;
+                }
+            }
+            throw new Exception("Message all failed save to es");
+        }
     }
     @Override
     public LogQueryResult query(LogSearchRequest request) {

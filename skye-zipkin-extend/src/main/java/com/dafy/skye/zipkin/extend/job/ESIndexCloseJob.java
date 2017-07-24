@@ -25,7 +25,7 @@ public class ESIndexCloseJob implements SimpleJob{
     @Autowired
     private TransportClient transportClient;
 
-    @Value("${zipkin.storage.elasticsearch.index}")
+    @Value("#{'${elasticjob.prefix}'.split(',')}")
     private List<String> indexPrefix;
 
     @Value("${elasticjob.indexOpenDay}")

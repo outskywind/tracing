@@ -6,6 +6,7 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
+import zipkin.autoconfigure.storage.elasticsearch.http.ZipkinElasticsearchHttpStorageProperties;
 import zipkin.server.EnableZipkinServer;
 
 import java.io.IOException;
@@ -19,8 +20,8 @@ import java.io.IOException;
 @SetcdPropertySource(
         etcdKeys={"/server-config/skye/application-${env}.yml"}
 )
-//此注解配合class将会实例化配置bean
-@EnableConfigurationProperties({ZipkinExtendESConfig.class})
+//此注解配合class将会实例化配置bean,注入到Bean时需要
+@EnableConfigurationProperties({ZipkinExtendESConfig.class,ZipkinElasticsearchHttpStorageProperties.class})
 public class ZipkinExtendApplication {
     public static void main(String[] args) {
         SpringApplication application=new SpringApplication(ZipkinExtendApplication.class);

@@ -26,21 +26,22 @@ public class CollectorDelegate {
         try{
             storage.save(event);
         }catch (Exception e){
-            log.error("Accept event error ",e);
+            log.error("Accept event error: ",e);
             metrics.incrementMessageError(1);
             return;
         }
         metrics.incrementMessages(1);
     }
-    public void acceptEvents(List<SkyeLogEvent> events){
+    public boolean acceptEvents(List<SkyeLogEvent> events){
         try{
             storage.batchSave(events);
         }catch (Exception e){
-            log.error("Accept events error ",e);
+            log.error("Accept events error：",e);
             metrics.incrementMessageError(1);
-            return;
+            return false;
         }
         metrics.incrementMessages(events.size());
+        return true;
     }
 
     public void accpetEvent(byte[] eventBytes,SkyeLogEventCodec codec){
@@ -52,10 +53,10 @@ public class CollectorDelegate {
             acceptEvent(event);
         }
     }
-    public void acceptEvents(List<byte[]> eventBytes, SkyeLogEventCodec codec){
+    public boolean acceptEvents(List<byte[]> eventBytes, SkyeLogEventCodec codec){
         if(eventBytes==null||eventBytes.isEmpty()){
             log.warn("Event bytes is empty");
-            return;
+            return false;
         }
         int droppedQuantity=0;
         int bytesQuantity=0;
@@ -71,7 +72,7 @@ public class CollectorDelegate {
         }
         metrics.incrementMessageDropped(droppedQuantity);
         metrics.incrementBytes(bytesQuantity);
-        acceptEvents(events);
+        return acceptEvents(events);
     }
     public static class Builder{
         private StorageComponent storage;
