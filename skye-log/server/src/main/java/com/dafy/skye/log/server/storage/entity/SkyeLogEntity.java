@@ -133,9 +133,9 @@ public class SkyeLogEntity {
 
     public static SkyeLogEntity build(SkyeLogEvent event){
         SkyeLogEntity entity=new SkyeLogEntity();
-        entity.setTraceId(event.getMdc().get("skyeTraceId"));
+        entity.setTraceId(event.getMdc().get("traceId"));
         //skyeTraceId不再保存到mdc
-        event.getMdc().remove("skyeTraceId");
+        event.getMdc().remove("traceId");
         Random random=new Random();
         UUID uuid = new UUID(UUIDs.startOf(event.getTimeStamp()).getMostSignificantBits(), random.nextLong());
         entity.setTsUuid(uuid.toString());

@@ -401,9 +401,15 @@ public class ZipkinExtendServiceImpl implements ZipkinExtendService {
         request.checkAndSetDefault();
         TraceQueryRequest.Builder builder = request.newBuilder(request);
         SpanTimeSeriesResult result = new SpanTimeSeriesResult();
-        //没有传指定的spans时，返回为空
+        //没有传指定的spans时，获取全部span列表再查询
         if(request.getSpans()==null || request.getSpans().isEmpty()){
-            return null;
+            SpanNameQueryRequest spanNameQueryRequest = new SpanNameQueryRequest();
+            spanNameQueryRequest.setServices(request.getServices());
+            spanNameQueryRequest.setEndTs(request.getEndTs());
+            spanNameQueryRequest.setLookback(request.getLookback());
+            Set<String> spans = getSpans(spanNameQueryRequest);
+            request.setSpans(Arrays.asList(spans.toArray(new String[0])));
+            //return null;
         }
         List<SpanTimeSeriesResult.SpanTimeSeries> sereis = new ArrayList<SpanTimeSeriesResult.SpanTimeSeries>();
         for (String span:request.getSpans()){

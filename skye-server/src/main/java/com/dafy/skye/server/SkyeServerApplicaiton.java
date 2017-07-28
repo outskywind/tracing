@@ -28,7 +28,7 @@ public class SkyeServerApplicaiton {
         application.run(args);
         try {
             //Job定时任务是非daemon，但是他此时的线程还没启动的话，会导致直接退出，
-            //因为第三方elastic 和 tomcat的线程都是daemon
+            //因为第三方elastic ,kafka和 tomcat的线程都是daemon
             Thread.sleep(10000L);
         } catch (InterruptedException e) {
             e.printStackTrace();

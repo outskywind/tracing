@@ -52,7 +52,7 @@ public class BraveAutoConfiguration {
         KafkaSender kafkaSender=KafkaSender.create(configProperties.getKafkaServers());
         Component.CheckResult checkResult=kafkaSender.check();
         if(!checkResult.ok){
-            throw new IllegalStateException("Kafka Sender check error ",checkResult.exception);
+            System.out.println("Kafka Sender check error:   " + checkResult.exception);
         }
         AsyncReporter.Builder reporter= AsyncReporter.builder(kafkaSender);
         builder.reporter(reporter.build());
@@ -61,6 +61,7 @@ public class BraveAutoConfiguration {
 
 
     @Bean
+    @ConditionalOnBean(Brave.class)
     @ConditionalOnClass({HandlerInterceptorAdapter.class})
     public SimpleBraveTracingInterceptor simpleBraveTracingInterceptor(Brave brave){
         SimpleBraveTracingInterceptor interceptor = new SimpleBraveTracingInterceptor(brave);

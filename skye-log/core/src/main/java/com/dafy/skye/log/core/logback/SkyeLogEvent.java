@@ -39,6 +39,8 @@ public class SkyeLogEvent implements ILoggingEvent,Serializable{
     private String pid;
     private long seqNo;
     private static final AtomicLong seqNoFactory=new AtomicLong(0);
+    private String traceId;
+
     public SkyeLogEvent() {
     }
 
@@ -54,7 +56,7 @@ public class SkyeLogEvent implements ILoggingEvent,Serializable{
         ledo.mdcPropertyMap = le.getMDCPropertyMap();
         ledo.timeStamp = le.getTimeStamp();
         ledo.throwableProxy = ThrowableProxyVO.build(le.getThrowableProxy());
-        ledo.mdcPropertyMap=le.getMDCPropertyMap();
+        ledo.traceId = le.getMDCPropertyMap().get("traceId");
         String systemAddress=null;
         try{
             systemAddress= SkyeLogUtil.getLocalHost();
@@ -329,5 +331,13 @@ public class SkyeLogEvent implements ILoggingEvent,Serializable{
 
     public void setSeqNo(long seqNo) {
         this.seqNo = seqNo;
+    }
+
+    public String getTraceId() {
+        return traceId;
+    }
+
+    public void setTraceId(String traceId) {
+        this.traceId = traceId;
     }
 }
