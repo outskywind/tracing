@@ -158,7 +158,7 @@ public class ElasticSearchStorage implements StorageComponent {
             request.endTs=System.currentTimeMillis();
         }
         if(request.lookback==null){
-            request.lookback=Long.valueOf(7*24*3600*1000);
+            request.lookback=Long.valueOf(24*3600*1000);
         }
         List<String> indices=indexNameFormatter.indexNamePatternsForRange(request.endTs-request.lookback,request.endTs);
         String[] indicess=new String[indices.size()];
@@ -176,7 +176,8 @@ public class ElasticSearchStorage implements StorageComponent {
             root.filter(QueryBuilders.termsQuery("traceId", request.traceId));
         }
         if(!Strings.isNullOrEmpty(request.message)){
-            root.filter(QueryBuilders.termsQuery("message",request.message));
+            //terms 查询是单词项精准查询，存储时使用了标准分析器，会统一成小写词项倒排索引中
+            root.filter(QueryBuilders.matchQuery("message",request.message));
         }
         if(!Strings.isNullOrEmpty(request.getMdc())){
             JavaType javaType= JacksonConvert.mapper()
