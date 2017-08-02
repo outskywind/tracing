@@ -33,6 +33,7 @@ import org.elasticsearch.common.transport.InetSocketTransportAddress;
 import org.elasticsearch.common.xcontent.XContentType;
 import org.elasticsearch.index.VersionType;
 import org.elasticsearch.index.query.BoolQueryBuilder;
+import org.elasticsearch.index.query.Operator;
 import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.index.query.TermsQueryBuilder;
 import org.elasticsearch.search.SearchHit;
@@ -177,7 +178,7 @@ public class ElasticSearchStorage implements StorageComponent {
         }
         if(!Strings.isNullOrEmpty(request.message)){
             //terms 查询是单词项精准查询，存储时使用了标准分析器，会统一成小写词项倒排索引中
-            root.filter(QueryBuilders.matchQuery("message",request.message));
+            root.filter(QueryBuilders.matchQuery("message",request.message).operator(Operator.AND));
         }
         if(!Strings.isNullOrEmpty(request.getMdc())){
             JavaType javaType= JacksonConvert.mapper()
