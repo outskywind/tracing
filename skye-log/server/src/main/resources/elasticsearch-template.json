@@ -20,7 +20,7 @@
           "type":"keyword"
         },
         "pid":{
-          "type":"integer",
+          "type":"keyword",
           "index":false
         },
         "thread":{
