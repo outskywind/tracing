@@ -40,6 +40,8 @@ import org.elasticsearch.search.SearchHit;
 import org.elasticsearch.search.aggregations.AggregationBuilders;
 import org.elasticsearch.search.aggregations.Aggregations;
 import org.elasticsearch.search.aggregations.bucket.terms.Terms;
+import org.elasticsearch.search.builder.SearchSourceBuilder;
+import org.elasticsearch.search.fetch.subphase.highlight.HighlightBuilder;
 import org.elasticsearch.search.sort.SortOrder;
 import org.elasticsearch.transport.client.PreBuiltTransportClient;
 import org.slf4j.Logger;
@@ -178,7 +180,8 @@ public class ElasticSearchStorage implements StorageComponent {
         }
         if(!Strings.isNullOrEmpty(request.message)){
             //terms 查询是单词项精准查询，存储时使用了标准分析器，会统一成小写词项倒排索引中
-            root.filter(QueryBuilders.matchQuery("message",request.message).operator(Operator.AND));
+            //短语搜索
+            root.filter(QueryBuilders.matchPhraseQuery("message",request.message));
         }
         if(!Strings.isNullOrEmpty(request.getMdc())){
             JavaType javaType= JacksonConvert.mapper()
@@ -191,6 +194,7 @@ public class ElasticSearchStorage implements StorageComponent {
             }
         }
         searchRequestBuilder.setQuery(root);
+        searchRequestBuilder.highlighter(SearchSourceBuilder.highlight().preTags("<span class='highlight'>").postTags("</span>").field("message"));
         searchRequestBuilder.setFrom(request.getFrom()).setSize(request.getPageSize());
         searchRequestBuilder.addSort("tsUuid", SortOrder.DESC);
         SearchResponse response=searchRequestBuilder.execute().actionGet();
@@ -201,7 +205,14 @@ public class ElasticSearchStorage implements StorageComponent {
         SearchHit[] hits=response.getHits().getHits();
         List<SkyeLogEntity> entities=new LinkedList<>();
         for(SearchHit hit:hits){
-            entities.add(JacksonConvert.readValue(hit.getSourceAsString(),SkyeLogEntity.class));
+            SkyeLogEntity entity = JacksonConvert.readValue(hit.getSourceAsString(),SkyeLogEntity.class);
+            //reset the highlighted text
+            if(hit.getHighlightFields()!=null&&hit.getHighlightFields().get("message")!=null){
+                String highlighText = Arrays.toString(hit.getHighlightFields().get("message").getFragments());
+                entity.setMessage(highlighText.substring(1,highlighText.length()-1));
+            }
+
+            entities.add(entity);
         }
         resultBuilder.content(entities);
         resultBuilder.total((int) response.getHits().totalHits);

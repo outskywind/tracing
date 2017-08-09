@@ -194,10 +194,10 @@ public class ZipkinExtendServiceImpl implements ZipkinExtendService {
             requestBuilder.addAggregation(AggregationBuilders.terms("trace_terms").size(zipkinExtendESConfig.getBucketsSize())
                     .field("traceId")
                     .subAggregation(AggregationBuilders.max("trace_duration")
-                            .field("duration"))
-                    //成功和异常的统计,在es里是key，value列表
-                    .subAggregation(AggregationBuilders.nested("ba","binaryAnnotations").subAggregation(AggregationBuilders.terms("call_status").size(zipkinExtendESConfig.getBucketsSize()).field("binaryAnnotations.key"))
-                                    .subAggregation(AggregationBuilders.terms("call_result").size(zipkinExtendESConfig.getBucketsSize()).field("binaryAnnotations.value"))));
+                            .field("duration")));
+                    //成功和异常的统计,在es里是key，value列表 嵌套聚合太多有性能问题，es查询要1分钟多
+                    //.subAggregation(AggregationBuilders.nested("ba","binaryAnnotations").subAggregation(AggregationBuilders.terms("call_status").size(zipkinExtendESConfig.getBucketsSize()).field("binaryAnnotations.key"))
+                    //                .subAggregation(AggregationBuilders.terms("call_result").size(zipkinExtendESConfig.getBucketsSize()).field("binaryAnnotations.value"))));
             requestBuilder.addAggregation(PipelineAggregatorBuilders.
                     statsBucket("trace_duration_stats","trace_terms>trace_duration"));
 
@@ -241,7 +241,7 @@ public class ZipkinExtendServiceImpl implements ZipkinExtendService {
                     statsBuilder.avgDuration(TimeUtil.microToMills(statsBucket.getAvg()));
                 }
                 //调用成功，异常统计
-                Terms traces = aggregations.get("trace_terms");
+                /*Terms traces = aggregations.get("trace_terms");
                 //tracscount,这3个统计值返回到前端列表
                 tracesCount = traces.getBuckets().size();
                 //----
@@ -292,7 +292,7 @@ public class ZipkinExtendServiceImpl implements ZipkinExtendService {
                     //统计each trace in this duration最终结果计数
                     exceptionsCount+=exception_for_the_trace;
                     successCount+=successCount_for_the_trace;
-                }
+                }*/
             }else{
                 statsBuilder.avgDuration(0).maxDuration(0)
                         .minDuration(0).count(0);
