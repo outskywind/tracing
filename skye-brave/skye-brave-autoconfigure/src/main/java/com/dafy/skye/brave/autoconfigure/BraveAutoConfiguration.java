@@ -4,15 +4,12 @@ import com.dafy.skye.brave.spring.mvc.SimpleBraveTracingInterceptor;
 import com.github.kristofa.brave.Brave;
 import com.github.kristofa.brave.Sampler;
 import com.google.common.base.Strings;
-import org.springframework.boot.autoconfigure.AutoConfigureAfter;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Lazy;
-import org.springframework.web.servlet.handler.HandlerInterceptorAdapter;
 import zipkin.Component;
 import zipkin.reporter.AsyncReporter;
 import zipkin.reporter.kafka10.KafkaSender;
@@ -27,7 +24,7 @@ import zipkin.reporter.kafka10.KafkaSender;
 public class BraveAutoConfiguration {
 
     @Bean
-    @ConditionalOnClass(Brave.class)
+    //@ConditionalOnClass(Brave.class) 此处已经存在了
     @Lazy
     //因为 @ConfigurationPorperties 使用Registrar的机制，这里会无法生效
     //因为spring 先处理加载完 BeanMethod 的信息，再加载Registrar的Bean信息
@@ -53,6 +50,7 @@ public class BraveAutoConfiguration {
         Component.CheckResult checkResult=kafkaSender.check();
         if(!checkResult.ok){
             System.out.println("Kafka Sender check error:   " + checkResult.exception);
+            return null;
         }
         AsyncReporter.Builder reporter= AsyncReporter.builder(kafkaSender);
         builder.reporter(reporter.build());
@@ -60,11 +58,7 @@ public class BraveAutoConfiguration {
     }
 
 
-    @Bean
-    @ConditionalOnBean(Brave.class)
-    @ConditionalOnClass({HandlerInterceptorAdapter.class})
-    public SimpleBraveTracingInterceptor simpleBraveTracingInterceptor(Brave brave){
-        SimpleBraveTracingInterceptor interceptor = new SimpleBraveTracingInterceptor(brave);
-        return interceptor;
-    }
+
+
+
 }

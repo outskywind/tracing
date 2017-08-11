@@ -21,12 +21,13 @@ public class DubboBraveProviderFilter implements Filter {
             return invoker.invoke(invocation);
         }
         else{
-            String traceId=invocation.getAttachment("traceId");
-            //请求进入植入TraceId
-            MDC.put(Constants.MDC_TRACE_ID_KEY,traceId);
+            //如果是外部没有传递接入监控
+            //String traceId=invocation.getAttachment("traceId");
             ServerRequestInterceptor serverRequestInterceptor=brave.serverRequestInterceptor();
             ServerResponseInterceptor serverResponseInterceptor=brave.serverResponseInterceptor();
             serverRequestInterceptor.handle(new DubboServerRequestAdapter(invoker,invocation,brave.serverTracer()));
+            //put the traceId into MDC
+            MDC.put(Constants.MDC_TRACE_ID_KEY,Long.toHexString(brave.serverSpanThreadBinder().getCurrentServerSpan().getSpan().getTrace_id()));
             Result result = invoker.invoke(invocation);
             serverResponseInterceptor.handle(new DubboServerResponseAdapter(result));
             //请求处理完毕清除TraceId
