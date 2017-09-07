@@ -5,7 +5,6 @@ import com.dafy.skye.log.server.autoconfig.EnableSkyeLogServer;
 import com.dafy.skye.server.auto.config.EnableZipkinExtend;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.boot.system.ApplicationPidFileWriter;
 import zipkin.server.EnableZipkinServer;
 
