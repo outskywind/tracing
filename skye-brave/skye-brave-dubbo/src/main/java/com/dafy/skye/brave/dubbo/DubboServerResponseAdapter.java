@@ -21,7 +21,8 @@ public class DubboServerResponseAdapter implements ServerResponseAdapter {
         List<KeyValueAnnotation> annotations = new ArrayList<KeyValueAnnotation>();
         if(!result.hasException()){
             Object value=result.getValue();
-            KeyValueAnnotation keyValueAnnotation=  KeyValueAnnotation.create("result",String.valueOf(value));
+            String valueStr = value==null?"null":String.valueOf(value);
+            KeyValueAnnotation keyValueAnnotation=KeyValueAnnotation.create("result",valueStr);
             annotations.add(keyValueAnnotation);
             //加上status状态，统计成功数使用
             KeyValueAnnotation statusAnnotation=  KeyValueAnnotation.create("status","success");
