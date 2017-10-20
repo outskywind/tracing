@@ -1,29 +1,22 @@
-package com.dafy.skye.server;
+package com.dafy.skye;
 
 import com.dafy.setcd.spring.boot.autoconfigure.SetcdPropertySource;
-import com.dafy.skye.druid.autoconfig.EnableDruidAutoConfig;
-import com.dafy.skye.log.server.autoconfig.EnableSkyeLogServer;
-import com.dafy.skye.server.auto.config.EnableZipkinExtend;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.system.ApplicationPidFileWriter;
-import zipkin.server.EnableZipkinServer;
 
 /**
- * Created by Caedmon on 2017/6/26.
+ * Created by quanchengyun on 2017/9/18.
  */
 @SpringBootApplication
-@EnableZipkinServer
-@EnableSkyeLogServer
 //配置此注解会覆盖默认的配置文件读取
 @SetcdPropertySource(
-        etcdKeys={"/server-config/skye/application-${env}.yml"}
+        etcdKeys={"/server-config/skye/druid-${env}.yml"}
 )
-@EnableZipkinExtend
-@EnableDruidAutoConfig
-public class SkyeServerApplicaiton {
+public class SkyeDruidApplication {
+
     public static void main(String[] args) {
-        SpringApplication application=new SpringApplication(SkyeServerApplicaiton.class);
+        SpringApplication application=new SpringApplication(SkyeDruidApplication.class);
         //运行启动写pid
         application.addListeners(new ApplicationPidFileWriter("SkyeServerApplicaiton.pid"));
         application.run(args);

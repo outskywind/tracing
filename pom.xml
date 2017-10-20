@@ -14,6 +14,7 @@
         <module>skye-log</module>
         <module>skye-server</module>
         <module>skye-zipkin-extend</module>
+        <module>skye-druid</module>
 
     </modules>
     <properties>

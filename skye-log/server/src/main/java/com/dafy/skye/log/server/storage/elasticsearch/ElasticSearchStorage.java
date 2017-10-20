@@ -155,20 +155,33 @@ public class ElasticSearchStorage implements StorageComponent {
             throw new Exception("Message all failed save to es");
         }
     }
+
+    /**
+     * from to 限制了10000条
+     * 查询真正关心的是前10页
+     * @param request
+     * @return
+     */
     @Override
     public LogQueryResult query(LogSearchRequest request) {
         if(request.endTs==null){
             request.endTs=System.currentTimeMillis();
         }
-        if(request.lookback==null){
-            request.lookback=Long.valueOf(24*3600*1000);
+        if(request.lookback==null) {
+            request.lookback = Long.valueOf(24 * 3600 * 1000);
         }
+        if(request.getPageIndex()>30){
+            return null;
+        }
+
         List<String> indices=indexNameFormatter.indexNamePatternsForRange(request.endTs-request.lookback,request.endTs);
         String[] indicess=new String[indices.size()];
         indices.toArray(indicess);
         SearchRequestBuilder searchRequestBuilder=transportClient.prepareSearch(indicess)
                 .setIndicesOptions(DefaultOptions.defaultIndicesOptions());
         BoolQueryBuilder root= QueryBuilders.boolQuery();
+        root.filter(QueryBuilders.rangeQuery("timestamp")
+                .gt(request.endTs-request.lookback).lte(request.endTs));
         if(!CollectionUtils.isEmpty(request.serviceNames)){
             root.filter(QueryBuilders.termsQuery("serviceName",request.serviceNames));
         }
@@ -196,7 +209,7 @@ public class ElasticSearchStorage implements StorageComponent {
         searchRequestBuilder.setQuery(root);
         searchRequestBuilder.highlighter(SearchSourceBuilder.highlight().preTags("<span class='highlight'>").postTags("</span>").field("message"));
         searchRequestBuilder.setFrom(request.getFrom()).setSize(request.getPageSize());
-        searchRequestBuilder.addSort("tsUuid", SortOrder.DESC);
+        searchRequestBuilder.addSort("timestamp", SortOrder.ASC);
         SearchResponse response=searchRequestBuilder.execute().actionGet();
         response.getTook();
         LogQueryResult.Builder resultBuilder=LogQueryResult.newBuilder();
@@ -218,6 +231,12 @@ public class ElasticSearchStorage implements StorageComponent {
         resultBuilder.total((int) response.getHits().totalHits);
         return resultBuilder.build();
     }
+
+
+    public void page(){
+
+    }
+
 
     @Override
     public Set<String> getServices() {
