@@ -28,8 +28,9 @@ public class DubboServerResponseAdapter implements ServerResponseAdapter {
             KeyValueAnnotation statusAnnotation=  KeyValueAnnotation.create("status","success");
             annotations.add(keyValueAnnotation);
         }else {
+            //null message exceptions
             KeyValueAnnotation keyValueAnnotation=  KeyValueAnnotation.create("exception",
-                    result.getException().getMessage());
+                    result.getException().getMessage()==null?"no exception message:":result.getException().getMessage());
             annotations.add(keyValueAnnotation);
         }
         return annotations;
