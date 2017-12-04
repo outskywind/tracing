@@ -14,7 +14,7 @@
               class="ch.qos.logback.core.rolling.RollingFileAppender">
         <file>/opt/logs/base/skye-server.log</file>
         <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
-            <FileNamePattern>/opt/logs/sevend/paymentcenter/paymentcenter.%d{yyyy-MM-dd}.log
+            <FileNamePattern>/opt/logs/base/skye-server.%d{yyyy-MM-dd}.log
             </FileNamePattern>
         </rollingPolicy>
         <encoder>
