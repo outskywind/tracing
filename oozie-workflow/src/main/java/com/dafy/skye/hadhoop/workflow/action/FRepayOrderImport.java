@@ -3,7 +3,6 @@ package com.dafy.skye.hadhoop.workflow.action;
 import com.dafy.skye.component.DateUtil;
 import com.dafy.skye.component.FileHelper;
 import com.dafy.skye.component.LogBuilder;
-import com.dafy.skye.mapper.FLoanOrderMapperStatement;
 import com.dafy.skye.mapper.FRepayOrderMapperStatement;
 import com.dafy.skye.model.Result;
 import org.slf4j.Logger;
@@ -33,6 +32,7 @@ public class FRepayOrderImport extends BasicOozieAction{
         super.postAction();
         //TODO 判断避免重复备份
         String date = DateUtil.getDateformat();
+        hiveConnector.execute(hiveconn, FRepayOrderMapperStatement.drop_backup_table.replaceAll("\\{date\\}",date));
         hiveConnector.execute(hiveconn, FRepayOrderMapperStatement.backup.replaceAll("\\{date\\}",date));
     }
 

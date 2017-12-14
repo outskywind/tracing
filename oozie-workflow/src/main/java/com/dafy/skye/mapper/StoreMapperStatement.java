@@ -16,6 +16,8 @@ public class StoreMapperStatement {
         //查询mysql表
         public static final String get_store = "select id, name ,province,city,update_time from t_aid_store";
 
+        public static final String drop_backup_table ="drop table if exists sevend{date}.t_aid_store";
+
         public static final String backup ="create table  sevend{date}.d_store location '/user/hive/warehouse/sevend{date}.db/d_store' as select * from sevend.d_store ";
 
 }

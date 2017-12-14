@@ -131,7 +131,18 @@ public class FCustomerImport extends BasicOozieAction {
                 Date update_time = rs.getDate(18);
                 values.add(sdf.format(create_time));
                 values.add(sdf.format(update_time));
-
+                /**
+                 *   "    quota_time TIMESTAMP," +
+                 "    quota INT, "+
+                 "    remain_quota INT, "+
+                 "    credit_status TINYINT, "+
+                 "    submit_time TIMESTAMP "+
+                 */
+                values.add(rs.getDate("quota_time")==null?null:sdf.format(rs.getDate("quota_time")));
+                values.add(String.valueOf(rs.getInt("quota")));
+                values.add(String.valueOf(rs.getInt("credit_status")));
+                values.add(rs.getDate("submit_time")==null?null:sdf.format(rs.getDate("submit_time")));
+                values.add(String.valueOf(rs.getInt("store_id")));
                 FileHelper.writeLine(fs,"\001",values.toArray(new String[0]));
             }
             fs.flush();

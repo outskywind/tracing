@@ -32,6 +32,8 @@ public class FRepayOrderMapperStatement {
 
     public static final String drop_table = "drop table if exists sevend.f_repay_order";
 
+    public static final String drop_backup_table ="drop table if exists sevend{date}.f_repay_order";
+
     public static final String backup ="create table  sevend{date}.f_repay_order location '/user/hive/warehouse/sevend{date}.db/f_repay_order' as select * from sevend.f_repay_order ";
 
     public static  final String load_data = "load data inpath ? into table sevend.f_repay_order";

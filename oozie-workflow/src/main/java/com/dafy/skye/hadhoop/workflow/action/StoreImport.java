@@ -5,6 +5,7 @@ import com.dafy.skye.hadhoop.workflow.ActionLoader;
 import com.dafy.skye.hadhoop.workflow.basic.HiveDataHelper;
 import com.dafy.skye.hadhoop.workflow.basic.RegionHelper;
 import com.dafy.skye.mapper.RegionMapperStatement;
+import com.dafy.skye.mapper.SCustomerLoanMapper;
 import com.dafy.skye.mapper.StoreMapperStatement;
 import com.dafy.skye.model.Result;
 import org.apache.hadoop.fs.FSDataOutputStream;
@@ -40,6 +41,7 @@ public class StoreImport extends  BasicOozieAction{
     protected void postAction() throws Exception{
         super.postAction();
         String date = DateUtil.getDateformat();
+        hiveConnector.execute(hiveconn, StoreMapperStatement.drop_backup_table.replaceAll("\\{date\\}",date));
         hiveConnector.execute(hiveconn, StoreMapperStatement.backup.replaceAll("\\{date\\}",date));
     }
     @Override

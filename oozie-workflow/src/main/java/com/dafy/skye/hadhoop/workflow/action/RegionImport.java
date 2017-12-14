@@ -4,7 +4,6 @@ import com.dafy.skye.component.DateUtil;
 import com.dafy.skye.component.FileHelper;
 import com.dafy.skye.component.LogBuilder;
 import com.dafy.skye.hadhoop.workflow.basic.RegionHelper;
-import com.dafy.skye.mapper.FCustomerMapperStatement;
 import com.dafy.skye.mapper.RegionMapperStatement;
 import com.dafy.skye.model.Result;
 import org.apache.commons.lang3.StringUtils;
@@ -36,6 +35,7 @@ public class RegionImport extends  BasicOozieAction{
     protected void postAction() throws Exception{
         super.postAction();
         String date = DateUtil.getDateformat();
+        hiveConnector.execute(hiveconn, RegionMapperStatement.drop_backup_table.replaceAll("\\{date\\}",date));
         hiveConnector.execute(hiveconn, RegionMapperStatement.backup.replaceAll("\\{date\\}",date));
     }
     @Override

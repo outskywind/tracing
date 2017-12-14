@@ -40,6 +40,7 @@ public class FLoanOrderImport extends BasicOozieAction{
         super.postAction();
         //TODO 判断避免重复备份
         String date = DateUtil.getDateformat();
+        hiveConnector.execute(hiveconn, FLoanOrderMapperStatement.drop_backup_table.replaceAll("\\{date\\}",date));
         hiveConnector.execute(hiveconn, FLoanOrderMapperStatement.backup.replaceAll("\\{date\\}",date));
     }
 
@@ -61,9 +62,7 @@ public class FLoanOrderImport extends BasicOozieAction{
 
     private void processOriginalData(ResultSet rs) throws Exception{
 
-        DB db = DBMaker
-                .memoryDB()
-                .make();
+        DB db = DBMaker.memoryDB().make();
         //loan_seq 处理
         final BTreeMap<String, LoanSeq> seqBTreeMap = db.treeMap("seq")
                 .keySerializer(Serializer.STRING)
@@ -175,6 +174,7 @@ public class FLoanOrderImport extends BasicOozieAction{
             }
         }).run();
 
+        //如果异常，最多可能阻塞4个小时
         f_seq.get(60, TimeUnit.MINUTES);
         f_repay.get(60, TimeUnit.MINUTES);
         f_remain.get(60, TimeUnit.MINUTES);
@@ -246,13 +246,14 @@ public class FLoanOrderImport extends BasicOozieAction{
                 FileHelper.writeLine(fs,"\001",values.toArray(new String[0]));
             }
             fs.flush();
-        }finally {
+        }finally{
             if(fs!=null){
                 fs.close();
             }
             rs.close();
+            db.close();
         }
-        db.close();
+
     }
 
     @Override

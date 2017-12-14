@@ -30,7 +30,13 @@ public class FCustomerMapperStatement {
             "    maintenance_id BIGINT," +
             "    interviewer_id BIGINT," +
             "    create_time TIMESTAMP," +
-            "    update_time TIMESTAMP" +
+            "    update_time TIMESTAMP," +
+            "    quota_time TIMESTAMP," +
+            "    quota INT, "+
+            "    remain_quota INT, "+
+            "    credit_status TINYINT, "+
+            "    submit_time TIMESTAMP, "+
+            "    store_id INT"+
             "    )" +
             "    ROW FORMAT DELIMITED FIELDS TERMINATED BY '\\001' lines terminated by '\\n' location '/user/hive/warehouse/sevend.db/f_customer'";
 
@@ -40,11 +46,7 @@ public class FCustomerMapperStatement {
     public static final String drop_backup_table ="drop table if exists sevend{date}.f_customer";
 
     public static final String backup ="create table sevend{date}.f_customer location '/user/hive/warehouse/sevend{date}.db/f_customer' as select * from sevend.f_customer ";
-    //"alter table table_a rename to new_database.table_a";
 
-    //先删除再新增
-    public static final String delete_by_id = "";
-    public static final String append = "";
     /**
      * 为了简单起见，先决定每次重新全表导入
      */
@@ -69,7 +71,13 @@ public class FCustomerMapperStatement {
             "    ex.aid_customer_id AS maintenance_id," +
             "    ex.interviewer_id," +
             "    c.create_time," +
-            "    c.update_time" +
+            "    c.update_time, " +
+            "    ex.real_name_callback_audit_time as quota_time, "+
+            "    ex.audit_system_real_name_status as credit_status, "+
+            "    ex.real_name_submit_audit_time AS submit_time, "+
+            "    cq.whole_quota as quota, "+
+            "    cq.remaining_quota as remain_quota, "+
+            "    ex.store_id "+
             " FROM" +
             "    t_customer c" +
             "        LEFT JOIN" +
@@ -77,8 +85,10 @@ public class FCustomerMapperStatement {
             "        AND b.is_security_card = 1" +
             "        AND b.real_name_call_back_status = 1" +
             "        LEFT JOIN" +
-            "    t_customer_extra_info ex ON c.id = ex.customer_id" +
-            " WHERE" +
+            "    t_customer_extra_info ex ON c.id = ex.customer_id AND ex.state=1" +
+            "    LEFT JOIN "+
+            "    t_customer_quota cq ON c.id=cq.customer_id AND cq.state=1"+
+            " WHERE " +
             "    c.customer_type = 1 " +
             " UNION ALL " +
             " SELECT " +
@@ -99,17 +109,24 @@ public class FCustomerMapperStatement {
             "    ex.aid_customer_id AS maintenance_id," +
             "    ex.interviewer_id," +
             "    c.create_time," +
-            "    c.update_time" +
-            " FROM" +
+            "    c.update_time," +
+            "    ex.real_name_callback_audit_time as quota_time, "+
+            "    ex.audit_system_real_name_status as credit_status, "+
+            "    ex.real_name_submit_audit_time AS submit_time, "+
+            "    cq.whole_quota as quota, "+
+            "    cq.remaining_quota as remain_quota, "+
+            "    ex.store_id "+
+            " FROM " +
             "    t_customer c" +
             "        LEFT JOIN" +
             "    t_bank_card b ON c.id = b.customer_id AND b.state = 1" +
             "        AND b.is_security_card = 1" +
             "        AND b.real_name_call_back_status = 1" +
-            "        LEFT JOIN" +
-            "    t_policyloan_credit_info ex ON c.id = ex.customer_id" +
-            " WHERE" +
+            "        LEFT JOIN " +
+            "    t_policyloan_credit_info ex ON c.id = ex.customer_id AND ex.state=1 " +
+            "    LEFT JOIN "+
+            "    t_customer_quota cq ON c.id=cq.customer_id AND cq.state=1"+
+            " WHERE " +
             "    c.customer_type = 2";
-
 
 }

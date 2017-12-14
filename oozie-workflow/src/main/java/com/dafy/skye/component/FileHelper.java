@@ -97,7 +97,7 @@ public class FileHelper {
                 if(column==null || column.equals("null") || column.equals("NULL")){
                     column = "\\N";
                 }
-                column = column.replaceAll("\n|\r\n|\r|\\s","");
+                column = column.replaceAll("\n|\r\n|\r","");
                 sb.append(column).append(delimiter);
             }
             //这里会不会占用内存过高

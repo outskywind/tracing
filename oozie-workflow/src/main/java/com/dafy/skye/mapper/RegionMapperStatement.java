@@ -15,6 +15,8 @@ public class RegionMapperStatement {
 
     public static  final String get_all_regions = "select id,city from d_region";
 
+    public static final String drop_backup_table ="drop table if exists sevend{date}.d_region";
+
     public static final String backup ="create table sevend{date}.d_region location '/user/hive/warehouse/sevend{date}.db/d_region' as select * from sevend.d_region";
 
 

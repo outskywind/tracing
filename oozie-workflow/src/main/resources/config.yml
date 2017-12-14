@@ -11,6 +11,7 @@ action:
     customerImport: com.dafy.skye.hadhoop.workflow.action.FCustomerImport
     loanImport: com.dafy.skye.hadhoop.workflow.action.FLoanOrderImport
     repayImport: com.dafy.skye.hadhoop.workflow.action.FRepayOrderImport
+    customerLoanImport: com.dafy.skye.hadhoop.workflow.action.SCustomerLoanImport
 
 com.dafy.skye.hadhoop.workflow.action.RegionImport:
   excludeNames:
@@ -26,10 +27,10 @@ hive:
     driver.class: "org.apache.hive.jdbc.HiveDriver"
 
 mysql:
-    #connectUrl: "jdbc:mysql://rdsc14z37q7i8pq2m79fo.mysql.rds.aliyuncs.com:3306/sevend?useUnicode=true&characterEncoding=utf8&autoReconnect=true&zeroDateTimeBehavior=convertToNull&allowMultiQueries=true&tinyInt1isBit=false"
-    #user: dafy
-    #password: dafy1024
     driver.class: "com.mysql.jdbc.Driver"
-    connectUrl: "jdbc:mysql://10.8.14.30:3305/sevend?useUnicode=true&characterEncoding=utf8&autoReconnect=true"
-    user: root
-    password: 4r3e2w1q
+    connectUrl: "jdbc:mysql://rdsc14z37q7i8pq2m79fo.mysql.rds.aliyuncs.com:3306/sevend?useUnicode=true&characterEncoding=utf8&autoReconnect=true&zeroDateTimeBehavior=convertToNull&allowMultiQueries=true&tinyInt1isBit=false"
+    user: dafy
+    password: dafy1024
+    #connectUrl: "jdbc:mysql://10.8.14.30:3305/sevend?useUnicode=true&characterEncoding=utf8&autoReconnect=true"
+    #user: root
+    #password: 4r3e2w1q

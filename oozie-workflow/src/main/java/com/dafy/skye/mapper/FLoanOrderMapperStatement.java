@@ -35,6 +35,8 @@ public class FLoanOrderMapperStatement {
 
     public static final String drop_table = "drop table if exists f_loan_order";
 
+    public static final String drop_backup_table ="drop table if exists sevend{date}.f_loan_order";
+
     public static final String backup ="create table  sevend{date}.f_loan_order location '/user/hive/warehouse/sevend{date}.db/f_loan_order' as select * from sevend.f_loan_order ";
 
     public static  final String load_data = "load data inpath ? into table f_loan_order";

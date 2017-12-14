@@ -31,6 +31,7 @@ public abstract class BasicOozieAction implements OozieAction {
 
     @Override
     public final Result doAction(Map configs) throws Exception{
+        long start = System.currentTimeMillis();
         init(configs);
         try{
             preAction();
@@ -39,6 +40,7 @@ public abstract class BasicOozieAction implements OozieAction {
             return null;
         }finally {
             clear();
+            log.info("action finished cost time: {} minutes",(System.currentTimeMillis()-start)/60000);
         }
     }
 
