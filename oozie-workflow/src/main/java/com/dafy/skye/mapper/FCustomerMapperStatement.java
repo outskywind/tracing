@@ -74,7 +74,7 @@ public class FCustomerMapperStatement {
             "    c.update_time, " +
             "    ex.real_name_callback_audit_time as quota_time, "+
             "    ex.audit_system_real_name_status as credit_status, "+
-            "    ex.real_name_submit_audit_time AS submit_time, "+
+            "    ex.real_name_submit_audit_time as submit_time, "+
             "    cq.whole_quota as quota, "+
             "    cq.remaining_quota as remain_quota, "+
             "    ex.store_id "+
@@ -112,7 +112,7 @@ public class FCustomerMapperStatement {
             "    c.update_time," +
             "    ex.real_name_callback_audit_time as quota_time, "+
             "    ex.audit_system_real_name_status as credit_status, "+
-            "    ex.real_name_submit_audit_time AS submit_time, "+
+            "    ex.real_name_submit_audit_time as submit_time, "+
             "    cq.whole_quota as quota, "+
             "    cq.remaining_quota as remain_quota, "+
             "    ex.store_id "+

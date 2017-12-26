@@ -140,6 +140,7 @@ public class FCustomerImport extends BasicOozieAction {
                  */
                 values.add(rs.getDate("quota_time")==null?null:sdf.format(rs.getDate("quota_time")));
                 values.add(String.valueOf(rs.getInt("quota")));
+                values.add(String.valueOf(rs.getInt("remain_quota")));
                 values.add(String.valueOf(rs.getInt("credit_status")));
                 values.add(rs.getDate("submit_time")==null?null:sdf.format(rs.getDate("submit_time")));
                 values.add(String.valueOf(rs.getInt("store_id")));

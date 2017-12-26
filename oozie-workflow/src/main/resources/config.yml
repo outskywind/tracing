@@ -18,10 +18,10 @@ com.dafy.skye.hadhoop.workflow.action.RegionImport:
     - "县"
 
 
-hdfs.dir: hdfs://ipo.link01.prd.df.cn:8020/user/root
+hdfs.dir: hdfs://cdh2.dafy.com:8020/user/root
 
 hive:
-    connectUrl: "jdbc:hive2://ipo.link01.prd.df.cn:10000/sevend"
+    connectUrl: "jdbc:hive2://cdh2.dafy.com:10000/sevend"
     user: root
     password: root
     driver.class: "org.apache.hive.jdbc.HiveDriver"
