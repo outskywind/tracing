@@ -1,5 +1,5 @@
 # 接入请查看wiki
-[接入指南](http://gitlab.ipo.com/base/skye/wikis/home)
+[接入指南](http://gitlab.7daichina.cn/base/skye/wikis/home)
 
 # 设计介绍
   系统功能包括调用链跟踪，调用时间监控，以及日志查询<br>
