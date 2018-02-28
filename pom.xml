@@ -15,9 +15,6 @@
         <module>skye-server</module>
         <module>skye-zipkin-extend</module>
         <module>skye-druid</module>
-        <module>oozie-workflow</module>
-
-
     </modules>
     <properties>
         <spring-data-elasticsearc.version>2.1.4.RELEASE</spring-data-elasticsearc.version>
