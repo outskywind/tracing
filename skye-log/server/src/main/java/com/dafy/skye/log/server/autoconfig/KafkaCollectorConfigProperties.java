@@ -3,6 +3,7 @@ package com.dafy.skye.log.server.autoconfig;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 
 import java.util.Map;
+import java.util.Properties;
 
 /**
  * Created by Caedmon on 2017/4/25.
@@ -13,7 +14,7 @@ public class KafkaCollectorConfigProperties {
     private String groupId;
     private Integer parallel=2;
     private Long pollInterval=1000L;
-    private Map<String,String> properties;
+    private Properties properties;
 
     public String getTopic() {
         return topic;
@@ -43,14 +44,6 @@ public class KafkaCollectorConfigProperties {
         this.pollInterval = pollInterval;
     }
 
-    public Map<String, String> getProperties() {
-        return properties;
-    }
-
-    public void setProperties(Map<String, String> properties) {
-        this.properties = properties;
-    }
-
     public long getPollInterval() {
         return pollInterval;
     }
@@ -59,4 +52,11 @@ public class KafkaCollectorConfigProperties {
         this.pollInterval = pollInterval;
     }
 
+    public Properties getProperties() {
+        return properties;
+    }
+
+    public void setProperties(Properties properties) {
+        this.properties = properties;
+    }
 }

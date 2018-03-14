@@ -1,6 +1,6 @@
 package com.dafy.skye;
 
-import com.dafy.setcd.spring.boot.autoconfigure.SetcdPropertySource;
+import com.dafy.setcd.spring.SetcdPropertySource;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.system.ApplicationPidFileWriter;

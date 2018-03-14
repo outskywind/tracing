@@ -2,21 +2,20 @@ package com.dafy.skye.zipkin.extend.service;
 
 import com.dafy.skye.common.elasticsearch.DefaultOptions;
 import com.dafy.skye.common.util.IndexNameFormatter;
+//import zipkin2.elasticsearch.ElasticsearchSpanStore;
+//import zipkin2.elasticsearch.internal.IndexNameFormatter;
 import com.dafy.skye.common.util.IntervalTimeUnit;
 import com.dafy.skye.common.util.TimestampRange;
 import com.dafy.skye.zipkin.extend.config.ZipkinExtendESConfig;
 import com.dafy.skye.zipkin.extend.dto.*;
 import com.dafy.skye.zipkin.extend.util.TimeUtil;
 import com.google.common.base.Strings;
-import io.netty.util.internal.StringUtil;
 import org.apache.lucene.search.join.ScoreMode;
 import org.elasticsearch.action.search.MultiSearchRequestBuilder;
 import org.elasticsearch.action.search.MultiSearchResponse;
 import org.elasticsearch.action.search.SearchRequestBuilder;
 import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.client.transport.TransportClient;
-import org.elasticsearch.common.settings.Settings;
-import org.elasticsearch.common.transport.InetSocketTransportAddress;
 import org.elasticsearch.index.query.BoolQueryBuilder;
 import org.elasticsearch.index.query.QueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
@@ -24,10 +23,8 @@ import org.elasticsearch.search.SearchHit;
 import org.elasticsearch.search.aggregations.AggregationBuilder;
 import org.elasticsearch.search.aggregations.AggregationBuilders;
 import org.elasticsearch.search.aggregations.Aggregations;
-import org.elasticsearch.search.aggregations.bucket.filter.Filter;
-import org.elasticsearch.search.aggregations.bucket.filters.FiltersAggregator;
+import org.elasticsearch.search.aggregations.BucketOrder;
 import org.elasticsearch.search.aggregations.bucket.nested.InternalNested;
-import org.elasticsearch.search.aggregations.bucket.nested.Nested;
 import org.elasticsearch.search.aggregations.bucket.terms.StringTerms;
 import org.elasticsearch.search.aggregations.bucket.terms.Terms;
 import org.elasticsearch.search.aggregations.bucket.terms.TermsAggregationBuilder;
@@ -36,21 +33,18 @@ import org.elasticsearch.search.aggregations.pipeline.bucketmetrics.stats.Intern
 import org.elasticsearch.search.aggregations.pipeline.bucketmetrics.stats.StatsBucket;
 import org.elasticsearch.search.aggregations.pipeline.bucketmetrics.stats.StatsBucketPipelineAggregationBuilder;
 import org.elasticsearch.search.sort.SortOrder;
-import org.elasticsearch.transport.client.PreBuiltTransportClient;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
-import org.springframework.util.StringUtils;
 import zipkin.Codec;
 import zipkin.Span;
 import zipkin.autoconfigure.storage.elasticsearch.http.ZipkinElasticsearchHttpStorageProperties;
 import zipkin.internal.GroupByTraceId;
+import zipkin.internal.V2StorageComponent;
 
 import javax.annotation.PostConstruct;
-import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.*;
-import java.util.concurrent.TimeUnit;
 
 /**
  * Created by Caedmon on 2017/6/15.
@@ -65,6 +59,10 @@ public class ZipkinExtendServiceImpl implements ZipkinExtendService {
     private IndexNameFormatter indexNameFormatter;
     @Autowired
     private TransportClient transportClient;
+
+    @Autowired
+    V2StorageComponent storage;
+
     @PostConstruct
     public void init() throws UnknownHostException{
         IndexNameFormatter.Builder formatterBuilder=IndexNameFormatter.builder();
@@ -73,7 +71,7 @@ public class ZipkinExtendServiceImpl implements ZipkinExtendService {
         this.indexNameFormatter=formatterBuilder.index(index).build();
     }
     String[] indices(long endTs,long lookup){
-        List<String> indices = indexNameFormatter.indexNamePatternsForRange(endTs-lookup, endTs);
+        List<String> indices = indexNameFormatter.formatTypeAndRange("span",endTs-lookup, endTs);
         String[] result=new String[indices.size()];
         indices.toArray(result);
         return result;
@@ -127,35 +125,62 @@ public class ZipkinExtendServiceImpl implements ZipkinExtendService {
         SearchRequestBuilder searchRequestBuilder=transportClient.prepareSearch(indices)
                 .setIndicesOptions(DefaultOptions.defaultIndicesOptions());
         BoolQueryBuilder rootQueryBuilder=new BoolQueryBuilder();
-        searchRequestBuilder.addAggregation(AggregationBuilders
-                .nested("binaryAnnotations","binaryAnnotations")
-                .subAggregation(AggregationBuilders.terms("service_names")
-                        .field("binaryAnnotations.endpoint.serviceName")));
-        searchRequestBuilder.addAggregation(AggregationBuilders
-                .nested("annotations","annotations")
-                .subAggregation(AggregationBuilders.terms("service_names")
-                        .field("annotations.endpoint.serviceName")));
+        searchRequestBuilder.addAggregation(AggregationBuilders.terms("localServiceName").field("localEndpoint.serviceName"));
+        searchRequestBuilder.addAggregation(AggregationBuilders.terms("remoteServiceName").field("remoteEndpoint.serviceName"));
         rootQueryBuilder.filter(timeRangeQuery(request.endTs,request.lookback));
         SearchResponse response=searchRequestBuilder.execute().actionGet();
         //
         if(response.getAggregations()==null){
             return null;
         }
-        InternalNested binaryAggregationNested=response.getAggregations().get("binaryAnnotations");
-        InternalNested annotationsNested=response.getAggregations().get("annotations");
-        Terms binaryTerms=binaryAggregationNested.getAggregations().get("service_names");
-        Terms terms=annotationsNested.getAggregations().get("service_names");
+        //InternalNested binaryAggregationNested=response.getAggregations().get("binaryAnnotations");
+        //InternalNested annotationsNested=response.getAggregations().get("annotations");
+        Terms localServiceName=response.getAggregations().get("localServiceName");
+        Terms remoteServiceName=response.getAggregations().get("remoteServiceName");
         Set<String> set=new HashSet<>();
-        List<Terms.Bucket> binaryTermsBuckets=binaryTerms.getBuckets();
+        List<? extends Terms.Bucket> binaryTermsBuckets=localServiceName.getBuckets();
         for(Terms.Bucket bucket:binaryTermsBuckets){
             set.add(bucket.getKeyAsString());
         }
-        List<Terms.Bucket> termsBucket=terms.getBuckets();
+        List<? extends Terms.Bucket> termsBucket=remoteServiceName.getBuckets();
         for(Terms.Bucket bucket:termsBucket){
             set.add(bucket.getKeyAsString());
         }
         return set;
     }
+
+    /*public Set<String> getServiceNames(ServiceNameQueryRequest request){
+        request.checkAndSetDefault();
+        String[] indices=indices(request.endTs,request.lookback);
+        SearchRequestBuilder searchRequestBuilder=transportClient.prepareSearch(indices)
+                .setIndicesOptions(DefaultOptions.defaultIndicesOptions());
+        BoolQueryBuilder rootQueryBuilder=new BoolQueryBuilder();
+        searchRequestBuilder.addAggregation(AggregationBuilders.terms("localEndpoint.serviceName").field("localEndpoint.serviceName"));
+        searchRequestBuilder.addAggregation(AggregationBuilders.terms("remoteEndpoint.serviceName").field("remoteEndpoint.serviceName"));
+        rootQueryBuilder.filter(timeRangeQuery(request.endTs,request.lookback));
+        SearchResponse response=searchRequestBuilder.execute().actionGet();
+        //
+        if(response.getAggregations()==null){
+            return null;
+        }
+        //InternalNested binaryAggregationNested=response.getAggregations().get("binaryAnnotations");
+        //InternalNested annotationsNested=response.getAggregations().get("annotations");
+        Terms binaryTerms=response.getAggregations().get("serviceName");
+        Terms terms=response.getAggregations().get("serviceName");
+        Set<String> set=new HashSet<>();
+        List<? extends Terms.Bucket> binaryTermsBuckets=binaryTerms.getBuckets();
+        for(Terms.Bucket bucket:binaryTermsBuckets){
+            set.add(bucket.getKeyAsString());
+        }
+        List<? extends Terms.Bucket> termsBucket=terms.getBuckets();
+        for(Terms.Bucket bucket:termsBucket){
+            set.add(bucket.getKeyAsString());
+        }
+        return set;
+    }*/
+
+
+
     public TraceQueryResult getTraces(TraceQueryRequest request){
         SearchRequestBuilder search= searchRequestBuilder(request);
         //AggregationBuilders.terms("trace_terms").size(10000);
@@ -204,7 +229,7 @@ public class ZipkinExtendServiceImpl implements ZipkinExtendService {
             multiSearch.add(requestBuilder);
             ranges.add(new TimestampRange(itemStartTs,itemEndTs));
             itemStartTs=itemEndTs;
-        }while (itemEndTs<=request.endTs);
+        }while (itemEndTs<request.endTs);
         MultiSearchResponse response=multiSearch.execute().actionGet();
         MultiSearchResponse.Item[] items=response.getResponses();
         List<TraceMetricsResult.TraceMetrics> stats=new ArrayList<>(items.length);
@@ -229,6 +254,7 @@ public class ZipkinExtendServiceImpl implements ZipkinExtendService {
             long successCount = 0;
             if(aggregations!=null){
                 InternalStatsBucket statsBucket=aggregations.get("trace_duration_stats");
+                //Terms trace_terms = aggregations.get("trace_terms");
                 if(statsBucket.getMax()<=0){
                     //System.out.println();
                 }
@@ -322,7 +348,7 @@ public class ZipkinExtendServiceImpl implements ZipkinExtendService {
         spanNameTerms.subAggregation(spanIdTerms);
         AggregationBuilder spanDuration=AggregationBuilders.max("span_duration").field("duration");
         spanIdTerms.subAggregation(spanDuration);
-        spanIdTerms.order(Terms.Order.aggregation("span_duration","value",false));
+        spanIdTerms.order(BucketOrder.aggregation("span_duration","value",false));
 //            spanIdTerms.order(Terms.Order.aggregation("span_duration","value",false));
         StatsBucketPipelineAggregationBuilder spanNameStats=PipelineAggregatorBuilders
                 .statsBucket("span_name_stats","span_id_terms>span_duration");
@@ -336,7 +362,7 @@ public class ZipkinExtendServiceImpl implements ZipkinExtendService {
         TreeSet<SpanMetricsResult.SpanMetrics> stats=new TreeSet<>();
         if(aggregations!=null){
             StringTerms spanTermsAgg=aggregations.get("span_name_terms");
-            List<Terms.Bucket> termsBuckets=spanTermsAgg.getBuckets();
+            List<? extends Terms.Bucket> termsBuckets=spanTermsAgg.getBuckets();
             for(Terms.Bucket termsBucket:termsBuckets){
                 SpanMetricsResult.SpanMetrics.Builder spanMetrics=SpanMetricsResult.SpanMetrics.newBuilder();
                 String spanName=termsBucket.getKeyAsString();
@@ -363,17 +389,13 @@ public class ZipkinExtendServiceImpl implements ZipkinExtendService {
                 .setIndicesOptions(DefaultOptions.defaultIndicesOptions());
         BoolQueryBuilder root=QueryBuilders.boolQuery();
         root.filter(QueryBuilders.rangeQuery("timestamp_millis")
-                .gt(request.endTs-request.lookback).lte(request.endTs));
+                .gte(request.endTs-request.lookback).lt(request.endTs));
         if(!CollectionUtils.isEmpty(request.spans)){
             root.filter(QueryBuilders.termsQuery("name",request.spans));
         }
         if(!CollectionUtils.isEmpty(request.services)){
-            root.filter(QueryBuilders.nestedQuery("annotations",
-                    QueryBuilders.termsQuery("annotations.endpoint.serviceName",request.services),
-                    ScoreMode.None));
-            root.filter(QueryBuilders.nestedQuery("binaryAnnotations",
-                    QueryBuilders.termsQuery("binaryAnnotations.endpoint.serviceName",request.services),
-                    ScoreMode.None));
+            root.should(QueryBuilders.termsQuery("localEndpoint.serviceName",request.services));
+            root.should(QueryBuilders.termsQuery("remoteEndpoint.serviceName",request.services));
         }
         if(request.minDuration!=null){
             root.filter(QueryBuilders.rangeQuery("duration").gte(request.minDuration));
@@ -384,6 +406,7 @@ public class ZipkinExtendServiceImpl implements ZipkinExtendService {
         if(!Strings.isNullOrEmpty(request.sortField)&&!Strings.isNullOrEmpty(request.sortField)){
             requestBuilder.addSort(request.sortField,SortOrder.fromString(request.sortOrder));
         }
+        root.minimumShouldMatch(1);
         requestBuilder.setSize(request.limit);
         requestBuilder.setQuery(root);
 

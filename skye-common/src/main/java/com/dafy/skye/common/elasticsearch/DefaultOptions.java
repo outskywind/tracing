@@ -1,5 +1,6 @@
 package com.dafy.skye.common.elasticsearch;
 
+
 import org.elasticsearch.action.support.IndicesOptions;
 
 /**

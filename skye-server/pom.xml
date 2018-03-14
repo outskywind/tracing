@@ -14,13 +14,13 @@
 
     </properties>
     <dependencies>
-        <!--  因为引入spring-boot-denpendencies 的方式，如果有多个子项目引入相同的依赖，就会最终用回spring-boot定义的
+        <!--  因为引入spring-boot-denpendencies 的方式，如果有多个子项目引入相同的依赖，就会最终用回spring-boot定义的版本号
          无法覆盖 -->
-        <dependency>
+       <!-- <dependency>
             <groupId>org.elasticsearch</groupId>
             <artifactId>elasticsearch</artifactId>
             <version>5.4.1</version>
-        </dependency>
+        </dependency>-->
         <dependency>
             <groupId>com.dafy.skye</groupId>
             <artifactId>skye-log-server</artifactId>
@@ -33,16 +33,22 @@
         </dependency>
         <!-- 配置中心 依赖 -->
         <dependency>
-            <groupId>com.dafy.spring-boot</groupId>
-            <artifactId>setcd-spring-boot-starter</artifactId>
-            <version>1.0.0-SNAPSHOT</version>
+            <artifactId>setcd</artifactId>
+            <groupId>com.dafy.setcd</groupId>
+            <version>2.0.2</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>com.squareup.okhttp3</groupId>
+                    <artifactId>okhttp</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
         <!--  druid集群方案 -->
-        <dependency>
+        <!--<dependency>
             <groupId>com.dafy.skye</groupId>
             <artifactId>skye-druid</artifactId>
             <version>1.0.0-SNAPSHOT</version>
-        </dependency>
+        </dependency>-->
 
     </dependencies>
     <build>

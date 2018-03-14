@@ -49,18 +49,15 @@
         <dependency>
             <groupId>org.elasticsearch.client</groupId>
             <artifactId>transport</artifactId>
-            <version>${elasticsearch.version}</version>
         </dependency>
-        <dependency>
+        <!--<dependency>
             <groupId>org.elasticsearch</groupId>
             <artifactId>elasticsearch</artifactId>
-            <version>${elasticsearch.version}</version>
         </dependency>
         <dependency>
             <groupId>org.elasticsearch.plugin</groupId>
             <artifactId>transport-netty4-client</artifactId>
-            <version>${elasticsearch.version}</version>
-        </dependency>
+        </dependency>-->
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-test</artifactId>
@@ -85,9 +82,9 @@
         </dependency>
         <!-- 配置中心 依赖 -->
         <dependency>
-            <groupId>com.dafy.spring-boot</groupId>
-            <artifactId>setcd-spring-boot-starter</artifactId>
-            <version>1.0.0-SNAPSHOT</version>
+            <artifactId>setcd</artifactId>
+            <groupId>com.dafy.setcd</groupId>
+            <version>2.0.2</version>
         </dependency>
         <dependency>
             <groupId>mysql</groupId>

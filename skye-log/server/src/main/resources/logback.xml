@@ -17,6 +17,7 @@
     </appender>
     <logger name="org.apache.kafka" level="INFO" />
     <logger name="kafka" level="WARN"/>
+    <logger name="org.apache.kafka.clients.consumer.KafkaConsumer" level="debug" />
     <root level="INFO">
         <appender-ref ref="console"/>
         <appender-ref ref="file"/>

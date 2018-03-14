@@ -1,7 +1,5 @@
 package com.dafy.skye.server;
-
-import com.dafy.setcd.spring.boot.autoconfigure.SetcdPropertySource;
-import com.dafy.skye.druid.autoconfig.EnableDruidAutoConfig;
+import com.dafy.setcd.spring.SetcdPropertySource;
 import com.dafy.skye.log.server.autoconfig.EnableSkyeLogServer;
 import com.dafy.skye.server.auto.config.EnableZipkinExtend;
 import org.springframework.boot.SpringApplication;
@@ -17,15 +15,14 @@ import zipkin.server.EnableZipkinServer;
 @EnableSkyeLogServer
 //配置此注解会覆盖默认的配置文件读取
 @SetcdPropertySource(
-        etcdKeys={"/server-config/skye/application-${env}.yml"}
+        etcdKeys={"/server-config/skye/application-${env}.yml"},localOverride=true
 )
 @EnableZipkinExtend
-@EnableDruidAutoConfig
 public class SkyeServerApplicaiton {
     public static void main(String[] args) {
         SpringApplication application=new SpringApplication(SkyeServerApplicaiton.class);
         //运行启动写pid
-        application.addListeners(new ApplicationPidFileWriter("SkyeServerApplicaiton.pid"));
+        //application.addListeners(new ApplicationPidFileWriter("skye-server.pid"));
         application.run(args);
         try {
             //Job定时任务是非daemon，但是他此时的线程还没启动的话，会导致直接退出，

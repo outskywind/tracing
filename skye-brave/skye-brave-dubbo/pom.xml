@@ -17,6 +17,12 @@
             <artifactId>dubbo</artifactId>
             <version>${dubbo.version}</version>
             <scope>provided</scope>
+            <exclusions>
+                <exclusion>
+                    <artifactId>spring</artifactId>
+                    <groupId>org.springframework</groupId>
+                </exclusion>
+            </exclusions>
         </dependency>
     </dependencies>
 </project>

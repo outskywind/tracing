@@ -1,10 +1,6 @@
 package com.dafy.skye.brave.autoconfigure;
 
-import com.github.kristofa.brave.Sampler;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.ConfigurationProperties;
-import org.springframework.context.annotation.Bean;
-import org.springframework.stereotype.Component;
 
 /**
  * Created by Caedmon on 2017/6/27.

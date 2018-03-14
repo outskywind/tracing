@@ -2,12 +2,10 @@ package com.dafy.skye.zipkin.extend.config;
 
 import org.elasticsearch.client.transport.TransportClient;
 import org.elasticsearch.common.settings.Settings;
-import org.elasticsearch.common.transport.InetSocketTransportAddress;
+import org.elasticsearch.common.transport.TransportAddress;
 import org.elasticsearch.transport.client.PreBuiltTransportClient;
-import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import zipkin.autoconfigure.storage.elasticsearch.http.ZipkinElasticsearchHttpStorageProperties;
 
 import java.net.InetAddress;
 
@@ -24,7 +22,7 @@ public class ESClientConfig {
         for(String host: zipkinExtendESConfig.getTransportHosts()){
             String[] array=host.split(":");
             transportClient
-                    .addTransportAddress(new InetSocketTransportAddress(
+                    .addTransportAddress(new TransportAddress(
                             InetAddress.getByName(array[0]), Integer.parseInt(array[1])));
         }
         return transportClient;

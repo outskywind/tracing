@@ -1,6 +1,7 @@
 package com.dafy.skye.common.util;
 
 import com.google.auto.value.AutoValue;
+import org.elasticsearch.common.inject.internal.Nullable;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -54,11 +55,11 @@ public abstract class IndexNameFormatter {
      * <p>For example, if {@code beginMillis} is 2016-11-30 and {@code endMillis} is 2017-01-02, the
      * result will be 2016-11-30, 2016-12-*, 2017-01-01 and 2017-01-02.
      */
-    public List<String> indexNamePatternsForRange(long beginMillis, long endMillis) {
+    public List<String> formatTypeAndRange(@Nullable String type, long beginMillis, long endMillis) {
         Calendar current = midnightUTC(beginMillis);
         Calendar end = midnightUTC(endMillis);
         if (current.equals(end)) {
-            return Collections.singletonList(indexNameForTimestamp(current.getTimeInMillis()));
+            return Collections.singletonList(formatTypeAndTimestamp(type,current.getTimeInMillis()));
         }
 
         List<String> indices = new ArrayList<>();
@@ -88,7 +89,7 @@ public abstract class IndexNameFormatter {
                     current.set(Calendar.DATE, 1); // rollback to first of the month
                 }
             }
-            indices.add(indexNameForTimestamp(current.getTimeInMillis()));
+            indices.add(formatTypeAndTimestamp(type,current.getTimeInMillis()));
             current.add(Calendar.DATE, 1);
         }
         return indices;
@@ -100,8 +101,12 @@ public abstract class IndexNameFormatter {
         return result;
     }
 
-    public String indexNameForTimestamp(long timestampMillis) {
-        return index() + "-" + dateFormat().get().format(new Date(timestampMillis));
+    public String formatTypeAndTimestamp(@Nullable String type, long timestampMillis) {
+        return prefix(type) + "-" + dateFormat().get().format(new Date(timestampMillis));
+    }
+
+    private String prefix(@Nullable String type) {
+        return type != null ? index() + ":" + type : index();
     }
 
     // for testing

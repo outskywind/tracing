@@ -37,15 +37,19 @@
                     <groupId>org.apache.logging.log4j</groupId>
                     <artifactId>log4j-slf4j-impl</artifactId>
                 </exclusion>
+                <exclusion>
+                    <groupId>io.druid</groupId>
+                    <artifactId>druid-aws-common</artifactId>
+                </exclusion>
             </exclusions>
         </dependency>
 
 
         <!-- 配置中心 依赖 -->
         <dependency>
-            <groupId>com.dafy.spring-boot</groupId>
-            <artifactId>setcd-spring-boot-starter</artifactId>
-            <version>1.0.0-SNAPSHOT</version>
+            <artifactId>setcd</artifactId>
+            <groupId>com.dafy.setcd</groupId>
+            <version>2.0.2</version>
         </dependency>
         <!-- 不使用spring-boot-starter 情况下支持yaml，需要手动引入依赖  -->
         <dependency>

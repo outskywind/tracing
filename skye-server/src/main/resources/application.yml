@@ -11,15 +11,16 @@ zipkin:
     sample-rate: ${COLLECTOR_SAMPLE_RATE:1.0}
     kafka:
       # ZooKeeper host string, comma-separated host:port value.
-      zookeeper: ${KAFKA_ZOOKEEPER:10.8.15.15:2181}
+      zookeeper: ${KAFKA_ZOOKEEPER:zookeeper1.dafy.com:2181}
       # Name of topic to poll for spans
       topic: ${KAFKA_TOPIC:zipkin}
       # Consumer group this process is consuming on behalf of.
-      group-id: ${KAFKA_GROUP_ID:zipkin}
+      group-id: ${KAFKA_GROUP_ID:zipkin-dev1}
       # Count of consumer threads consuming the topic
       streams: ${KAFKA_STREAMS:1}
       # Maximum size of a message containing spans in bytes
       max-message-size: ${KAFKA_MAX_MESSAGE_SIZE:1048576}
+
     scribe:
       enabled: ${SCRIBE_ENABLED:true}
       category: zipkin
@@ -37,7 +38,7 @@ zipkin:
     type: ${STORAGE_TYPE:elasticsearch}
     elasticsearch:
       # host is left unset intentionally, to defer the decision
-      hosts: ${ES_HOSTS:http://10.8.15.79:9200}
+      hosts: ${ES_HOSTS:http://127.0.0.1:9200}
       pipeline: ${ES_PIPELINE:}
       max-requests: ${ES_MAX_REQUESTS:64}
       index: ${ES_INDEX:zipkin}
@@ -94,9 +95,9 @@ logging:
 zipkin-extend:
     elasticsearch:
       transport-hosts:
-        - 10.8.15.79:9300
+        - 127.0.0.1:9300
       type: zipkin
-      cluster-name: skye
+      cluster-name: esvm-dev
 
 spring:
   mvc:
@@ -114,7 +115,7 @@ spring:
     max-total: 10
     max-idle: 5
     min-idle: 5
-    host: 10.8.15.15
+    host: zookeeper1.dafy.com
     port: 16389
     test-on-borrow: false
     test-on-return: false
@@ -123,9 +124,10 @@ skye.log.server:
   storage:
     type: elasticsearch
     elasticsearch:
-      transport-hosts: 10.8.15.79:9300
+      transport-hosts: 127.0.0.1:9300
       index-shards: 5
       index-replicas: 2
+      cluster-name: esvm-dev
   kafka:
     topic: skye-log
     groupId: skye-log
@@ -134,9 +136,9 @@ skye.log.server:
       type: redis
     properties:
       #kafka 地址
-      bootstrap.servers: 10.8.15.82:9092
+      bootstrap.servers: kafka1.skye.dafy.com:9092
       #zookeeper 地址
-      zookeeper.connect: 10.8.15.15:2181
+      zookeeper.connect: zookeeper1.dafy.com:2181
       #zookeeper 链接超时时间
       zookeeper.connection.timeout.ms: 6000
       #是否自动ack
@@ -145,19 +147,20 @@ skye.log.server:
 elasticjob:
   regCenter:
     namespace: elastic-search-index-close
-    serverList: 10.8.15.15:2181
+    serverList: zookeeper1.dafy.com:2181
   simpleJob:
     cron: 0 30 0 * * ?
     shardingTotalCount: 1    #最小值为1
     shardingItemParameters:   #不能大于shardingTotalCount
   datasource:
-      url: jdbc:mysql://10.8.15.15:3306/elasticjobevent?useUnicode=true&characterEncoding=utf-8&verifyServerCertificate=false&useSSL=false&requireSSL=false
+      url: jdbc:mysql://10.40.11.40:3306/elasticjobevent?useUnicode=true&characterEncoding=utf-8&verifyServerCertificate=false&useSSL=false&requireSSL=false
       driver-class-name: com.mysql.jdbc.Driver
       username: dafy
-      password:
+      password: dafy1024
       max-active: 10
       min-idle: 5
       initial-size: 5
       test-on-borrow: true
       validation-query: SELECT 1
   indexOpenDay: 7
+  prefix: zipkin-,skye-

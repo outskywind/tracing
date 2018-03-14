@@ -29,11 +29,9 @@ import org.elasticsearch.client.IndicesAdminClient;
 import org.elasticsearch.client.transport.TransportClient;
 import org.elasticsearch.cluster.metadata.IndexTemplateMetaData;
 import org.elasticsearch.common.settings.Settings;
-import org.elasticsearch.common.transport.InetSocketTransportAddress;
+import org.elasticsearch.common.transport.TransportAddress;
 import org.elasticsearch.common.xcontent.XContentType;
-import org.elasticsearch.index.VersionType;
 import org.elasticsearch.index.query.BoolQueryBuilder;
-import org.elasticsearch.index.query.Operator;
 import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.index.query.TermsQueryBuilder;
 import org.elasticsearch.search.SearchHit;
@@ -41,7 +39,6 @@ import org.elasticsearch.search.aggregations.AggregationBuilders;
 import org.elasticsearch.search.aggregations.Aggregations;
 import org.elasticsearch.search.aggregations.bucket.terms.Terms;
 import org.elasticsearch.search.builder.SearchSourceBuilder;
-import org.elasticsearch.search.fetch.subphase.highlight.HighlightBuilder;
 import org.elasticsearch.search.sort.SortOrder;
 import org.elasticsearch.transport.client.PreBuiltTransportClient;
 import org.slf4j.Logger;
@@ -72,7 +69,7 @@ public class ElasticSearchStorage implements StorageComponent {
         for(String host: esConfig.getTransportHosts()){
             String[] array=host.split(":");
             this.transportClient
-                    .addTransportAddress(new InetSocketTransportAddress(
+                    .addTransportAddress(new TransportAddress(
                             InetAddress.getByName(array[0]), Integer.parseInt(array[1])));
         }
         IndexNameFormatter.Builder formatterBuilder=IndexNameFormatter.builder();
@@ -120,7 +117,7 @@ public class ElasticSearchStorage implements StorageComponent {
 
     @Override
     public void save(final SkyeLogEvent event) throws Exception{
-        String index=indexNameFormatter.indexNameForTimestamp(event.getTimeStamp());
+        String index=indexNameFormatter.formatTypeAndTimestamp(null,event.getTimeStamp());
         IndexRequestBuilder indexRequestBuilder=transportClient.prepareIndex(index,esConfig.getType());
         indexRequestBuilder.setOpType(DocWriteRequest.OpType.CREATE);
         SkyeLogEntity entity=SkyeLogEntity.build(event);
@@ -134,7 +131,7 @@ public class ElasticSearchStorage implements StorageComponent {
     public void batchSave(Collection<SkyeLogEvent> events) throws Exception{
         BulkRequestBuilder bulkRequestBuilder=transportClient.prepareBulk();
         for(SkyeLogEvent event:events){
-            String index=indexNameFormatter.indexNameForTimestamp(event.getTimeStamp());
+            String index=indexNameFormatter.formatTypeAndTimestamp(null,event.getTimeStamp());
             IndexRequestBuilder indexRequestBuilder=transportClient.prepareIndex(index,esConfig.getType());
             indexRequestBuilder.setOpType(DocWriteRequest.OpType.INDEX);
             SkyeLogEntity entity=SkyeLogEntity.build(event);
@@ -157,7 +154,7 @@ public class ElasticSearchStorage implements StorageComponent {
     }
 
     /**
-     * from to 限制了10000条
+     * from to 限制了3000条
      * 查询真正关心的是前10页
      * @param request
      * @return
@@ -174,7 +171,7 @@ public class ElasticSearchStorage implements StorageComponent {
             return null;
         }
 
-        List<String> indices=indexNameFormatter.indexNamePatternsForRange(request.endTs-request.lookback,request.endTs);
+        List<String> indices=indexNameFormatter.formatTypeAndRange(null,request.endTs-request.lookback,request.endTs);
         String[] indicess=new String[indices.size()];
         indices.toArray(indicess);
         SearchRequestBuilder searchRequestBuilder=transportClient.prepareSearch(indicess)
@@ -213,7 +210,7 @@ public class ElasticSearchStorage implements StorageComponent {
         SearchResponse response=searchRequestBuilder.execute().actionGet();
         response.getTook();
         LogQueryResult.Builder resultBuilder=LogQueryResult.newBuilder();
-        resultBuilder.took(response.getTookInMillis());
+        resultBuilder.took(response.getTook().getSeconds());
         resultBuilder.error(response.getShardFailures().toString());
         SearchHit[] hits=response.getHits().getHits();
         List<SkyeLogEntity> entities=new LinkedList<>();
@@ -242,7 +239,7 @@ public class ElasticSearchStorage implements StorageComponent {
     public Set<String> getServices() {
         long endTs=System.currentTimeMillis();
         long startTs=System.currentTimeMillis()-esConfig.getDefaultLookback();
-        List<String> indices=indexNameFormatter.indexNamePatternsForRange(startTs,endTs);
+        List<String> indices=indexNameFormatter.formatTypeAndRange(null,startTs,endTs);
         String[] indicess=new String[indices.size()];
         indices.toArray(indicess);
         SearchRequestBuilder searchRequestBuilder=transportClient.prepareSearch(indicess)

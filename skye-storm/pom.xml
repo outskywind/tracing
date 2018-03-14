@@ -59,9 +59,9 @@
         </dependency>
         <!-- 配置中心 依赖 -->
         <dependency>
-            <groupId>com.dafy.spring-boot</groupId>
-            <artifactId>setcd-spring-boot-starter</artifactId>
-            <version>1.0.0-SNAPSHOT</version>
+            <groupId>com.dafy.setcd</groupId>
+            <artifactId>setcd</artifactId>
+            <version>2.0.2</version>
             <exclusions>
                 <exclusion>
                     <groupId>ch.qos.logback</groupId>

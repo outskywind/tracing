@@ -1,9 +1,8 @@
 package com.dafy.skye.zipkin.extend;
 
-import com.dafy.setcd.spring.boot.autoconfigure.SetcdPropertySource;
+import com.dafy.setcd.spring.SetcdPropertySource;
 import com.dafy.skye.zipkin.extend.config.ZipkinExtendESConfig;
 import org.springframework.boot.SpringApplication;
-import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import zipkin.autoconfigure.storage.elasticsearch.http.ZipkinElasticsearchHttpStorageProperties;

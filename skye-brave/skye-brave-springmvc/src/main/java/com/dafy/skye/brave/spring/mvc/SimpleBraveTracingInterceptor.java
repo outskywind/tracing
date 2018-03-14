@@ -42,6 +42,9 @@ public class SimpleBraveTracingInterceptor extends HandlerInterceptorAdapter{
                 return request.getMethod();
             }
         };
+        if(brave==null){
+            return true;
+        }
         ServerRequestAdapter adapter = new HttpServerRequestAdapter(serverRequest, new SpanNameProvider() {
             @Override
             public String spanName(HttpRequest httpRequest) {
@@ -56,6 +59,9 @@ public class SimpleBraveTracingInterceptor extends HandlerInterceptorAdapter{
 
     @Override
     public void afterCompletion(HttpServletRequest request, final HttpServletResponse response, Object handler, Exception ex) throws Exception {
+        if(brave==null){
+            return;
+        }
         ServerResponseInterceptor serverResponseInterceptor = this.brave.serverResponseInterceptor();
         ServerResponseAdapter adapter = new HttpServerResponseAdapter(new HttpResponse() {
             @Override
