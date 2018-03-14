@@ -9,7 +9,7 @@ import java.util.List;
  * Created by quanchengyun on 2018/3/13.
  */
 @ConfigurationProperties("zipkin.storage.elasticsearch")
-public class ZipkinElasticsearchTransportClientStorageProperties {
+public class ZipkinElasticsearchStorageProperties {
 
     /** Indicates the ingest pipeline used before spans are indexed. no default */
     private String pipeline;

@@ -29,7 +29,7 @@ public class ElasticSearchStorageAutoConfiguration {
 
     @Bean
     ElasticsearchHttpStorage elasticsearchHttpStorage(
-            ZipkinElasticsearchTransportClientStorageProperties elasticsearch,
+            ZipkinElasticsearchStorageProperties elasticsearch,
             @Qualifier("zipkinElasticsearchHttp") OkHttpClient client,
             @Value("${zipkin.query.lookback:86400000}") int namesLookback,
             @Value("${zipkin.storage.strict-trace-id:true}") boolean strictTraceId,

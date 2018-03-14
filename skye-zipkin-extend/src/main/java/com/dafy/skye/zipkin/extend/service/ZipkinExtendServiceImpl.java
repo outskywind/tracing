@@ -1,5 +1,6 @@
 package com.dafy.skye.zipkin.extend.service;
 
+import com.dafy.skye.autoconf.ZipkinElasticsearchStorageProperties;
 import com.dafy.skye.common.elasticsearch.DefaultOptions;
 import com.dafy.skye.common.util.IndexNameFormatter;
 //import zipkin2.elasticsearch.ElasticsearchSpanStore;
@@ -38,7 +39,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 import zipkin.Codec;
 import zipkin.Span;
-import zipkin.autoconfigure.storage.elasticsearch.http.ZipkinElasticsearchHttpStorageProperties;
 import zipkin.internal.GroupByTraceId;
 import zipkin.internal.V2StorageComponent;
 
@@ -54,7 +54,7 @@ public class ZipkinExtendServiceImpl implements ZipkinExtendService {
     @Autowired
     private ZipkinExtendESConfig zipkinExtendESConfig;
     @Autowired
-    private ZipkinElasticsearchHttpStorageProperties zipkinESStorageProperties;
+    private ZipkinElasticsearchStorageProperties zipkinESStorageProperties;
 
     private IndexNameFormatter indexNameFormatter;
     @Autowired
@@ -522,11 +522,11 @@ public class ZipkinExtendServiceImpl implements ZipkinExtendService {
         this.zipkinExtendESConfig = zipkinExtendESConfig;
     }
 
-    public ZipkinElasticsearchHttpStorageProperties getZipkinESStorageProperties() {
+    public ZipkinElasticsearchStorageProperties getZipkinESStorageProperties() {
         return zipkinESStorageProperties;
     }
 
-    public void setZipkinESStorageProperties(ZipkinElasticsearchHttpStorageProperties zipkinESStorageProperties) {
+    public void setZipkinESStorageProperties(ZipkinElasticsearchStorageProperties zipkinESStorageProperties) {
         this.zipkinESStorageProperties = zipkinESStorageProperties;
     }
 

@@ -24,10 +24,17 @@
         </dependency>
         <!--  zipkin 查询界面  end -->
         <!-- zipkin 收集kafka ,存储到 es -->
+        <!--
         <dependency>
             <groupId>io.zipkin.java</groupId>
             <artifactId>zipkin-autoconfigure-storage-elasticsearch-http</artifactId>
             <version>${zipkin.version}</version>
+        </dependency>
+        -->
+        <dependency>
+            <groupId>com.dafy.skye</groupId>
+            <artifactId>autoconf-elasticsearch</artifactId>
+            <version>1.0.0-SNAPSHOT</version>
         </dependency>
         <dependency>
             <groupId>io.zipkin.java</groupId>
