@@ -8,20 +8,13 @@ import java.io.*;
  * Created by Caedmon on 2017/5/8.
  */
 public class JavaSkyeLogEventCodec implements SkyeLogEventCodec {
+
     @Override
-    public SkyeLogEvent decode(byte[] value) {
+    public SkyeLogEvent decode(byte[] value) throws Exception {
 
-        try {
-            ByteArrayInputStream bis=new ByteArrayInputStream(value);
-            ObjectInputStream ois=new ObjectInputStream(bis);
-            return (SkyeLogEvent) ois.readObject();
-        } catch (IOException e) {
-            e.printStackTrace();
-        } catch (ClassNotFoundException e) {
-            e.printStackTrace();
-        }
-
-        return null;
+        ByteArrayInputStream bis=new ByteArrayInputStream(value);
+        ObjectInputStream ois=new ObjectInputStream(bis);
+        return (SkyeLogEvent) ois.readObject();
     }
 
     @Override

@@ -1,5 +1,6 @@
 package com.dafy.skye.log.appender;
 
+import ch.qos.logback.classic.Level;
 import ch.qos.logback.classic.PatternLayout;
 import ch.qos.logback.classic.spi.ILoggingEvent;
 import ch.qos.logback.core.UnsynchronizedAppenderBase;
@@ -124,8 +125,11 @@ public class LogKafkaAppender extends UnsynchronizedAppenderBase<ILoggingEvent> 
     }
     @Override
     protected void append(ILoggingEvent event) {
+        if(event.getLevel()== Level.DEBUG || event.getLevel()== Level.TRACE){
+            return;
+        }
         //kafka 连接失败，就不会appender发送记录
-        if(event != null && this.isStarted()) {
+        if(this.isStarted()) {
             try {
                 if(includeCallerData){
                     event.getCallerData();
@@ -139,7 +143,6 @@ public class LogKafkaAppender extends UnsynchronizedAppenderBase<ILoggingEvent> 
             } catch (InterruptedException var3) {
                 this.addError("Interrupted while appending event to KakfaProducerAppender", var3);
             }
-
         }
     }
 

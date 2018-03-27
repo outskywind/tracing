@@ -15,8 +15,7 @@ import zipkin.server.EnableZipkinServer;
 @EnableSkyeLogServer
 //配置此注解会覆盖默认的配置文件读取
 @SetcdPropertySource(
-        etcdKeys={"/server-config/skye/application-${env}.yml"},localOverride=true
-)
+        etcdKeys={"/server-config/skye/application-${env}.yml"},localOverride = true)
 @EnableZipkinExtend
 public class SkyeServerApplicaiton {
     public static void main(String[] args) {

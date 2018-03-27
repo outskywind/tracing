@@ -9,7 +9,7 @@ public interface SkyeLogEventCodec {
 
     JavaSkyeLogEventCodec DEFAULT=new JavaSkyeLogEventCodec();
 
-    SkyeLogEvent decode(byte[] value);
+    SkyeLogEvent decode(byte[] value) throws Exception;
 
     byte[] encode(SkyeLogEvent event);
 }

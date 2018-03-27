@@ -13,12 +13,12 @@ import zipkin.internal.V2StorageComponent;
 import zipkin.storage.AsyncSpanStore;
 import zipkin2.elasticsearch.ElasticsearchStorage;
 import zipkin2.elasticsearch.internal.client.HttpCall;
-import zipkin2.internal.Platform;
 import zipkin2.storage.SpanConsumer;
 import zipkin2.storage.SpanStore;
 import zipkin2.storage.StorageComponent;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 
@@ -36,7 +36,7 @@ public class ElasticsearchHttpStorage extends StorageComponent implements V2Stor
     private String indexTemplateSpan ;
     private volatile AtomicBoolean hasIndexTemplateSpan = new AtomicBoolean(false);
 
-    private OkHttpClient client ;
+    //private OkHttpClient client ;
 
     public ElasticsearchHttpStorage(ElasticsearchStorage delegate, boolean legacyReadsEnabled,
                                         boolean searchEnabled,String indexTemplateSpan) {
@@ -54,7 +54,6 @@ public class ElasticsearchHttpStorage extends StorageComponent implements V2Stor
      * @return
       */
     @Override public SpanConsumer spanConsumer() {
-        //TODO
         //return delegate.spanConsumer();
         ensureIndexTemplates();
         return new ElasticsearchSpanConsumer(delegate,this.searchEnabled);
@@ -82,34 +81,40 @@ public class ElasticsearchHttpStorage extends StorageComponent implements V2Stor
             if(hasIndexTemplateSpan.compareAndSet(false,true)){
                 String index = delegate.indexNameFormatter().index();
                 try{
-                    EnsureIndexTemplate.apply(http(),index,indexTemplateSpan);
-                }catch (IOException e){
-                    log.error("创建索引模板失败");
-                    throw Platform.get().uncheckedIOException(e);
+                    String indexTemplate = resolveIndexTemplate();
+                    if(indexTemplate!=null){
+                        log.info("zipkin index template load successfully");
+                        EnsureIndexTemplate.apply(delegate.http(),index,indexTemplate);
+                    }
+                }catch (Exception e){
+                    log.error("创建索引模板失败",e);
+                    throw new RuntimeException(e);
                 }
             }
         }
     }
 
-    public // hosts resolution might imply a network call, and we might make a new okhttp instance
-    HttpCall.Factory http() {
-        List<String> hosts = delegate.hostsSupplier().get();
-        if (hosts.isEmpty()) throw new IllegalArgumentException("no hosts configured");
-        OkHttpClient ok = hosts.size() == 1
-                ? client
-                : client.newBuilder()
-                .dns(PseudoAddressRecordSet.create(hosts, client.dns()))
-                .build();
-        ok.dispatcher().setMaxRequests(1);
-        ok.dispatcher().setMaxRequestsPerHost(1);
-        return new HttpCall.Factory(ok, HttpUrl.parse(hosts.get(0)));
-    }
 
-    public OkHttpClient getClient() {
-        return client;
-    }
-
-    public void setClient(OkHttpClient client) {
-        this.client = client;
+    protected String  resolveIndexTemplate() {
+        System.out.println("this system classpath="+System.getProperty("java.class.path"));
+        if(indexTemplateSpan!=null){
+            //果然是在所有的classpath 下面加载资源文件。
+            InputStream in  = this.getClass().getClassLoader().getResourceAsStream(indexTemplateSpan);
+            if(in==null){
+                throw new RuntimeException("index template " + indexTemplateSpan + "can't be load from classpath");
+            }
+            try{
+                //since this is a local file inputStream read all bytes at once
+                byte[] b = new byte[in.available()];
+                String json;
+                if(in.read(b)>0){
+                    json = new String(b,"UTF-8");
+                    return json;
+                }
+            }catch(IOException e){
+                log.error("索引配置文件读取失败",e);
+            }
+        }
+        return null;
     }
 }

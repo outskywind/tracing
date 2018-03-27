@@ -52,7 +52,7 @@ public class LogServerAutoConfiguration {
         return kafkaCollector;
     }*/
 
-    @ConditionalOnBean({OffsetComponent.class,CollectorDelegate.class})
+    @ConditionalOnBean({CollectorDelegate.class})
     @Bean(initMethod = "start")
     KafkaCollectorV2 kafkaCollectorV2(){
         return new KafkaCollectorV2();

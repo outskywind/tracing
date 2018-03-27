@@ -14,7 +14,8 @@
           "type": "date"
         },
         "serviceName":{
-          "type":"keyword"
+          "type":"keyword",
+          "eager_global_ordinals": true
         },
         "address":{
           "type":"keyword"

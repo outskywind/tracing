@@ -31,7 +31,7 @@ public class SkyeLogEvent implements ILoggingEvent,Serializable{
     private transient Object[] argumentArray;
     private ThrowableProxyVO throwableProxy;
     private StackTraceElement[] callerDataArray;
-    private Marker marker;
+    //private Marker marker;
     private Map<String, String> mdcPropertyMap;
     private long timeStamp;
     private String serviceName;
@@ -52,7 +52,7 @@ public class SkyeLogEvent implements ILoggingEvent,Serializable{
         ledo.level = le.getLevel();
         ledo.message = le.getMessage();
         ledo.argumentArray = le.getArgumentArray();
-        ledo.marker = le.getMarker();
+        //ledo.marker = le.getMarker();
         ledo.mdcPropertyMap = le.getMDCPropertyMap();
         ledo.timeStamp = le.getTimeStamp();
         ledo.throwableProxy = ThrowableProxyVO.build(le.getThrowableProxy());
@@ -108,9 +108,9 @@ public class SkyeLogEvent implements ILoggingEvent,Serializable{
         this.callerDataArray = callerDataArray;
     }
 
-    public void setMarker(Marker marker) {
-        this.marker = marker;
-    }
+    //public void setMarker(Marker marker) {
+    //    this.marker = marker;
+    //}
 
     public void setMdcPropertyMap(Map<String, String> mdcPropertyMap) {
         this.mdcPropertyMap = mdcPropertyMap;
@@ -171,7 +171,7 @@ public class SkyeLogEvent implements ILoggingEvent,Serializable{
     }
 
     public Marker getMarker() {
-        return this.marker;
+        return null;
     }
 
     public long getTimeStamp() {
@@ -288,13 +288,13 @@ public class SkyeLogEvent implements ILoggingEvent,Serializable{
             if(this.timeStamp != other.timeStamp) {
                 return false;
             } else {
-                if(this.marker == null) {
-                    if(other.marker != null) {
-                        return false;
-                    }
-                } else if(!this.marker.equals(other.marker)) {
-                    return false;
-                }
+                //if(this.marker == null) {
+                //    if(other.marker != null) {
+                //         return false;
+                //    }
+                //} else if(!this.marker.equals(other.marker)) {
+                //    return false;
+                //}
 
                 if(this.mdcPropertyMap == null) {
                     if(other.mdcPropertyMap != null) {

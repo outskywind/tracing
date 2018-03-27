@@ -20,6 +20,7 @@ import java.io.IOException;
  * 直接抄源代码
  * {@see ElasticsearchHttpStorage}
  */
+@Deprecated
 public class ElasticsearchTransportClientStorage extends StorageComponent implements V2StorageComponent.LegacySpanStoreProvider{
 
 

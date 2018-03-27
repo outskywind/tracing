@@ -95,12 +95,14 @@ public class ElasticSearchStorage implements StorageComponent {
         }
         PutIndexTemplateRequestBuilder requestBuilder=adminClient
                 .preparePutTemplate(templateName);
-        Settings.Builder settings=Settings.builder().put("number_of_shards",esConfig.getIndexShards());
-        settings.put("number_of_replicas",1);
-        requestBuilder.setSettings(settings.build());
+        //Settings.Builder settings=Settings.builder().put("number_of_shards",esConfig.getIndexShards());
+        //settings.put("number_of_replicas",1);
+        //requestBuilder.setSettings(settings.build());
         requestBuilder.setTemplate(esConfig.getIndex()+"-*");
         String mappingSource=ResourceUtil.readString("elasticsearch-template.json");
+        String settings = ResourceUtil.readString("skye-elasticsearch-settings.json");
         requestBuilder.addMapping(esConfig.getType(),mappingSource, XContentType.JSON);
+        requestBuilder.setSettings(settings,XContentType.JSON);
         PutIndexTemplateResponse putIndexTemplateResponse=requestBuilder.execute().actionGet();
         return putIndexTemplateResponse.isAcknowledged();
     }

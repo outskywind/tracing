@@ -17,6 +17,7 @@
         <module>skye-druid</module>
         <module>autoconf-elasticsearch</module>
         <module>elasticsearch-storage</module>
+        <module>spring-boot-config-center</module>
     </modules>
     <properties>
         <spring-data-elasticsearc.version>2.1.4.RELEASE</spring-data-elasticsearc.version>
@@ -68,6 +69,11 @@
                 <groupId>org.elasticsearch.plugin</groupId>
                 <artifactId>transport-netty4-client</artifactId>
                 <version>6.1.1</version>
+            </dependency>
+            <dependency>
+                <groupId>org.slf4j</groupId>
+                <artifactId>slf4j-api</artifactId>
+                <version>${sl4j.version}</version>
             </dependency>
         </dependencies>
     </dependencyManagement>

@@ -6,6 +6,7 @@ import com.dafy.skye.zipkin.extend.config.ZipkinExtendESConfig;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
+import org.springframework.util.StringUtils;
 import zipkin.server.EnableZipkinServer;
 
 
@@ -22,6 +23,9 @@ import zipkin.server.EnableZipkinServer;
 @EnableConfigurationProperties({ZipkinExtendESConfig.class,ZipkinElasticsearchStorageProperties.class})
 public class ZipkinExtendApplication {
     public static void main(String[] args) {
+        if(StringUtils.isEmpty(System.getProperty("env"))){
+            System.setProperty("env","dev");
+        }
         SpringApplication application=new SpringApplication(ZipkinExtendApplication.class);
         application.run(args);
         try {

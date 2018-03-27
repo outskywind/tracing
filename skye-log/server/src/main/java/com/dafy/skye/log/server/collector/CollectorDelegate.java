@@ -46,12 +46,17 @@ public class CollectorDelegate {
 
     public void accpetEvent(byte[] eventBytes,SkyeLogEventCodec codec){
         metrics.incrementBytes(eventBytes.length);
-        SkyeLogEvent event=codec.decode(eventBytes);
-        if(event==null){
-            metrics.incrementMessageDropped(1);
-        }else{
-            acceptEvent(event);
+        try{
+            SkyeLogEvent event=codec.decode(eventBytes);
+            if(event==null){
+                metrics.incrementMessageDropped(1);
+            }else{
+                acceptEvent(event);
+            }
+        }catch (Exception e){
+            log.error("decode error:",e);
         }
+
     }
     public boolean acceptEvents(List<byte[]> eventBytes, SkyeLogEventCodec codec){
         if(eventBytes==null||eventBytes.isEmpty()){
@@ -63,15 +68,23 @@ public class CollectorDelegate {
         List<SkyeLogEvent> events=new ArrayList<>(eventBytes.size());
         for(byte[] bytes:eventBytes){
             bytesQuantity+=bytes.length;
-            SkyeLogEvent event=codec.decode(bytes);
-            if(event==null){
-                droppedQuantity++;
-            }else{
-                events.add(event);
+            try{
+                SkyeLogEvent event=codec.decode(bytes);
+                if(event==null){
+                    droppedQuantity++;
+                }else{
+                    events.add(event);
+                }
+            }catch(Exception e){
+                log.error("decode exception:",e);
             }
         }
         metrics.incrementMessageDropped(droppedQuantity);
         metrics.incrementBytes(bytesQuantity);
+        if(eventBytes==null||eventBytes.isEmpty()){
+            log.warn("Event bytes is empty");
+            return false;
+        }
         return acceptEvents(events);
     }
     public static class Builder{
