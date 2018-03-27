@@ -3,15 +3,12 @@ package com.dafy.skye.zipkin.extend.service;
 import com.dafy.skye.autoconf.ZipkinElasticsearchStorageProperties;
 import com.dafy.skye.common.elasticsearch.DefaultOptions;
 import com.dafy.skye.common.util.IndexNameFormatter;
-//import zipkin2.elasticsearch.ElasticsearchSpanStore;
-//import zipkin2.elasticsearch.internal.IndexNameFormatter;
 import com.dafy.skye.common.util.IntervalTimeUnit;
 import com.dafy.skye.common.util.TimestampRange;
 import com.dafy.skye.zipkin.extend.config.ZipkinExtendESConfig;
 import com.dafy.skye.zipkin.extend.dto.*;
 import com.dafy.skye.zipkin.extend.util.TimeUtil;
 import com.google.common.base.Strings;
-import org.apache.lucene.search.join.ScoreMode;
 import org.elasticsearch.action.search.MultiSearchRequestBuilder;
 import org.elasticsearch.action.search.MultiSearchResponse;
 import org.elasticsearch.action.search.SearchRequestBuilder;
@@ -25,7 +22,6 @@ import org.elasticsearch.search.aggregations.AggregationBuilder;
 import org.elasticsearch.search.aggregations.AggregationBuilders;
 import org.elasticsearch.search.aggregations.Aggregations;
 import org.elasticsearch.search.aggregations.BucketOrder;
-import org.elasticsearch.search.aggregations.bucket.nested.InternalNested;
 import org.elasticsearch.search.aggregations.bucket.terms.StringTerms;
 import org.elasticsearch.search.aggregations.bucket.terms.Terms;
 import org.elasticsearch.search.aggregations.bucket.terms.TermsAggregationBuilder;
@@ -100,9 +96,7 @@ public class ZipkinExtendServiceImpl implements ZipkinExtendService {
         root.filter(QueryBuilders.rangeQuery("timestamp_millis")
                 .gt(request.endTs-request.lookback).lte(request.endTs));
         if(!CollectionUtils.isEmpty(request.services)){
-            root.filter(QueryBuilders.nestedQuery("annotations",
-                    QueryBuilders.termsQuery("annotations.endpoint.serviceName",request.services),
-                    ScoreMode.None));
+            root.filter( QueryBuilders.termsQuery("localEndpoint.serviceName",request.services));
         }
         esRequest.setQuery(root);
         esRequest.addAggregation(AggregationBuilders.terms("span_names").field("name"));
@@ -133,8 +127,6 @@ public class ZipkinExtendServiceImpl implements ZipkinExtendService {
         if(response.getAggregations()==null){
             return null;
         }
-        //InternalNested binaryAggregationNested=response.getAggregations().get("binaryAnnotations");
-        //InternalNested annotationsNested=response.getAggregations().get("annotations");
         Terms localServiceName=response.getAggregations().get("localServiceName");
         Terms remoteServiceName=response.getAggregations().get("remoteServiceName");
         Set<String> set=new HashSet<>();
