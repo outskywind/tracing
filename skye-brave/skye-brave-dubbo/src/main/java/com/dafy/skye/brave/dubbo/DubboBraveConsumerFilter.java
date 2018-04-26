@@ -15,10 +15,7 @@ import org.slf4j.LoggerFactory;
 )
 public class DubboBraveConsumerFilter implements Filter{
 
-    private boolean skye_tracing;
-
     private volatile Brave brave;
-    private static final Logger log= LoggerFactory.getLogger(DubboBraveConsumerFilter.class);
     public Result invoke(Invoker<?> invoker, Invocation invocation) throws RpcException {
         if(brave==null){
             //由于客户端没有正确配置监控信息，将不会拦截统计调用链上报

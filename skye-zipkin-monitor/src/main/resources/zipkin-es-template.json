@@ -1,0 +1,125 @@
+{
+    "order": 0,
+    "index_patterns": [
+      "zipkin:span-*"
+    ],
+    "settings": {
+      "index.store.preload": ["nvd", "dvd", "tim", "doc", "dim"],
+      "index": {
+        "refresh_interval": "5s",
+        "mapper": {
+          "dynamic": "false"
+        },
+        "requests": {
+          "cache": {
+            "enable": "true"
+          }
+        },
+        "analysis": {
+          "filter": {
+            "traceId_filter": {
+              "type": "pattern_capture",
+              "preserve_original": "true",
+              "patterns": [
+                "([0-9a-f]{1,16})$"
+              ]
+            }
+          },
+          "analyzer": {
+            "traceId_analyzer": {
+              "filter": "traceId_filter",
+              "type": "custom",
+              "tokenizer": "keyword"
+            }
+          }
+        },
+        "number_of_shards": "3",
+        "number_of_replicas": "1"
+      }
+    },
+    "mappings": {
+      "span": {
+        "_source": {
+          "excludes": [
+            "_q"
+          ]
+        },
+        "properties": {
+          "traceId": {
+            "type": "keyword",
+            "norms": false
+          },
+          "name": {
+            "type": "keyword",
+            "norms": false
+          },
+          "localEndpoint": {
+            "type": "object",
+            "dynamic": false,
+            "properties": {
+              "serviceName": {
+                "type": "keyword",
+                "norms": false,
+                "eager_global_ordinals": true
+              },
+              "ipv4": {
+                "type": "keyword",
+                "norms": false,
+                "eager_global_ordinals": true
+              }
+            }
+          },
+          "remoteEndpoint": {
+            "type": "object",
+            "dynamic": false,
+            "properties": {
+              "serviceName": {
+                "type": "keyword",
+                "norms": false
+              }
+            }
+          },
+          "timestamp_millis": {
+            "type": "date",
+            "format": "epoch_millis"
+          },
+          "duration": {
+            "type": "long"
+          },
+          "annotations": {
+            "enabled": false
+          },
+          "tags": {
+            "type":  "object",
+            "dynamic": true,
+            "enabled": true,
+            "properties":{
+              "status": {
+                "type": "keyword",
+                "norms": false
+              }
+            }
+          },
+          "_q": {
+            "type": "keyword",
+            "norms": false
+          }
+        }
+      },
+      "_default_": {
+        "dynamic_templates": [
+          {
+            "strings": {
+              "mapping": {
+                "type": "keyword",
+                "doc_values": true
+              },
+              "match_mapping_type": "string",
+              "match": "*"
+            }
+          }
+        ]
+      }
+    },
+    "aliases": {}
+}

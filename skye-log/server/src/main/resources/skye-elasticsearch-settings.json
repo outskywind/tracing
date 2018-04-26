@@ -1,5 +1,5 @@
 {
-  "index.store.preload": ["nvd", "dvd"],
+  "index.store.preload": ["nvd", "dvd", "tim", "doc", "dim"],
   "refresh_interval": "60s",
   "number_of_shards": "3",
   "number_of_replicas": "1"

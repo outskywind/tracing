@@ -44,11 +44,13 @@ import org.elasticsearch.transport.client.PreBuiltTransportClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.util.CollectionUtils;
+import org.springframework.util.StringUtils;
 
 import javax.annotation.PostConstruct;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.*;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  * Created by Caedmon on 2017/4/26.
@@ -58,6 +60,7 @@ public class ElasticSearchStorage implements StorageComponent {
     private IndexNameFormatter indexNameFormatter;
     private static final Logger log= LoggerFactory.getLogger(ElasticSearchStorage.class);
     private TransportClient transportClient;
+
     public ElasticSearchStorage(LogStorageESConfigProperties esConfig){
         this.esConfig=esConfig;
     }
@@ -78,8 +81,8 @@ public class ElasticSearchStorage implements StorageComponent {
         this.indexNameFormatter=formatterBuilder.index(index).build();
     }
     /**
-     * 确认模版是否已存在,如果模版不存在则创建一个
-     * */
+     * 不存在则创建一个模板
+     */
     boolean ensureTemplate(){
         final IndicesAdminClient adminClient=transportClient.admin().indices();
         GetIndexTemplatesRequestBuilder getTemplatesRequest=adminClient.prepareGetTemplates();
@@ -181,8 +184,8 @@ public class ElasticSearchStorage implements StorageComponent {
         BoolQueryBuilder root= QueryBuilders.boolQuery();
         root.filter(QueryBuilders.rangeQuery("timestamp")
                 .gt(request.endTs-request.lookback).lte(request.endTs));
-        if(!CollectionUtils.isEmpty(request.serviceNames)){
-            root.filter(QueryBuilders.termsQuery("serviceName",request.serviceNames));
+        if(StringUtils.hasText(request.serviceName)){
+            root.filter(QueryBuilders.termsQuery("serviceName",request.serviceName));
         }
         if(!CollectionUtils.isEmpty(request.levels)){
             root.filter(QueryBuilders.termsQuery("level",request.levels));

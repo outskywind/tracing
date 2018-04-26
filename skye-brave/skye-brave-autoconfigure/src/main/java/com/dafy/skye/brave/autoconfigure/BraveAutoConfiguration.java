@@ -3,6 +3,7 @@ package com.dafy.skye.brave.autoconfigure;
 import com.github.kristofa.brave.Brave;
 import com.github.kristofa.brave.Sampler;
 import com.google.common.base.Strings;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -21,7 +22,7 @@ import zipkin.reporter.kafka10.KafkaSender;
 public class BraveAutoConfiguration {
 
     @Bean
-    //@ConditionalOnClass(Brave.class) 此处已经存在了
+    @ConditionalOnClass(Brave.class)
     @Lazy
     //因为 @ConfigurationPorperties 使用Registrar的机制，这里会无法生效
     //因为spring 先处理加载完 BeanMethod 的信息，再加载Registrar的Bean信息

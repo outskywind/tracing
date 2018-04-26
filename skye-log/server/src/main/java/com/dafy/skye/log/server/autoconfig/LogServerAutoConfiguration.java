@@ -1,6 +1,8 @@
 package com.dafy.skye.log.server.autoconfig;
 
 import com.dafy.skye.log.server.collector.CollectorDelegate;
+import com.dafy.skye.log.server.collector.filter.CollectFilter;
+import com.dafy.skye.log.server.collector.filter.LogLevelFilter;
 import com.dafy.skye.log.server.kafka.KafkaCollectorV2;
 import com.dafy.skye.log.server.kafka.offset.OffsetComponent;
 import com.dafy.skye.log.server.metrics.MemoryCollectorMetrics;
@@ -12,6 +14,9 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import sun.rmi.runtime.Log;
+
+import java.util.List;
 
 /**
  * Created by Caedmon on 2017/4/24.
@@ -31,10 +36,19 @@ public class LogServerAutoConfiguration {
     }
     @ConditionalOnBean(StorageComponent.class)
     @Bean
-    CollectorDelegate collectorDelegate(StorageComponent storageComponent){
+    CollectorDelegate collectorDelegate(StorageComponent storageComponent, List<CollectFilter> filters){
         CollectorDelegate delegate=new CollectorDelegate(storageComponent,new MemoryCollectorMetrics());
         return delegate;
     }
+
+    @Bean
+    CollectFilter logLevelFilter(){
+        LogLevelFilter filter = new LogLevelFilter();
+        filter.setOrder(0);
+        return filter;
+    }
+
+
 
     /*@Bean(initMethod = "start")
     @ConditionalOnProperty(name = "skye.log.server.kafka.offset.type",havingValue = "redis")

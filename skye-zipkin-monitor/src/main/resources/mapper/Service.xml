@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.dafy.skye.zipkin.extend.mapper.ServiceMapper" >
+
+    <delete id="deleteUserFollow">
+        DELETE FROM user_service
+        WHERE
+        user = #{user}
+        AND service in
+        <foreach collection="services" separator="," item="service" open="(" close=")">
+            #{service}
+        </foreach>
+    </delete>
+
+    <insert id="addUserFollow">
+        INSERT ignore INTO user_service ( `user`, service)
+        VALUES
+        <foreach collection="services" separator="," item="service">
+            (#{user}, #{service})
+        </foreach>
+    </insert>
+
+    <select id="listFollow" resultType="java.lang.String">
+        SELECT
+            service
+        FROM
+            user_service
+        WHERE
+            user = #{user}
+    </select>
+
+</mapper>

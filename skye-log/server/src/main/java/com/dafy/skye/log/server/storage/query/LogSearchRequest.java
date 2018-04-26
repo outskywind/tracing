@@ -11,7 +11,7 @@ public class LogSearchRequest {
     public Long lookback;
     public Long endTs;
     public List<String> levels;
-    public List<String> serviceNames;
+    public String serviceName;
     public String mdc;
     public Integer pageIndex;
     public Integer pageSize;
@@ -55,12 +55,12 @@ public class LogSearchRequest {
         this.levels = levels;
     }
 
-    public List<String> getServiceNames() {
-        return serviceNames;
+    public String getServiceName() {
+        return serviceName;
     }
 
-    public void setServiceNames(List<String> serviceNames) {
-        this.serviceNames = serviceNames;
+    public void setServiceNames(String serviceName) {
+        this.serviceName = serviceName;
     }
 
     public String getMdc() {
@@ -112,7 +112,7 @@ public class LogSearchRequest {
                 ", lookback=" + lookback +
                 ", endTs=" + endTs +
                 ", levels=" + levels +
-                ", serviceNames=" + serviceNames +
+                ", serviceNames=" + serviceName +
                 ", mdc='" + mdc + '\'' +
                 ", pageIndex=" + pageIndex +
                 ", pageSize=" + pageSize +

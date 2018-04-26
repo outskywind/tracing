@@ -18,7 +18,7 @@ public class LogStorageESConfigProperties {
     private boolean ensureIndex=true;
     private Integer indexShards=5;
     private Integer indexReplicas=1;
-    private Long defaultLookback=604800000L;
+    private Long defaultLookback=86400000L;
     private String clusterName="skye";
     public List<String> getTransportHosts() {
         return transportHosts;

@@ -3,7 +3,6 @@ package com.dafy.skye.brave.dubbo;
 import com.alibaba.dubbo.rpc.Result;
 import com.github.kristofa.brave.KeyValueAnnotation;
 import com.github.kristofa.brave.ServerResponseAdapter;
-import org.slf4j.MDC;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -22,11 +21,11 @@ public class DubboServerResponseAdapter implements ServerResponseAdapter {
         if(!result.hasException()){
             Object value=result.getValue();
             String valueStr = value==null?"null":String.valueOf(value);
-            KeyValueAnnotation keyValueAnnotation=KeyValueAnnotation.create("result",valueStr);
-            annotations.add(keyValueAnnotation);
+            //KeyValueAnnotation keyValueAnnotation=KeyValueAnnotation.create("result",valueStr);
+            //annotations.add(keyValueAnnotation);
             //加上status状态，统计成功数使用
             KeyValueAnnotation statusAnnotation=  KeyValueAnnotation.create("status","success");
-            annotations.add(keyValueAnnotation);
+            annotations.add(statusAnnotation);
         }else {
             //null message exceptions
             KeyValueAnnotation keyValueAnnotation=  KeyValueAnnotation.create("exception",

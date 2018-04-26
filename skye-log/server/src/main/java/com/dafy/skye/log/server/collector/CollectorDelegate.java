@@ -1,13 +1,17 @@
 package com.dafy.skye.log.server.collector;
 
+import com.dafy.skye.log.server.collector.filter.CollectFilter;
+import com.dafy.skye.log.server.collector.filter.FilterChain;
 import com.dafy.skye.log.server.metrics.CollectorMetrics;
 import com.dafy.skye.log.server.storage.StorageComponent;
 import com.dafy.skye.log.core.SkyeLogEventCodec;
 import com.dafy.skye.log.core.logback.SkyeLogEvent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 
 /**
@@ -17,12 +21,61 @@ import java.util.List;
 public class CollectorDelegate {
     private StorageComponent storage;
     private CollectorMetrics metrics;
+
+    private FilterChain chain = new FilterChain();
+
     private static final Logger log= LoggerFactory.getLogger(CollectorDelegate.class);
     public CollectorDelegate(StorageComponent storage, CollectorMetrics metrics){
         this.storage=storage;
         this.metrics=metrics;
+        this.chain.addFilter(new InvokeStorage());
     }
-    public void acceptEvent(SkyeLogEvent event){
+
+
+    class InvokeStorage implements CollectFilter{
+
+        @Override
+        public Object filter(List<SkyeLogEvent> event, Iterator<CollectFilter> filters) {
+            return doAcceptEvents(event);
+        }
+
+        @Override
+        public int getOrder() {
+            return Integer.MAX_VALUE;
+        }
+
+        @Override
+        public void setOrder(int order) {
+        }
+    }
+
+    public void addFilters(List<CollectFilter> filters){
+        for(CollectFilter filter:filters){
+            this.chain.addFilter(filter);
+        }
+    }
+
+    public void addFilter(CollectFilter filter){
+        this.chain.addFilter(filter);
+    }
+
+
+
+    public FilterChain getChain() {
+        return chain;
+    }
+
+    public void setChain(FilterChain chain) {
+        this.chain = chain;
+    }
+
+    public void invokeFilters(List<SkyeLogEvent> events){
+        this.chain.doNextFilter(events);
+    }
+
+    /*public void acceptEvent(SkyeLogEvent event){
+
+
         try{
             storage.save(event);
         }catch (Exception e){
@@ -31,8 +84,13 @@ public class CollectorDelegate {
             return;
         }
         metrics.incrementMessages(1);
+    }*/
+
+    public boolean acceptEvents(List<SkyeLogEvent> events) {
+            return (boolean)this.chain.doNextFilter(events);
     }
-    public boolean acceptEvents(List<SkyeLogEvent> events){
+
+    public boolean doAcceptEvents(List<SkyeLogEvent> events){
         try{
             storage.batchSave(events);
         }catch (Exception e){
@@ -44,7 +102,7 @@ public class CollectorDelegate {
         return true;
     }
 
-    public void accpetEvent(byte[] eventBytes,SkyeLogEventCodec codec){
+    /*public void accpetEvent(byte[] eventBytes,SkyeLogEventCodec codec){
         metrics.incrementBytes(eventBytes.length);
         try{
             SkyeLogEvent event=codec.decode(eventBytes);
@@ -57,7 +115,7 @@ public class CollectorDelegate {
             log.error("decode error:",e);
         }
 
-    }
+    }*/
     public boolean acceptEvents(List<byte[]> eventBytes, SkyeLogEventCodec codec){
         if(eventBytes==null||eventBytes.isEmpty()){
             log.warn("Event bytes is empty");

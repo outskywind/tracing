@@ -13,15 +13,14 @@
         <module>skye-brave</module>
         <module>skye-log</module>
         <module>skye-server</module>
-        <module>skye-zipkin-extend</module>
+        <module>skye-zipkin-monitor</module>
         <module>skye-druid</module>
         <module>autoconf-elasticsearch</module>
         <module>elasticsearch-storage</module>
-        <module>spring-boot-config-center</module>
     </modules>
     <properties>
         <spring-data-elasticsearc.version>2.1.4.RELEASE</spring-data-elasticsearc.version>
-        <elasticsearch.version>6.1.1</elasticsearch.version>
+        <elasticsearch.version>6.2.0</elasticsearch.version>
         <kafka.version>0.10.2.0</kafka.version>
         <spring-boot.version>1.5.3.RELEASE</spring-boot.version>
         <auto-value.version>1.4.1</auto-value.version>
@@ -58,22 +57,32 @@
             <dependency>
                 <groupId>org.elasticsearch.client</groupId>
                 <artifactId>transport</artifactId>
-                <version>6.1.1</version>
+                <version>6.2.0</version>
             </dependency>
             <dependency>
                 <groupId>org.elasticsearch</groupId>
                 <artifactId>elasticsearch</artifactId>
-                <version>6.1.1</version>
+                <version>6.2.0</version>
+            </dependency>
+            <dependency>
+                <groupId>org.elasticsearch.client</groupId>
+                <artifactId>elasticsearch-rest-high-level-client</artifactId>
+                <version>6.2.0</version>
             </dependency>
             <dependency>
                 <groupId>org.elasticsearch.plugin</groupId>
                 <artifactId>transport-netty4-client</artifactId>
-                <version>6.1.1</version>
+                <version>6.2.0</version>
             </dependency>
             <dependency>
                 <groupId>org.slf4j</groupId>
                 <artifactId>slf4j-api</artifactId>
                 <version>${sl4j.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>mysql</groupId>
+                <artifactId>mysql-connector-java</artifactId>
+                <version>5.1.41</version>
             </dependency>
         </dependencies>
     </dependencyManagement>
