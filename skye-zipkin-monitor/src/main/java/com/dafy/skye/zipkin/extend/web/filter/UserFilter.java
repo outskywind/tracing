@@ -27,7 +27,6 @@ public class UserFilter implements Filter {
     @Value("${login.url}")
     String loginUrl;
 
-
     @Autowired
     UserService userService;
 
@@ -45,8 +44,11 @@ public class UserFilter implements Filter {
             }
         });
         if(user == null){
-            ((HttpServletResponse )response).sendRedirect(loginUrl);
-            return ;
+            //((HttpServletResponse )response).sendRedirect(loginUrl);
+            response.getWriter().write("{\"code\":\"no user\",\"result\":null}");
+            response.setContentType("application/json");
+            response.flushBuffer();
+            return;
         }
         UserSessionHolder.setUser(user);
         chain.doFilter(request,response);

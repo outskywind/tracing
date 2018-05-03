@@ -6,7 +6,11 @@
         INSERT INTO rule ( `name`, type, service, interface, dimension, `condition`, threshold )
         VALUES
         <foreach collection="list" separator="," item="rule">
-        ( #{rule.type}, #{rule.type}, #{rule.service}, #{rule.spanName}, #{rule.dimension}, #{rule.condition}, #{rule.threshold} )
+        ( #{rule.type}, #{rule.type},
+            <choose><when test="rule.service==null">''</when><otherwise>#{rule.service}</otherwise></choose>
+            , <choose><when test="rule.spanName==null">''</when><otherwise>#{rule.spanName}</otherwise></choose>
+            ,
+            #{rule.dimension}, #{rule.condition}, #{rule.thresholdStr} )
         </foreach>
     </insert>
 
@@ -15,45 +19,70 @@
         `name`,
         `type`,
         `service`,
-        `interface`,
+        `interface` AS spanName,
         `dimension`,
         `condition`,
-        `threshold`,
+        `threshold` AS thresholdStr,
         `is_deleted`
         FROM `rule`
-        where service in <foreach collection="favServices" open="(" close=")" item="service" separator=",">
-         #{service}
-    </foreach>
+        <where>
+            is_deleted=0
+            <if test="favServices !=null">
+            AND
+            service in <foreach collection="favServices" open="(" close=")" item="service" separator=",">
+            #{service}
+            </foreach>
+            </if>
+        </where>
         UNION ALL
         SELECT `id`,
         `name`,
         `type`,
         `service`,
-        `interface`,
+        `interface` AS spanName,
         `dimension`,
         `condition`,
-        `threshold`,
+        `threshold` AS thresholdStr,
         `is_deleted`
         FROM `rule`
-        where service =''
+        WHERE
+            is_deleted=0
+            AND
+            service =''
+    </select>
+
+
+    <select id="listAll" resultType="com.dafy.skye.zipkin.extend.dto.Rule">
+        SELECT `id`,
+        `name`,
+        `type`,
+        `service`,
+        `interface` AS spanName,
+        `dimension`,
+        `condition`,
+        `threshold` AS thresholdStr,
+        `is_deleted`
+        FROM `rule`
+        WHERE
+        is_deleted=0
     </select>
 
     <update id="modify">
         UPDATE rule
         <set>
             condition = #{condition},
-            threshold = #{threshold}
+            threshold = #{thresholdStr}
         </set>
         where id=#{id}
     </update>
 
     <update id="delete">
-        UPDATE
-        rule
-        SET is_deleted=1
-        where id IN
-        <foreach collection="list" item="rule" open="(" separator="," close=")">
-        #{rule.id}
+        DELETE FROM
+            rule
+        WHERE
+            id IN
+        <foreach collection="list" item="ruleid" open="(" separator="," close=")">
+        #{ruleid}
         </foreach>
     </update>
 

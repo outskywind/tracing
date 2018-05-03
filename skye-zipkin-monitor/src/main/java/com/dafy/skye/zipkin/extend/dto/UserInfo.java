@@ -1,7 +1,6 @@
 package com.dafy.skye.zipkin.extend.dto;
 
-import java.util.HashSet;
-import java.util.Set;
+import java.util.*;
 
 /**
  * Created by quanchengyun on 2018/4/13.
@@ -14,6 +13,7 @@ public class UserInfo {
 
     private Set<String> favServices = new HashSet<>();
 
+    private Map<String,List<Rule>> ruleMap = new HashMap<>();
 
     public String getName() {
         return name;
@@ -37,5 +37,13 @@ public class UserInfo {
 
     public void setFavServices(Set<String> favServices) {
         this.favServices = favServices;
+    }
+
+    public Map<String, List<Rule>> getRuleMap() {
+        return ruleMap;
+    }
+
+    public void setRuleMap(Map<String, List<Rule>> ruleMap) {
+        this.ruleMap = ruleMap;
     }
 }

@@ -230,7 +230,23 @@ public class ZipkinExtendServiceImpl implements ZipkinExtendService {
                 service.setLatency(Math.round(time.getValue())/1000);
                 service.setQps(count.getValue()*1000/(double)request.lookback);
                 service.setSuccess_rate(Math.round(success_count.getValue()*100/count.getValue())+"%");
+                service.setSuccessPercent(Math.round(success_count.getValue()*100/count.getValue()));
                 //host
+                ParsedStringTerms hosts = serviceBucket.getAggregations().get("host");
+                for(Terms.Bucket host: hosts.getBuckets()){
+                    MonitorMetric metric = new MonitorMetric();
+                    service.getServers().add(metric);
+                    metric.setName((String)host.getKey());
+                    count = host.getAggregations().get("count");
+                    time = host.getAggregations().get("time");
+                    success = host.getAggregations().get("success");
+                    success_count = success.getAggregations().get("count");
+                    //service.setName(serviceName);
+                    metric.setLatency(Math.round(time.getValue())/1000);
+                    metric.setQps(count.getValue()*1000/(double)request.lookback);
+                    metric.setSuccess_rate(Math.round(success_count.getValue()*100/count.getValue())+"%");
+                    metric.setSuccessPercent(Math.round(success_count.getValue()*100/count.getValue()));
+                }
             }
         }catch(Exception e){
             log.error("服务面板数据查询异常:",e);

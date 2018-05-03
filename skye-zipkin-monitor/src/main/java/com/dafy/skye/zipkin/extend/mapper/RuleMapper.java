@@ -15,7 +15,9 @@ public interface RuleMapper {
 
     List<Rule> list(@Param("favServices") Set<String> favServices);
 
+    List<Rule> listAll();
+
     void modify(Rule rule);
 
-    void delete(List<Rule> rules);
+    void delete(List<Integer> rules);
 }

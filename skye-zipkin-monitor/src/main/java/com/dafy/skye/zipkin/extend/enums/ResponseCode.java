@@ -5,11 +5,17 @@ package com.dafy.skye.zipkin.extend.enums;
  */
 public enum ResponseCode {
 
-    SUCCESS("0");
+    SUCCESS("0"),
+    SYSTEM_ERROR("系统错误")
+    ,RULE_DUPLICATE("");
 
     private String value;
 
     ResponseCode(String value){
         this.value=value;
+    }
+
+    public String value(){
+        return  this.value;
     }
 }

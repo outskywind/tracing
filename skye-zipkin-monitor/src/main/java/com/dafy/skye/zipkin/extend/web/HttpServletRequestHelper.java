@@ -4,7 +4,6 @@ import com.dafy.skye.zipkin.extend.dto.UserInfo;
 import com.dafy.skye.zipkin.extend.web.filter.FilterCallback;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.sun.tools.internal.xjc.reader.xmlschema.bindinfo.BIConversion;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import sun.misc.BASE64Decoder;

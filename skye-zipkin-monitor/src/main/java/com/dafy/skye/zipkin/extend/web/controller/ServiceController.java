@@ -1,15 +1,16 @@
 package com.dafy.skye.zipkin.extend.web.controller;
 
+import com.dafy.skye.zipkin.extend.cache.RulesRefreshHolder;
 import com.dafy.skye.zipkin.extend.cache.ServiceRefreshHolder;
-import com.dafy.skye.zipkin.extend.dto.BasicQueryRequest;
-import com.dafy.skye.zipkin.extend.dto.Response;
-import com.dafy.skye.zipkin.extend.dto.ServiceMonitorMetric;
-import com.dafy.skye.zipkin.extend.dto.UserInfo;
+import com.dafy.skye.zipkin.extend.dto.*;
+import com.dafy.skye.zipkin.extend.enums.ResponseCode;
+import com.dafy.skye.zipkin.extend.service.RuleService;
 import com.dafy.skye.zipkin.extend.service.ZipkinExtendService;
 import com.dafy.skye.zipkin.extend.util.TimeUtil;
 import com.dafy.skye.zipkin.extend.service.UserService;
 import com.dafy.skye.zipkin.extend.web.session.UserSessionHolder;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Controller;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.*;
@@ -27,10 +28,17 @@ public class ServiceController extends BaseSessionController{
     ServiceRefreshHolder holder;
 
     @Autowired
+    RulesRefreshHolder rulesRefreshHolder;
+
+    @Autowired
     UserService userService;
 
     @Autowired
     ZipkinExtendService zipkinExtendService;
+
+    @Autowired
+    @Qualifier("ruleService")
+    RuleService ruleService;
 
 
     @RequestMapping("/closeIndex")
@@ -69,8 +77,8 @@ public class ServiceController extends BaseSessionController{
     public Response followServices(@RequestBody List<String> services) {
         UserInfo user = getUser();
         Set<String> set = new HashSet<>(services);
-        String code = userService.followServices(user.getEmail(),set);
-        return new Response(code,null);
+        ResponseCode code = userService.followServices(user.getEmail(),set);
+        return new Response(code.value(),null);
     }
 
 
@@ -79,8 +87,8 @@ public class ServiceController extends BaseSessionController{
     public Response unfollowServices(@RequestBody List<String> services) {
         UserInfo user = getUser();
         Set<String> set = new HashSet<>(services);
-        String code = userService.unfollowServices(user.getEmail(),set);
-        return new Response(code,null);
+        ResponseCode code = userService.unfollowServices(user.getEmail(),set);
+        return new Response(code.value(),null);
     }
 
 
@@ -117,7 +125,14 @@ public class ServiceController extends BaseSessionController{
         request.setLookback(end-start);
         request.setServices(Arrays.asList(userInfo.getFavServices().toArray(new String[0])));
         List<ServiceMonitorMetric> result = zipkinExtendService.getServiceMonitorMetrics(request);
-
+        List<Rule> rules = rulesRefreshHolder.getRules();
+        for(ServiceMonitorMetric monitorMetric:result){
+            ruleService.decideStat(monitorMetric,rules);
+            List<MonitorMetric> servers = monitorMetric.getServers();
+            for(MonitorMetric server: servers){
+                ruleService.decideStat(monitorMetric,rules);
+            }
+        }
         return new Response("0",result);
     }
 

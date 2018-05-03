@@ -6,11 +6,13 @@ import com.dafy.skye.zipkin.extend.enums.Stat;
  * Created by quanchengyun on 2018/4/23.
  */
 public class MonitorMetric {
+    // service 或者是 host 或者是 spanName=interface
     public String name;
     public String success_rate;
+    private double successPercent;
     public double qps;
     public long latency;
-    public Stat stat;
+    public Stat stat=Stat.GREEN;
 
     public String getName() {
         return name;
@@ -50,5 +52,13 @@ public class MonitorMetric {
 
     public void setStat(Stat stat) {
         this.stat = stat;
+    }
+
+    public double getSuccessPercent() {
+        return successPercent;
+    }
+
+    public void setSuccessPercent(double successPercent) {
+        this.successPercent = successPercent;
     }
 }

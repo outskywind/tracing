@@ -1,5 +1,6 @@
 package com.dafy.skye.zipkin.extend.dto;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -7,7 +8,7 @@ import java.util.List;
  */
 public class ServiceMonitorMetric extends MonitorMetric {
 
-    public List<MonitorMetric> servers;
+    public List<MonitorMetric> servers = new ArrayList<>();
 
     public List<MonitorMetric> getServers() {
         return servers;

@@ -1,5 +1,6 @@
 package com.dafy.skye.zipkin.extend.service;
 
+import com.dafy.skye.zipkin.extend.enums.ResponseCode;
 import com.dafy.skye.zipkin.extend.mapper.ServiceMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -21,23 +22,23 @@ public class UserService {
     @Autowired
     ServiceMapper serviceMapper;
 
-    public String followServices(String user, Set<String> set) {
+    public ResponseCode followServices(String user, Set<String> set) {
         try{
             serviceMapper.addUserFollow(user,set);
-            return "0";
+            return ResponseCode.SUCCESS;
         }catch(Exception e){
             log.error("关注服务 error.",e);
-            return "server error";
+            return ResponseCode.SYSTEM_ERROR;
         }
     }
 
-    public String unfollowServices(String user, Set<String> set) {
+    public ResponseCode unfollowServices(String user, Set<String> set) {
         try{
             serviceMapper.deleteUserFollow(user,set);
-            return "0";
+            return ResponseCode.SUCCESS;
         }catch(Exception e){
             log.error("取消关注服务 error.",e);
-            return "server error";
+            return ResponseCode.SYSTEM_ERROR;
         }
     }
 
