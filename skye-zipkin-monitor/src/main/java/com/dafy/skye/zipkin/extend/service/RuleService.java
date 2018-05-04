@@ -130,10 +130,10 @@ public class RuleService{
                 case ">=" :  {
                     Threshold threshold  = rule.getThreshold();
                     if(metric.getLatency() >= threshold.getRed()){
-                        metric.setStat(Stat.RED);
+                        metric.setStat(Stat.red);
                     }
                     else if(metric.getLatency() >= threshold.getYellow()){
-                        metric.setStat(Stat.YELLOW);
+                        metric.setStat(Stat.yellow);
                     }
                     break;
                 }
@@ -148,10 +148,10 @@ public class RuleService{
                 case ">=" :  {
                     Threshold threshold  = rule.getThreshold();
                     if(metric.getLatency() >= threshold.getRed()){
-                        metric.setStat(Stat.RED);
+                        metric.setStat(Stat.red);
                     }
                     else if(metric.getLatency() >= threshold.getYellow()){
-                        metric.setStat(Stat.YELLOW);
+                        metric.setStat(Stat.yellow);
                     }
                     break;
                 }

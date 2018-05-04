@@ -1,6 +1,7 @@
 package com.dafy.skye.zipkin.extend.dto;
 
 import com.dafy.skye.zipkin.extend.enums.Stat;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 
 /**
  * Created by quanchengyun on 2018/4/23.
@@ -9,10 +10,12 @@ public class MonitorMetric {
     // service 或者是 host 或者是 spanName=interface
     public String name;
     public String success_rate;
+    @JsonIgnore
     private double successPercent;
     public double qps;
     public long latency;
-    public Stat stat=Stat.GREEN;
+    //jackson 序列化枚举类型时，使用的是枚举类型的名字
+    public Stat stat=Stat.green;
 
     public String getName() {
         return name;

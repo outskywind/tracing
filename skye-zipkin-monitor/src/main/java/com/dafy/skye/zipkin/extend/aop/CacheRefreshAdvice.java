@@ -17,6 +17,11 @@ public class CacheRefreshAdvice<T> extends Advice<T> {
     }
 
     @Override
+    public void setTarget(T target,Class<T> targetClass) {
+        super.setTarget(target,targetClass);
+    }
+
+    @Override
     public void after(Object result) {
         holder.remove();
     }

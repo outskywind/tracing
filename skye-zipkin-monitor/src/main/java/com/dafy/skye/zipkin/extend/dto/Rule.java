@@ -1,5 +1,7 @@
 package com.dafy.skye.zipkin.extend.dto;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 /**
  * Created by quanchengyun on 2018/4/12.
  */
@@ -13,7 +15,7 @@ public class Rule {
 
     private String service;
     private String spanName;
-
+    @JsonIgnore
     private String thresholdStr;
 
     public int getId() {

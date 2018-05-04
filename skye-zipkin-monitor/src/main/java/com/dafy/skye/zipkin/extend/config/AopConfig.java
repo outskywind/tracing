@@ -27,9 +27,9 @@ public class AopConfig {
 
     @Bean
     public CacheRefreshAdvice<RuleService> cacheRefreshAdvice(){
-        CacheRefreshAdvice refreshAdvice = new CacheRefreshAdvice<RuleService>();
+        CacheRefreshAdvice<RuleService> refreshAdvice = new CacheRefreshAdvice<>();
         refreshAdvice.setPointCut(new String[]{"add","modify","delete"});
-        refreshAdvice.setTarget(ruleService(),UserService.class);
+        refreshAdvice.setTarget(ruleService(),RuleService.class);
         return refreshAdvice;
     }
 
