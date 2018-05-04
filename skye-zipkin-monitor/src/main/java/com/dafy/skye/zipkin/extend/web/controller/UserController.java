@@ -12,7 +12,8 @@ import java.util.Map;
 /**
  * Created by quanchengyun on 2018/5/2.
  */
-@RestController("/user")
+@RestController
+@RequestMapping("/user")
 public class UserController extends BaseSessionController{
 
     @RequestMapping("/info")
