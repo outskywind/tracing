@@ -5,14 +5,15 @@ package com.dafy.skye.zipkin.extend.enums;
  */
 public enum Stat {
 
-    green("green"),yellow("yellow"),red("red");
-    String value;
+    green(0),yellow(1),red(2);
+    int value;
 
-    Stat(String value){
+    Stat(int value){
         this.value = value;
     }
 
-    public String getValue(){
+    public int value(){
         return this.value;
     }
+
 }

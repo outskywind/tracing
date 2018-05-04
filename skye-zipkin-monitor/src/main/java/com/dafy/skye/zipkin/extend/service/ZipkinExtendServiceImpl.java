@@ -228,7 +228,7 @@ public class ZipkinExtendServiceImpl implements ZipkinExtendService {
                 ParsedCardinality success_count = success.getAggregations().get("count");
                 service.setName(serviceName);
                 service.setLatency(Math.round(time.getValue())/1000);
-                service.setQps(count.getValue()*1000/(double)request.lookback);
+                service.setQps(Math.round(count.getValue()*1000/(double)request.lookback));
                 service.setSuccess_rate(Math.round(success_count.getValue()*100/count.getValue())+"%");
                 service.setSuccessPercent(Math.round(success_count.getValue()*100/count.getValue()));
                 //host
@@ -243,7 +243,7 @@ public class ZipkinExtendServiceImpl implements ZipkinExtendService {
                     success_count = success.getAggregations().get("count");
                     //service.setName(serviceName);
                     metric.setLatency(Math.round(time.getValue())/1000);
-                    metric.setQps(count.getValue()*1000/(double)request.lookback);
+                    metric.setQps(Math.round(count.getValue()*1000/(double)request.lookback));
                     metric.setSuccess_rate(Math.round(success_count.getValue()*100/count.getValue())+"%");
                     metric.setSuccessPercent(Math.round(success_count.getValue()*100/count.getValue()));
                 }

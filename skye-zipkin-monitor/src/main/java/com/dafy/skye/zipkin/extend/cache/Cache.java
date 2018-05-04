@@ -21,7 +21,7 @@ public class Cache {
 
     public <T> T get(String key){
         CacheItem<?> item = holder.get(key);
-        if(item!=null && item.expire < System.currentTimeMillis()){
+        if(item!=null && (item.expire<=0 || item.expire < System.currentTimeMillis())){
             return (T)item.element;
         }
         return null;
@@ -37,13 +37,28 @@ public class Cache {
         if(value==null){
             return false;
         }
-        CacheItem<?> item = new CacheItem<>(value,System.currentTimeMillis()+expireSecs*1000);
+        CacheItem<?> item = null;
+        if(expireSecs<=0){
+             item = new CacheItem<>(value);
+        }
+        else{
+             item = new CacheItem<>(value,System.currentTimeMillis()+expireSecs*1000);
+        }
         holder.put(key,item);
         return true;
     }
 
+    public  boolean add(String key, Object value){
+        return add(key,value,0);
+    }
+
+
     public void remove(String key){
         holder.remove(key);
+    }
+
+    public void clear(){
+        holder.clear();
     }
 
 

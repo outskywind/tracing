@@ -39,7 +39,6 @@ public abstract  class Advice<T> implements MethodInterceptor {
             }
         }
         if (!ismatch){
-            // intercept the aspect here
             return method.invoke(target,objects);
         }
         before();

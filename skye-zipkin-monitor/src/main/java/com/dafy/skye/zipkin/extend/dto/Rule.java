@@ -1,5 +1,6 @@
 package com.dafy.skye.zipkin.extend.dto;
 
+import com.dafy.skye.zipkin.extend.enums.RuleKey;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
 /**
@@ -10,6 +11,7 @@ public class Rule {
     private int id;
     private String type;
     private String dimension;
+
     private String condition;
     private Threshold threshold;
 
@@ -80,5 +82,16 @@ public class Rule {
 
     public void setThresholdStr(String thresholdStr) {
         this.thresholdStr = thresholdStr;
+    }
+
+
+    public String key(){
+        //String key=null;
+        if(RuleKey.DEFAULT.equals(this.getType())){
+            return RuleKey.DEFAULT;
+        }
+        StringBuilder sb = new StringBuilder(this.service);
+        sb.append(".").append(this.spanName);
+        return sb.toString();
     }
 }

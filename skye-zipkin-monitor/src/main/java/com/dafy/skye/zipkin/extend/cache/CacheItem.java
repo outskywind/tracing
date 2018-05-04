@@ -17,5 +17,9 @@ public class CacheItem<T> {
         this.expire = expire;
     }
 
+    public CacheItem(T element){
+        this.element = element;
+    }
+
 
 }

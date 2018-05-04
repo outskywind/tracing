@@ -107,59 +107,44 @@ public class RuleService{
     /**
      * 判断监控维度的状态
      * @param metric
-     * @return
+     * @param rules 这里已经是整合之后的规则列表，只需直接判断即可
      */
-    public void decideStat(MonitorMetric metric, List<Rule> rules){
-        //key service.interface ->rule
-        //    default ->rule
+    public void decideStat(MonitorMetric metric, Rule[] rules){
+        //多个维度的规则，状态取最差的那一个
+        Stat stat = Stat.green;
         for(Rule rule:rules){
-            if("default".equals(rule.getType())){
-                doDecide(metric,rule);
-            }
-            else if(metric.name.equals(rule.getService()) || metric.name.equals(rule.getSpanName())){
-                doDecide(metric,rule);
-                break;
+            Stat decided = doDecide(metric,rule);
+            if(decided.value()>stat.value()){
+                stat = decided;
             }
         }
+        metric.setStat(stat);
     }
 
-
-    private void doDecide(MonitorMetric metric, Rule rule){
+    /**
+     * 不使用condition字段自己判断
+     * @param metric
+     * @param rule
+     */
+    private Stat doDecide(MonitorMetric metric, Rule rule){
         if(Demension.LATENCY.value().equals(rule.getDimension())){
-            switch (rule.getCondition()){
-                case ">=" :  {
-                    Threshold threshold  = rule.getThreshold();
-                    if(metric.getLatency() >= threshold.getRed()){
-                        metric.setStat(Stat.red);
-                    }
-                    else if(metric.getLatency() >= threshold.getYellow()){
-                        metric.setStat(Stat.yellow);
-                    }
-                    break;
-                }
-                case "<=" : {
-                    //nothing to do ..
-                    break;
-                }
+            Threshold threshold  = rule.getThreshold();
+            if(metric.getLatency() >= threshold.getRed()){
+                return Stat.red;
+            }
+            else if(metric.getLatency() >= threshold.getYellow()){
+                return Stat.yellow;
             }
         }
         else if(Demension.SUCCESS_RATE.value().equals(rule.getDimension())){
-            switch (rule.getCondition()){
-                case ">=" :  {
-                    Threshold threshold  = rule.getThreshold();
-                    if(metric.getLatency() >= threshold.getRed()){
-                        metric.setStat(Stat.red);
-                    }
-                    else if(metric.getLatency() >= threshold.getYellow()){
-                        metric.setStat(Stat.yellow);
-                    }
-                    break;
-                }
-                case "<=" : {
-                    //nothing to do ..
-                    break;
-                }
+            Threshold threshold  = rule.getThreshold();
+            if(metric.getSuccessPercent() <= threshold.getRed()){
+                return Stat.red;
+            }
+            else if(metric.getSuccessPercent() <= threshold.getYellow()){
+                return Stat.yellow;
             }
         }
+        return Stat.green;
     }
 }

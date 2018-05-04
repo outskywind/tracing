@@ -8,7 +8,6 @@ import com.dafy.skye.zipkin.extend.service.RuleService;
 import com.dafy.skye.zipkin.extend.service.ZipkinExtendService;
 import com.dafy.skye.zipkin.extend.util.TimeUtil;
 import com.dafy.skye.zipkin.extend.service.UserService;
-import com.dafy.skye.zipkin.extend.web.session.UserSessionHolder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Controller;
@@ -125,12 +124,14 @@ public class ServiceController extends BaseSessionController{
         request.setLookback(end-start);
         request.setServices(Arrays.asList(userInfo.getFavServices().toArray(new String[0])));
         List<ServiceMonitorMetric> result = zipkinExtendService.getServiceMonitorMetrics(request);
-        List<Rule> rules = rulesRefreshHolder.getRules();
+        Rule[] rules = null;
+        //因为是 服务面板数据，因此使用默认的或者服务粒度的
         for(ServiceMonitorMetric monitorMetric:result){
+            rules = rulesRefreshHolder.getRules(monitorMetric.getName());
             ruleService.decideStat(monitorMetric,rules);
             List<MonitorMetric> servers = monitorMetric.getServers();
             for(MonitorMetric server: servers){
-                ruleService.decideStat(monitorMetric,rules);
+                ruleService.decideStat(server,rules);
             }
         }
         return new Response("0",result);
