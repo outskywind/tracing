@@ -1,18 +1,13 @@
 package com.dafy.skye.zipkin.extend.web.controller;
 
-import com.dafy.skye.druid.entity.GroupbyQueryResult;
-import com.dafy.skye.druid.entity.TimeSeriesQueryResult;
-import com.dafy.skye.druid.rest.*;
 import com.dafy.skye.zipkin.extend.cache.RulesRefreshHolder;
 import com.dafy.skye.zipkin.extend.cache.ServiceRefreshHolder;
-import com.dafy.skye.zipkin.extend.converter.DruidResultConverter;
 import com.dafy.skye.zipkin.extend.dto.*;
 import com.dafy.skye.zipkin.extend.enums.ResponseCode;
 import com.dafy.skye.zipkin.extend.service.RuleService;
 import com.dafy.skye.zipkin.extend.service.ZipkinExtendService;
 import com.dafy.skye.zipkin.extend.util.TimeUtil;
 import com.dafy.skye.zipkin.extend.service.UserService;
-import org.joda.time.DateTime;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Controller;
@@ -36,9 +31,6 @@ public class ServiceController extends BaseSessionController{
 
     @Autowired
     UserService userService;
-
-    @Autowired
-    RestDruidClient restDruidClient;
 
     @Autowired
     ZipkinExtendService zipkinExtendService;
@@ -150,47 +142,19 @@ public class ServiceController extends BaseSessionController{
     @RequestMapping("/series")
     @ResponseBody
     public Response  series(@RequestBody ServiceSeriesRequest request){
-        //druid 一次最多5000个时序点因此如果时间序列250个点，只能一次返回最多20条线
-        //时间粒度需要后端重新计算校验
-        GroupByQueryBuilder builder = GroupByQueryBuilder.builder();
-        builder.dataSource("service-span-metric").dimensions(new String[]{"spanName"})
-                .filter(Filter.builder().type(LogicType.selector).dimension("serviceName").value(request.getService()))
-                .granularity(TimeUtil.parseTimeInterval(request.getTimeInterval()),new DateTime(request.getStart()))
-                .timeRange(TimeInterval.builder().start(new DateTime(request.getStart())).end(new DateTime(request.getEnd())))
-                .addAggregation(Aggregation.builder().name("latency").type(AggregationType.longSum).fieldName("duration"))
-                .addAggregation(Aggregation.builder().name("_count").type(AggregationType.longSum).fieldName("count"))
-                .addPostAggregation(PostAggregation.builder().name("avg_latency").fn(Fn.div)
-                        .fields(Arrays.asList(new PostAggregation.PostAggregationField("latency"),new PostAggregation.PostAggregationField("_count"))));
-        List<GroupbyQueryResult> queryResult =  restDruidClient.groupby(builder);
-
-        return  new Response("0",DruidResultConverter.convertSeriesMetricGroupby(queryResult,"spanName",request.getTimeInterval()));
+        Collection<TimeSeriesResult>  result = zipkinExtendService.getServiceSeries(request);
+        return  new Response("0",result);
     }
 
 
     @RequestMapping("/interface/profile")
     @ResponseBody
     public Response  interfaceProfile(@RequestBody ServiceSeriesRequest request){
-        //druid 一次最多5000个时序点因此如果时间序列250个点，一次返回最多20条线
-        //时间粒度需要后端重新计算校验
-        GroupByQueryBuilder builder = GroupByQueryBuilder.builder();
-        builder.dataSource("service-span-metric").dimensions(new String[]{"spanName"})
-                .filter(Filter.builder().type(LogicType.selector).dimension("serviceName").value(request.getService()))
-                .granularity(Granularity.all)
-                .timeRange(TimeInterval.builder().start(new DateTime(request.getStart())).end(new DateTime(request.getEnd())))
-                .addAggregation(Aggregation.builder().name("latency").type(AggregationType.longSum).fieldName("duration"))
-                .addAggregation(Aggregation.builder().name("success").type(AggregationType.longSum).fieldName("successCount"))
-                .addAggregation(Aggregation.builder().name("peak_qps").type(AggregationType.longMax).fieldName("count"))
-                .addAggregation(Aggregation.builder().name("_count").type(AggregationType.longSum).fieldName("count"))
-                .addPostAggregation(PostAggregation.builder().name("avg_latency").fn(Fn.div)
-                        .fields(Arrays.asList(new PostAggregation.PostAggregationField("latency"),new PostAggregation.PostAggregationField("_count"))))
-                .addPostAggregation(PostAggregation.builder().name("success_rate").fn(Fn.div)
-                        .fields(Arrays.asList(new PostAggregation.PostAggregationField("success"),new PostAggregation.PostAggregationField("_count"))));
-        List<GroupbyQueryResult> queryResult =  restDruidClient.groupby(builder);
-        Collection<MonitorMetric> monitorMetrics = DruidResultConverter.convertMetric(queryResult,"spanName");
+        Collection<MonitorMetric> monitorMetrics = zipkinExtendService.getInterfacesMonitorMetric(request);
         //根据规则判断状态
         Rule[] rules ;
         for(MonitorMetric monitorMetric: monitorMetrics){
-            rules = rulesRefreshHolder.getRules(monitorMetric.getName());
+            rules = rulesRefreshHolder.getRules(request.getService(),monitorMetric.getName());
             ruleService.decideStat(monitorMetric,rules);
         }
         return  new Response("0",monitorMetrics);
@@ -200,25 +164,29 @@ public class ServiceController extends BaseSessionController{
     @RequestMapping("/interface/series")
     @ResponseBody
     public Response interfaceSeries(@RequestBody InterfaceSeriesRequest request){
-
-        TimeSeriesQueryBuilder builder = TimeSeriesQueryBuilder.builder();
-        builder.dataSource("service-span-metric")
-                .filter(Filter.builder().type(LogicType.and).fields(
-                        Field.builder().type(Field.FieldType.selector).dimension("serviceName").value(request.getService()),
-                        Field.builder().type(Field.FieldType.selector).dimension("spanName").value(request.getName())))
-                .granularity(TimeUtil.parseTimeInterval(request.getTimeInterval()),new DateTime(request.getStart()))
-                .timeRange(TimeInterval.builder().start(new DateTime(request.getStart())).end(new DateTime(request.getEnd())))
-                .addAggregation(Aggregation.builder().name("latency").type(AggregationType.longSum).fieldName("duration"))
-                .addAggregation(Aggregation.builder().name("_count").type(AggregationType.longSum).fieldName("count"))
-                .addPostAggregation(PostAggregation.builder().name("avg_latency").fn(Fn.div)
-                        .fields(Arrays.asList(new PostAggregation.PostAggregationField("latency"),new PostAggregation.PostAggregationField("_count"))));
-        List<TimeSeriesQueryResult> queryResult =  restDruidClient.timeseries(builder);
-
-        return  new Response("0",DruidResultConverter.convertSeriesMetricTimeseries(queryResult,request.getTimeInterval()));
+        Collection<SeriesMetric> seriesMetrics = zipkinExtendService.getInterfaceSeries(request);
+        return  new Response("0",seriesMetrics);
     }
 
 
+    @RequestMapping("/interface/traces")
+    @ResponseBody
+    public Response interfaceTraces(@RequestBody InterfaceSeriesRequest request){
+        BasicQueryRequest queryRequest = new BasicQueryRequest();
+        queryRequest.setEndTs(request.getEnd());
+        queryRequest.setLookback(request.getEnd()-request.getStart());
+        queryRequest.setServices(Arrays.asList(request.getService()));
+        queryRequest.setSpans(Arrays.asList(request.getName()));
+        queryRequest.setLimit(200);
 
+        List<Trace> traces = zipkinExtendService.getInterfaceTraces(queryRequest);
+        //TODO
+        Rule[] rules  = rulesRefreshHolder.getRules(request.getService(),request.getName());
+        for(Trace trace: traces){
+            ruleService.decideStat(trace,rules);
+        }
+        return new Response("0",traces);
+    }
 
 
 

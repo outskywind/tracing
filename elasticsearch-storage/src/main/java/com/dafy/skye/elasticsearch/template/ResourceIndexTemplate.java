@@ -17,9 +17,10 @@ public class ResourceIndexTemplate extends IndexTemplate {
 
     @Override
     public String resolveTemplate() throws Exception{
+        InputStream in = null;
         if(resource!=null){
             //果然是在所有的classpath 下面加载资源文件。
-            InputStream in  = this.getClass().getClassLoader().getResourceAsStream(resource);
+            in  = this.getClass().getClassLoader().getResourceAsStream(resource);
             if(in==null){
                 throw new RuntimeException("index template " + resource + "can't be load from classpath");
             }
@@ -33,6 +34,10 @@ public class ResourceIndexTemplate extends IndexTemplate {
                 }
             }catch(IOException e){
                 throw  new IOException("索引配置文件读取失败",e);
+            }finally {
+                if(in!=null){
+                    in.close();
+                }
             }
         }
         return null;

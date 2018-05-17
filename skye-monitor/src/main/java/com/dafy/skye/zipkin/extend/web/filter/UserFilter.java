@@ -7,14 +7,11 @@ import com.dafy.skye.zipkin.extend.web.session.UserSessionHolder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
-import org.springframework.util.CollectionUtils;
 
 import javax.servlet.*;
 import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 import javax.validation.constraints.NotNull;
 import java.io.IOException;
-import java.util.Collections;
 
 /**
  * Created by quanchengyun on 2018/4/13.

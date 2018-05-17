@@ -54,6 +54,9 @@ public class ZipkinElasticsearchQuery {
             requestBuilder.sort(request.sortField, SortOrder.fromString(request.sortOrder));
         }
         requestBuilder.size(0);
+        if(request.getLimit()>0){
+            requestBuilder.size(request.getLimit());
+        }
         requestBuilder.query(root);
 
         return requestBuilder;

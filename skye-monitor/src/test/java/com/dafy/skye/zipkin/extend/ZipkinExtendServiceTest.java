@@ -18,7 +18,7 @@ import java.util.*;
  * Created by Caedmon on 2017/6/18.
  */
 @RunWith(SpringJUnit4ClassRunner.class)
-@SpringBootTest(classes = ZipkinExtendApplication.class,webEnvironment = SpringBootTest.WebEnvironment.NONE,
+@SpringBootTest(classes = SkyeMonitorApplication.class,webEnvironment = SpringBootTest.WebEnvironment.NONE,
         properties={"env=dev"})
 public class ZipkinExtendServiceTest {
 
@@ -36,14 +36,7 @@ public class ZipkinExtendServiceTest {
         System.out.println(serviceNames);
     }
 
-    @Test
-    public void testGetTraces(){
-        BasicQueryRequest request=BasicQueryRequest.newBuilder()
-                .lookback(lookback())
-                .endTs(endTs()).build();
-        TraceQueryResult result=zipkinExtendService.getTraces(request);
-        System.out.println(JacksonConvert.toPrettyString(result));
-    }
+
     @Test
     public void testGetSpanStats(){
         BasicQueryRequest request=BasicQueryRequest.newBuilder()
@@ -54,15 +47,6 @@ public class ZipkinExtendServiceTest {
         //System.out.println(JacksonConvert.toPrettyString(result));
     }
 
-    @Test
-    public void testSpanTimeSeries(){
-        BasicQueryRequest request=BasicQueryRequest.newBuilder()
-                .lookback(lookback())
-                .endTs(1498486059308L).spans(Arrays.asList("gatewayprovider.start","officeprovider.startwork")).
-                        build();
-        TimeSeriesResult result=zipkinExtendService.getServiceTimeSeries(request);
-        System.out.println(JacksonConvert.toPrettyString(result));
-    }
 
 
     public static void main(String[] args) {

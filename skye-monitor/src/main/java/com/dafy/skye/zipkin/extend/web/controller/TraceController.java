@@ -16,27 +16,9 @@ public class TraceController {
 
     ZipkinExtendService zipkinExtendService;
 
-    /*@RequestMapping("/span/metrics")
-    SpanMetricsResult getSpanMetrics(@RequestBody  TraceQueryRequest request){
-        return zipkinExtendService.getSpansMetrics(request);
-    }*/
-    @RequestMapping("/list")
-    TraceQueryResult getTraces(@RequestBody  BasicQueryRequest request){
-        return zipkinExtendService.getTraces(request);
-    }
     @RequestMapping("/services")
     Set<String> getServiceNames(@RequestBody BasicQueryRequest request){
         return zipkinExtendService.getServices(request);
-    }
-
-    /**
-     * span调用时间序列图
-     * @param request
-     * @return
-     */
-    @RequestMapping("/span/series")
-    TimeSeriesResult getServiceTimeSeries(@RequestBody BasicQueryRequest request){
-        return zipkinExtendService.getServiceTimeSeries(request);
     }
 
     public ZipkinExtendService getZipkinExtendService() {

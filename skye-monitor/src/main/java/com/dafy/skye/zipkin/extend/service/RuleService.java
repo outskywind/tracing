@@ -3,6 +3,7 @@ package com.dafy.skye.zipkin.extend.service;
 import com.dafy.skye.zipkin.extend.dto.MonitorMetric;
 import com.dafy.skye.zipkin.extend.dto.Rule;
 import com.dafy.skye.zipkin.extend.dto.Threshold;
+import com.dafy.skye.zipkin.extend.dto.Trace;
 import com.dafy.skye.zipkin.extend.enums.Demension;
 import com.dafy.skye.zipkin.extend.enums.ResponseCode;
 import com.dafy.skye.zipkin.extend.enums.Stat;
@@ -104,6 +105,49 @@ public class RuleService{
     }
 
 
+
+    /**
+     * 判断监控维度的状态
+     * @param trace
+     * @param rules 这里已经是整合之后的规则列表，只需直接判断即可
+     */
+    public void decideStat(Trace trace, Rule[] rules){
+        //多个维度的规则，状态取最差的那一个
+        Stat stat = Stat.green;
+        if(!trace.isSuccess()){
+            stat = Stat.red;
+        }
+        else{
+            for(Rule rule:rules){
+                Stat decided = doDecide(trace,rule);
+                if(decided.value()>stat.value()){
+                    stat = decided;
+                }
+            }
+        }
+        trace.setStat(stat);
+    }
+
+    /**
+     * 不使用condition字段自己判断
+     * @param trace
+     * @param rule
+     */
+    private Stat doDecide(Trace trace, Rule rule){
+        if(Demension.LATENCY.value().equals(rule.getDimension())){
+            Threshold threshold  = rule.getThreshold();
+            if(trace.getLatency() >= threshold.getRed()){
+                return Stat.red;
+            }
+            else if(trace.getLatency() >= threshold.getYellow()){
+                return Stat.yellow;
+            }
+        }
+        return Stat.green;
+    }
+
+
+
     /**
      * 判断监控维度的状态
      * @param metric
@@ -120,6 +164,7 @@ public class RuleService{
         }
         metric.setStat(stat);
     }
+
 
     /**
      * 不使用condition字段自己判断

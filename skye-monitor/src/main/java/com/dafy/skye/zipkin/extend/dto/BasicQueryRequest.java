@@ -17,7 +17,7 @@ public class BasicQueryRequest extends TimeBaseQueryRequest{
     public List<String> tags;
     public Long minDuration;
     public Long maxDuration;
-    public int limit;
+    public int limit=0;
     public String sortField="timestamp_millis";
     public String sortOrder="desc";
 

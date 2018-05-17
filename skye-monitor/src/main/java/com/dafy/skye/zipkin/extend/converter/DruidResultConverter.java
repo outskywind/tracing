@@ -10,6 +10,7 @@ import org.joda.time.DateTime;
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
 
+import java.math.BigDecimal;
 import java.util.*;
 
 /**
@@ -57,7 +58,8 @@ public class DruidResultConverter {
         for(TimeSeriesQueryResult result:series){
             long avg_latency = result.getResult().get("avg_latency")==null?0: Math.round((Double)(result.getResult().get("avg_latency")));
             long count = result.getResult().get("_count")==null?0:(Integer)(result.getResult().get("_count"));
-            long avg_qps = count/ TimeUtil.parseTimeIntervalSeconds(timeInterval);
+            //div
+            double avg_qps = div(count,TimeUtil.parseTimeIntervalSeconds(timeInterval),2);
             String timestamp = result.getTimestamp();
             DateTimeFormatter format = DateTimeFormat.forPattern("yyyy-MM-dd'T'HH:mm:ss.SSSZ");
             //时间解析
@@ -65,6 +67,13 @@ public class DruidResultConverter {
             seriesMetrics.add(new SeriesMetric(dateTime.getMillis(),avg_qps,avg_latency,count));
         }
         return seriesMetrics;
+    }
+
+
+    private static double div(long div1, long div2, int scale){
+        BigDecimal bigDecimal = new BigDecimal(div1);
+        BigDecimal bigDecimal2 = new BigDecimal(div2);
+        return bigDecimal.divide(bigDecimal2, scale, BigDecimal.ROUND_HALF_UP).doubleValue();
     }
 
 

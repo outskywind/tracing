@@ -2,6 +2,7 @@ package com.dafy.skye.zipkin.extend.service;
 
 import com.dafy.skye.zipkin.extend.dto.*;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Set;
 
@@ -12,11 +13,15 @@ public interface ZipkinExtendService {
 
     Set<String> getServices(BasicQueryRequest request);
 
-    TraceQueryResult getTraces(BasicQueryRequest request);
-
-    TimeSeriesResult getServiceTimeSeries(BasicQueryRequest request);
-
     List<ServiceMonitorMetric> getServiceMonitorMetrics(BasicQueryRequest request);
 
     List<String> getServiceInterfaces(String serviceName);
+
+    Collection<TimeSeriesResult> getServiceSeries(ServiceSeriesRequest request);
+
+    Collection<MonitorMetric> getInterfacesMonitorMetric(ServiceSeriesRequest request);
+
+    Collection<SeriesMetric> getInterfaceSeries(InterfaceSeriesRequest request);
+
+    List<Trace> getInterfaceTraces(BasicQueryRequest request);
 }

@@ -17,8 +17,8 @@ import org.springframework.context.annotation.FilterType;
 @Configuration
 //当配置为@ConfigurationProperties时，要被注入bean时，如果是第三方jar包的话，因为不被扫描到，所以只能指定class
 @EnableConfigurationProperties({ZipkinExtendESConfigurationProperties.class})
-@ComponentScan(basePackages = {"com.dafy.skye.zipkin.extend"},excludeFilters = @ComponentScan.Filter(type= FilterType.REGEX,pattern="com.dafy.skye.zipkin.extend.ZipkinExtendApplication"))
-public class ZipkinExtendAutoConfiguration {
+@ComponentScan(basePackages = {"com.dafy.skye.zipkin.extend"},excludeFilters = @ComponentScan.Filter(type= FilterType.REGEX,pattern="com.dafy.skye.zipkin.extend.SkyeMonitorApplication"))
+public class SkyeMonitorAutoConfiguration {
 
     @Bean
     ZipkinExtendService zipkinExtendService(ZipkinExtendESConfigurationProperties zipkinExtendESConfigurationProperties,

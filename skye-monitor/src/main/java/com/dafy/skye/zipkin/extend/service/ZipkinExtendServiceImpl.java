@@ -2,11 +2,16 @@ package com.dafy.skye.zipkin.extend.service;
 
 import com.dafy.skye.common.elasticsearch.DefaultOptions;
 import com.dafy.skye.common.util.IndexNameFormatter;
+import com.dafy.skye.druid.entity.GroupbyQueryResult;
+import com.dafy.skye.druid.entity.TimeSeriesQueryResult;
+import com.dafy.skye.druid.rest.*;
 import com.dafy.skye.zipkin.config.elasticsearch.ZipkinElasticsearchStorageProperties;
 import com.dafy.skye.zipkin.extend.config.ZipkinExtendESConfigurationProperties;
+import com.dafy.skye.zipkin.extend.converter.DruidResultConverter;
 import com.dafy.skye.zipkin.extend.dto.*;
 
 import com.dafy.skye.zipkin.extend.query.ZipkinElasticsearchQuery;
+import com.dafy.skye.zipkin.extend.util.TimeUtil;
 import com.google.common.base.Strings;
 
 import org.elasticsearch.action.search.*;
@@ -16,29 +21,23 @@ import org.elasticsearch.client.transport.TransportClient;
 import org.elasticsearch.index.query.BoolQueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.search.SearchHit;
+import org.elasticsearch.search.SearchHits;
 import org.elasticsearch.search.aggregations.*;
 import org.elasticsearch.search.aggregations.bucket.filter.ParsedFilter;
-import org.elasticsearch.search.aggregations.bucket.histogram.DateHistogramInterval;
-import org.elasticsearch.search.aggregations.bucket.histogram.Histogram;
-import org.elasticsearch.search.aggregations.bucket.histogram.ParsedDateHistogram;
 import org.elasticsearch.search.aggregations.bucket.terms.ParsedStringTerms;
 import org.elasticsearch.search.aggregations.bucket.terms.Terms;
 import org.elasticsearch.search.aggregations.metrics.avg.ParsedAvg;
 import org.elasticsearch.search.aggregations.metrics.cardinality.ParsedCardinality;
 import org.elasticsearch.search.builder.SearchSourceBuilder;
 import org.elasticsearch.search.sort.SortOrder;
-import org.joda.time.DateTimeZone;
+import org.joda.time.DateTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
-import zipkin.Codec;
-import zipkin.Span;
-import zipkin.internal.GroupByTraceId;
 
 import javax.annotation.PostConstruct;
-import java.net.UnknownHostException;
 import java.util.*;
 
 /**
@@ -58,11 +57,14 @@ public class ZipkinExtendServiceImpl implements ZipkinExtendService {
     private TransportClient transportClient;
 
     @Autowired
+    RestDruidClient restDruidClient;
+
+    @Autowired
     private RestHighLevelClient restClient;
 
 
     @PostConstruct
-    public void init() throws UnknownHostException{
+    public void init() {
         IndexNameFormatter.Builder formatterBuilder=IndexNameFormatter.builder();
         formatterBuilder.dateSeparator('-');
         final String index=zipkinESStorageProperties.getIndex();
@@ -105,54 +107,6 @@ public class ZipkinExtendServiceImpl implements ZipkinExtendService {
             log.error("ES统计服务失败：",e);
         }
         return set;
-    }
-
-
-    //服务详细表格
-    @Override
-    public TimeSeriesResult getServiceTimeSeries(BasicQueryRequest request) {
-        String[] indices=indices(request.endTs,request.lookback);
-        SearchRequest searchRequest = new SearchRequest();
-        searchRequest.indices(indices);
-        searchRequest.indicesOptions(IndicesOptions.lenientExpandOpen());
-        SearchSourceBuilder searchSourceBuilder = ZipkinElasticsearchQuery.searchSourceBuilder(request);
-        searchSourceBuilder.aggregation(AggregationBuilders.dateHistogram("timeSplit").
-                dateHistogramInterval(new DateHistogramInterval(request.timeInterval)).field("timestamp_millis").timeZone(DateTimeZone.forID("+08:00"))
-                .subAggregation(AggregationBuilders.terms("services").field("name").order(BucketOrder.count(false))
-                        .subAggregation(AggregationBuilders.cardinality("count").field("id"))
-                        .subAggregation(AggregationBuilders.avg("time").field("duration")))
-        );
-        searchRequest.source(searchSourceBuilder);
-        TimeSeriesResult result = new TimeSeriesResult();
-       try{
-           SearchResponse  response = restClient.search(searchRequest);
-           ParsedDateHistogram timeSplit = response.getAggregations().get("timeSplit");
-           Map<String,TimeSeriesResult> data = new HashMap<>();
-           for(Histogram.Bucket timeBucket:timeSplit.getBuckets()){
-                Terms services = timeBucket.getAggregations().get("services");
-                for(Terms.Bucket serviceBucket:services.getBuckets()){
-                    String service = (String)serviceBucket.getKey();
-                    ParsedCardinality count = serviceBucket.getAggregations().get("count");
-                    ParsedAvg time = serviceBucket.getAggregations().get("time");
-                    TimeSeriesResult series = data.get(service);
-                    if(series==null){
-                        series = new TimeSeriesResult();
-                        series.setName(service);
-                        data.put(service,series);
-                    }
-                    SeriesMetric metric = new SeriesMetric(Long.parseLong(timeBucket.getKeyAsString()),0,Math.round(time.getValue())/1000,count.getValue());
-                    //metric.setAvgDuration(Math.round(time.getValue())/1000);
-                    //metric.setCount(count.getValue());
-                    //metric.setSpanName(service);
-                    //metric.setStartTs(Long.parseLong(timeBucket.getKeyAsString()));
-                    //metric.setEndTs(metric.getStartTs()); 不设置结束时间
-                    series.getSeries().add(metric);
-                }
-           }
-       }catch (Exception e){
-           log.error("查询异常:",e);
-       }
-        return result;
     }
 
     /**
@@ -218,11 +172,93 @@ public class ZipkinExtendServiceImpl implements ZipkinExtendService {
         return result;
     }
 
+    @Override
+    public Collection<TimeSeriesResult> getServiceSeries(ServiceSeriesRequest request){
+        //druid 一次最多5000个时序点因此如果时间序列250个点，只能一次返回最多20条线
+        //时间粒度需要后端重新计算校验
+        GroupByQueryBuilder builder = GroupByQueryBuilder.builder();
+        builder.dataSource("service-span-metric").dimensions(new String[]{"spanName"})
+                .filter(Filter.builder().type(LogicType.selector).dimension("serviceName").value(request.getService()))
+                .granularity(TimeUtil.parseTimeInterval(request.getTimeInterval()),new DateTime(request.getStart()))
+                .timeRange(TimeInterval.builder().start(new DateTime(request.getStart())).end(new DateTime(request.getEnd())))
+                .addAggregation(com.dafy.skye.druid.rest.Aggregation.builder().name("latency").type(AggregationType.longSum).fieldName("duration"))
+                .addAggregation(com.dafy.skye.druid.rest.Aggregation.builder().name("_count").type(AggregationType.longSum).fieldName("count"))
+                .addPostAggregation(PostAggregation.builder().name("avg_latency").fn(Fn.div)
+                        .fields(Arrays.asList(new PostAggregation.PostAggregationField("latency"),new PostAggregation.PostAggregationField("_count"))));
+        List<GroupbyQueryResult> queryResult =  restDruidClient.groupby(builder);
 
+        return DruidResultConverter.convertSeriesMetricGroupby(queryResult,"spanName",request.getTimeInterval());
+    }
 
+    @Override
+    public Collection<MonitorMetric> getInterfacesMonitorMetric(ServiceSeriesRequest request) {
+        //druid 一次最多5000个时序点因此如果时间序列250个点，一次返回最多20条线
+        //时间粒度需要后端重新计算校验
+        GroupByQueryBuilder builder = GroupByQueryBuilder.builder();
+        builder.dataSource("service-span-metric").dimensions(new String[]{"spanName"})
+                .filter(Filter.builder().type(LogicType.selector).dimension("serviceName").value(request.getService()))
+                .granularity(Granularity.all)
+                .timeRange(TimeInterval.builder().start(new DateTime(request.getStart())).end(new DateTime(request.getEnd())))
+                .addAggregation(com.dafy.skye.druid.rest.Aggregation.builder().name("latency").type(AggregationType.longSum).fieldName("duration"))
+                .addAggregation(com.dafy.skye.druid.rest.Aggregation.builder().name("success").type(AggregationType.longSum).fieldName("successCount"))
+                .addAggregation(com.dafy.skye.druid.rest.Aggregation.builder().name("peak_qps").type(AggregationType.longMax).fieldName("count"))
+                .addAggregation(com.dafy.skye.druid.rest.Aggregation.builder().name("_count").type(AggregationType.longSum).fieldName("count"))
+                .addPostAggregation(PostAggregation.builder().name("avg_latency").fn(Fn.div)
+                        .fields(Arrays.asList(new PostAggregation.PostAggregationField("latency"),new PostAggregation.PostAggregationField("_count"))))
+                .addPostAggregation(PostAggregation.builder().name("success_rate").fn(Fn.div)
+                        .fields(Arrays.asList(new PostAggregation.PostAggregationField("success"),new PostAggregation.PostAggregationField("_count"))));
+        List<GroupbyQueryResult> queryResult =  restDruidClient.groupby(builder);
+        return DruidResultConverter.convertMetric(queryResult,"spanName");
+    }
 
+    @Override
+    public Collection<SeriesMetric> getInterfaceSeries(InterfaceSeriesRequest request) {
+        TimeSeriesQueryBuilder builder = TimeSeriesQueryBuilder.builder();
+        builder.dataSource("service-span-metric")
+                .filter(Filter.builder().type(LogicType.and).fields(
+                        Field.builder().type(Field.FieldType.selector).dimension("serviceName").value(request.getService()),
+                        Field.builder().type(Field.FieldType.selector).dimension("spanName").value(request.getName())))
+                .granularity(TimeUtil.parseTimeInterval(request.getTimeInterval()),new DateTime(request.getStart()))
+                .timeRange(TimeInterval.builder().start(new DateTime(request.getStart())).end(new DateTime(request.getEnd())))
+                .addAggregation(com.dafy.skye.druid.rest.Aggregation.builder().name("latency").type(AggregationType.longSum).fieldName("duration"))
+                .addAggregation(com.dafy.skye.druid.rest.Aggregation.builder().name("_count").type(AggregationType.longSum).fieldName("count"))
+                .addPostAggregation(PostAggregation.builder().name("avg_latency").fn(Fn.div)
+                        .fields(Arrays.asList(new PostAggregation.PostAggregationField("latency"),new PostAggregation.PostAggregationField("_count"))));
+        List<TimeSeriesQueryResult> queryResult =  restDruidClient.timeseries(builder);
+        return DruidResultConverter.convertSeriesMetricTimeseries(queryResult,request.getTimeInterval());
+    }
 
+    @Override
+    public List<Trace> getInterfaceTraces(BasicQueryRequest request) {
+        List<Trace> result = new ArrayList<>();
+        try{
+            String[] indices=indices(request.endTs,request.lookback);
+            SearchRequest searchRequest = new SearchRequest();
+            searchRequest.indices(indices);
+            searchRequest.indicesOptions(IndicesOptions.lenientExpandOpen());
+            SearchSourceBuilder searchSourceBuilder = ZipkinElasticsearchQuery.searchSourceBuilder(request);
+            searchSourceBuilder.fetchSource(new String[]{"traceId","duration","timestamp_millis","localEndpoint.ipv4","tags.status"},new String[]{});
+            searchRequest.source(searchSourceBuilder);
+            SearchResponse  searchResponse = restClient.search(searchRequest);
+            SearchHits hits = searchResponse.getHits();
+            SearchHit[] searchHits = hits.getHits();
+            for (SearchHit hit : searchHits) {
+                // do something with the SearchHit
+                Map<String, Object> sourceAsMap = hit.getSourceAsMap();
+                Trace trace = new Trace();
+                trace.setTraceId((String)sourceAsMap.get("traceId"));
+                trace.setLatency(Math.round((Integer)sourceAsMap.get("duration")/1000));//zipkin 原始值 microseconds
+                trace.setTimestamp((Long)sourceAsMap.get("timestamp_millis"));
+                trace.setHost((String)(((Map)sourceAsMap.get("localEndpoint")).get("ipv4")));
 
+                trace.setSuccess(sourceAsMap.get("tags")!=null && "success".equals(((Map)sourceAsMap.get("tags")).get("status")));
+                result.add(trace);
+            }
+        }catch (Exception e){
+            log.error("error:",e);
+        }
+        return result;
+    }
 
 
     @Override
@@ -282,28 +318,6 @@ public class ZipkinExtendServiceImpl implements ZipkinExtendService {
         requestBuilder.setQuery(root);
 
         return requestBuilder;
-    }
-
-    public TraceQueryResult getTraces(BasicQueryRequest request){
-        SearchRequestBuilder search= searchRequestBuilder(request);
-        //AggregationBuilders.terms("trace_terms").size(10000);
-        SearchResponse response=search.execute().actionGet();
-        SearchHit[] hits=response.getHits().getHits();
-        List<Span> spans=new LinkedList<>();
-        if(hits!=null){
-            for(SearchHit hit:hits){
-                String source=hit.getSourceAsString();
-                Span span=Codec.JSON.readSpan(source.getBytes());
-                spans.add(span);
-            }
-        }
-        List<List<Span>> traces=GroupByTraceId.apply(spans,false,true);
-        TraceQueryResult result=new TraceQueryResult();
-        result.setTook(response.getTook().seconds());
-        result.setError(response.getShardFailures().toString());
-        result.setTraces(traces);
-        result.setSuccess(true);
-        return result;
     }
 
     public ZipkinExtendESConfigurationProperties getZipkinExtendESConfigurationProperties() {

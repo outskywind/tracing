@@ -1,2 +1,2 @@
 org.springframework.boot.autoconfigure.EnableAutoConfiguration=\
-com.dafy.skye.monitor.config.ZipkinExtendAutoConfiguration
+com.dafy.skye.monitor.config.SkyeMonitorAutoConfiguration

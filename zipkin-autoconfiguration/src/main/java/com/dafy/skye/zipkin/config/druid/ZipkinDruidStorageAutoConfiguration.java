@@ -110,6 +110,11 @@ public class ZipkinDruidStorageAutoConfiguration {
             sender.start();
             instance.add(dataSource,sender);
         }
+        try{
+            ins.close();
+        }catch (Exception e){
+            //.nothing
+        }
         return instance;
     }
 

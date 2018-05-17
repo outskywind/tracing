@@ -19,12 +19,12 @@ import zipkin.server.EnableZipkinServer;
 @SetcdPropertySource(
         etcdKeys={"/server-config/skye/application-${env}.yml"},localOverride = true
 )
-public class ZipkinExtendApplication {
+public class SkyeMonitorApplication {
     public static void main(String[] args) {
         if(StringUtils.isEmpty(System.getProperty("env"))){
             System.setProperty("env","dev");
         }
-        SpringApplication application=new SpringApplication(ZipkinExtendApplication.class);
+        SpringApplication application=new SpringApplication(SkyeMonitorApplication.class);
         application.run(args);
         try {
             //Job定时任务是非deamon，但是他此时的线程还没启动的话，会导致直接退出，

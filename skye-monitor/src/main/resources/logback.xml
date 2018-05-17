@@ -1,24 +1,32 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<configuration>
-    <appender name="console" class="ch.qos.logback.core.ConsoleAppender" >
+<configuration scan="true" scanPeriod="30 seconds">
+
+    <contextListener class="ch.qos.logback.classic.jul.LevelChangePropagator">
+        <resetJUL>true</resetJUL>
+    </contextListener>
+    <jmxConfigurator />
+    <appender name="console" class="ch.qos.logback.core.ConsoleAppender">
         <encoder>
-            <pattern>[%t]%X{1} %date{HH:mm:ss.SSS} %-5level %logger{50}%L - %m%n </pattern>
-            <!--<pattern>%date{HH:mm:ss.SSS} %-5level %logger{50} - %msg %X{1}%n </pattern>-->
+            <pattern>%-20(%d{HH:mm:ss.SSS} [%thread]) %-5level [%X{braveTraceId}] %logger{80}:%line - %msg%n</pattern>
         </encoder>
     </appender>
-    <appender name="file" class="ch.qos.logback.core.rolling.RollingFileAppender">
-        <file>logs/consumer.log</file>
+    <appender name="file"
+              class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <file>/opt/logs/base/skye-server.log</file>
         <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
-            <fileNamePattern>/logs/consumer.%d{yyyy-MM-dd}.log</fileNamePattern>
+            <FileNamePattern>/opt/logs/base/skye-server.%d{yyyy-MM-dd}.log
+            </FileNamePattern>
         </rollingPolicy>
         <encoder>
-            <pattern>[%t] %X{1} %date{HH:mm:ss.SSS} %-5level %logger{50}%L- %m%n </pattern>
+            <pattern>%-20(%d{HH:mm:ss.SSS} [%thread]) %-5level [%X{braveTraceId}] %logger{80}:%line - %msg%n</pattern>
         </encoder>
     </appender>
-    <logger name="org.apache.kafka" level="INFO" />
-    <logger name="kafka" level="WARN"/>
+    <logger name="org.apache.tomcat" level="WARN"/>
+    <logger name="org.apache.kafka" level="INFO"/>
+    <logger name="org.apache.zookeeper" level="INFO"/>
+    <logger name="kafka" level="WARN"></logger>
     <root level="INFO">
-        <appender-ref ref="console"/>
-        <appender-ref ref="file"/>
+        <appender-ref ref="console" />
+        <appender-ref ref="file" />
     </root>
 </configuration>

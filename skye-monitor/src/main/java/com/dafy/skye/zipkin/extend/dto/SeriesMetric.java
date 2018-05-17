@@ -6,11 +6,11 @@ package com.dafy.skye.zipkin.extend.dto;
 public class SeriesMetric {
 
     private long start;
-    private long qps;
+    private double qps;
     private long latency;
     private long count;
 
-    public SeriesMetric ( long start, long qps,long latency,long count){
+    public SeriesMetric ( long start, double qps,long latency,long count){
         this.start=start;
         this.qps = qps;
         this.latency = latency;

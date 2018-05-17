@@ -13,14 +13,13 @@
         <module>skye-brave</module>
         <module>skye-log</module>
         <module>skye-server</module>
-        <module>skye-monitor</module>
-        <module>elasticsearch-storage-autoconfiguration</module>
-        <module>elasticsearch-storage</module>
-        <module>qps</module>
         <module>kafka</module>
+        <module>skye-monitor</module>
         <module>skye-monitor-autoconfiguration</module>
-        <module>druid-storage-autoconfiguration</module>
+        <module>elasticsearch-storage</module>
+        <module>elasticsearch-storage-autoconfiguration</module>
         <module>druid-storage</module>
+        <module>druid-storage-autoconfiguration</module>
         <module>zipkin</module>
         <module>zipkin-autoconfiguration</module>
     </modules>

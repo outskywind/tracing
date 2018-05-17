@@ -10,10 +10,10 @@ public class MonitorMetric {
     // service 或者是 host 或者是 spanName=interface
     private String name;
     private String success_rate;
-    //后台计算判断用，不给页面
+    //后台计算判断用，不给页面,数据库规则保留的是整数百分数
     @JsonIgnore
     private double successPercent;
-    private long qps;
+    private double qps;
     private long peak_qps;
     private long latency;
     private long count;
@@ -36,11 +36,11 @@ public class MonitorMetric {
         this.success_rate = success_rate;
     }
 
-    public long getQps() {
+    public double getQps() {
         return qps;
     }
 
-    public void setQps(long qps) {
+    public void setQps(double qps) {
         this.qps = qps;
     }
 

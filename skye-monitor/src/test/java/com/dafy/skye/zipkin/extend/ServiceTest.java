@@ -14,7 +14,7 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
  * Created by quanchengyun on 2018/5/16.
  */
 @RunWith(SpringJUnit4ClassRunner.class)
-@SpringBootTest(classes = ZipkinExtendApplication.class,webEnvironment = SpringBootTest.WebEnvironment.NONE,
+@SpringBootTest(classes = SkyeMonitorApplication.class,webEnvironment = SpringBootTest.WebEnvironment.NONE,
         properties={"env=dev"})
 public class ServiceTest {
 
