@@ -15,28 +15,9 @@
 
     <dependencies>
         <dependency>
-            <groupId>org.elasticsearch.client</groupId>
-            <artifactId>transport</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.elasticsearch</groupId>
-            <artifactId>elasticsearch</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.elasticsearch.plugin</groupId>
-            <artifactId>transport-netty4-client</artifactId>
-        </dependency>
-
-        <dependency>
-            <groupId>io.zipkin.zipkin2</groupId>
-            <artifactId>zipkin-storage-elasticsearch</artifactId>
-            <version>${zipkin.version}</version>
-        </dependency>
-
-        <dependency>
-            <groupId>io.zipkin.java</groupId>
+            <groupId>com.dafy.skye</groupId>
             <artifactId>zipkin</artifactId>
-            <version>${zipkin.version}</version>
+            <version>1.0.0-SNAPSHOT</version>
         </dependency>
 
         <dependency>

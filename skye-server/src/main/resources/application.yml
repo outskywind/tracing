@@ -11,7 +11,7 @@ zipkin:
     sample-rate: ${COLLECTOR_SAMPLE_RATE:1.0}
     kafka:
       # ZooKeeper host string, comma-separated host:port value.
-      zookeeper: ${KAFKA_ZOOKEEPER:zookeeper1.dafy.com:2181}
+      bootstrap-servers: ${KAFKA_SERVER:kafka1.skye.dafy.com:9092,kafka2.skye.dafy.com:9092,kafka3.skye.dafy.com:9092}
       # Name of topic to poll for spans
       topic: ${KAFKA_TOPIC:zipkin}
       # Consumer group this process is consuming on behalf of.
@@ -32,6 +32,28 @@ zipkin:
     names-max-age: 300
     # CORS allowed-origins.
     allowed-origins: "*"
+
+  druid:
+      zk:
+        host: druid-zk1.dafy.com:2181
+        path: /druid/discovery/druid:broker
+        namespace: druid-broker-service-discovery
+      kafka:
+        # Name of topic to poll for spans
+        topic: ${KAFKA_TOPIC:zipkin}
+        # Consumer group this process is consuming on behalf of.
+        group: ${KAFKA_GROUP_ID:druid}
+        #是否自动ack
+        properties:
+            #kafka 地址
+            bootstrap.servers: ${KAFKA_SERVER:kafka1.skye.dafy.com:9092,kafka2.skye.dafy.com:9092,kafka3.skye.dafy.com:9092}
+            max.poll.records: 100
+            max.poll.interval.ms: 60000
+            #是否自动ack
+            enable.auto.commit: false
+            auto.offset.reset: earliest
+            key.deserializer: org.apache.kafka.common.serialization.ByteArrayDeserializer
+            value.deserializer: org.apache.kafka.common.serialization.ByteArrayDeserializer
 
   storage:
     strict-trace-id: ${STRICT_TRACE_ID:true}
@@ -122,6 +144,7 @@ spring:
     test-on-borrow: false
     test-on-return: false
     timeout: 30000
+
 skye.log.server:
   storage:
     type: elasticsearch
@@ -134,8 +157,6 @@ skye.log.server:
     topic: skye-log
     groupId: skye-log
     parallel: 2
-    offset:
-      type: redis
     properties:
       #kafka 地址
       bootstrap.servers: kafka1.skye.dafy.com:9092

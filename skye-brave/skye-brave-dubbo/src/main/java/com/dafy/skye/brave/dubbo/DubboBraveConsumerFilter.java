@@ -21,6 +21,7 @@ public class DubboBraveConsumerFilter implements Filter{
             //由于客户端没有正确配置监控信息，将不会拦截统计调用链上报
             return invoker.invoke(invocation);
         } else{
+
             ClientRequestInterceptor clientRequestInterceptor=brave.clientRequestInterceptor();
             ClientResponseInterceptor clientResponseInterceptor=brave.clientResponseInterceptor();
             ClientSpanThreadBinder clientSpanThreadBinder=brave.clientSpanThreadBinder();

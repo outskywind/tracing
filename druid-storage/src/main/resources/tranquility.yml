@@ -1,0 +1,44 @@
+dataSources:
+  service-span-metric:
+    spec:
+      dataSchema:
+        dataSource: service-span-metric
+        parser:
+          type: string
+          parseSpec:
+            format: json
+            timestampSpec:
+              column: timestamp
+              format: millis
+            dimensionsSpec:
+              dimensions: [serviceName,spanName,host]
+
+        metricsSpec:
+          - { type: count, name: count }
+          - { type : doubleSum,name : duration,fieldName : duration }
+          - { type : longSum,name : successCount,fieldName : success }
+          - { type : longSum,name : exceptionCount,fieldName : exception }
+
+        granularitySpec:
+          type: uniform
+          segmentGranularity: day
+          queryGranularity: second
+          rollup: true
+
+      ioConfig:
+        type: realtime
+
+      tuningConfig:
+        type: realtime
+        maxRowsInMemory: 1000
+        intermediatePersistPeriod: PT45S
+        windowPeriod: PT1H
+
+    properties:
+      task.partitions: 1
+      task.replicants: 1
+
+properties:
+  task.partitions: 1
+  zookeeper.connect: druid-zk1.dafy.com:2181
+  reportDropsAsExceptions: true

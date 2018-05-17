@@ -28,7 +28,7 @@
         </dependency>
         <dependency>
             <groupId>com.dafy.skye</groupId>
-            <artifactId>skye-zipkin-monitor</artifactId>
+            <artifactId>skye-monitor-autoconfiguration</artifactId>
             <version>1.0.0-SNAPSHOT</version>
         </dependency>
         <!-- 配置中心 依赖 -->

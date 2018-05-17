@@ -71,8 +71,6 @@ public class StormConfig {
             }
         };
     }
-
-
     /**
      * 使用一致hash分区
      * @return

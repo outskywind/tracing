@@ -4,16 +4,18 @@ package com.dafy.skye.log.server.kafka;
  * Created by quanchengyun on 2018/2/1.
  */
 
+import com.dafy.kafka.*;
 import com.dafy.skye.log.core.SkyeLogEventCodec;
-import com.dafy.skye.log.server.autoconfig.KafkaCollectorConfigProperties;
 import com.dafy.skye.log.server.collector.CollectorComponent;
 import com.dafy.skye.log.server.collector.CollectorDelegate;
 import org.apache.kafka.clients.consumer.*;
+import org.apache.kafka.clients.consumer.KafkaConsumer;
 import org.apache.kafka.common.PartitionInfo;
 import org.apache.kafka.common.TopicPartition;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 
 import java.util.*;
 import java.util.concurrent.ExecutorService;
@@ -21,16 +23,14 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
- * 使用kafka consumer group 管理消费者offset,运行时将会判断上次的消费者offset保存下来
- * 确保1.不会重复消费，2.不会跳跃offset丢失数据
- * 对于1.判断最后一个record的offset是否小于当前offset，是则丢弃；否则倒序遍历 retrieve
- * 对于2.判断第一个获取的record的offset是否大于当前offset
- * //这里没有事务，因此可能还是会重复消费，二阶段提交模式先提交再ACK，那么就是会重复
+ *  @see com.dafy.kafka.KafkaConsumer
  */
+@Deprecated
 public class KafkaCollectorV2 implements CollectorComponent {
 
     @Autowired
-    private KafkaCollectorConfigProperties kafkaCollectorConfig;
+    @Qualifier("skye.log.kafkaConfigurationProperties")
+    private KafkaConfigurationProperties kafkaCollectorConfig;
     @Autowired
     private CollectorDelegate delegate;
 
@@ -89,7 +89,7 @@ public class KafkaCollectorV2 implements CollectorComponent {
                 public void run() {
                     try {
                         while (true){
-                            ConsumerRecords<String, byte[]> records = consumer.poll(kafkaCollectorConfig.getPollInterval());
+                            ConsumerRecords<String, byte[]> records = consumer.poll(1000);
                             if(records.isEmpty()){
                                 continue;
                             }
