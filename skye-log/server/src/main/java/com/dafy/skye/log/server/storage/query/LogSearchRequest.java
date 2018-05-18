@@ -15,6 +15,8 @@ public class LogSearchRequest {
     public Long start;
     public Long end;
     public String keyword;
+    public String exception;
+
     public String timeInterval;
 
     public Integer page;
@@ -125,6 +127,14 @@ public class LogSearchRequest {
         this.timeInterval = timeInterval;
     }
 
+    public String getException() {
+        return exception;
+    }
+
+    public void setException(String exception) {
+        this.exception = exception;
+    }
+
     @Override
     public String toString() {
         return "LogSearchRequest{" +
@@ -136,6 +146,7 @@ public class LogSearchRequest {
                 ", start=" + start +
                 ", end=" + end +
                 ", keyword='" + keyword + '\'' +
+                ", exception='" + exception + '\'' +
                 ", timeInterval='" + timeInterval + '\'' +
                 ", page=" + page +
                 ", size=" + size +
