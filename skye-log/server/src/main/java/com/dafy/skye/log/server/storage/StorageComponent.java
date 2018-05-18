@@ -1,13 +1,13 @@
 package com.dafy.skye.log.server.storage;
 
-import com.dafy.skye.log.server.collector.CollectorComponent;
-import com.dafy.skye.log.server.storage.query.LogSearchRequest;
-import com.dafy.skye.log.server.storage.query.LogQueryResult;
 import com.dafy.skye.log.core.logback.SkyeLogEvent;
+import com.dafy.skye.log.server.collector.CollectorComponent;
+import com.dafy.skye.log.server.storage.query.CountMetric;
+import com.dafy.skye.log.server.storage.query.LogQueryResult;
+import com.dafy.skye.log.server.storage.query.LogSearchRequest;
 
 import java.util.Collection;
 import java.util.List;
-import java.util.Set;
 
 /**
  * Created by Caedmon on 2017/4/14.
@@ -21,8 +21,5 @@ public interface StorageComponent extends CollectorComponent {
 
     LogQueryResult query(LogSearchRequest request);
 
-    Set<String> getServices();
-
-
-
+    List<CountMetric> countSeries(LogSearchRequest request);
 }

@@ -8,6 +8,7 @@ import com.dafy.skye.log.core.logback.SkyeLogEvent;
 import com.dafy.skye.log.server.autoconfig.LogStorageESConfigProperties;
 import com.dafy.skye.log.server.storage.StorageComponent;
 import com.dafy.skye.log.server.storage.entity.SkyeLogEntity;
+import com.dafy.skye.log.server.storage.query.CountMetric;
 import com.dafy.skye.log.server.storage.query.LogSearchRequest;
 import com.dafy.skye.log.server.storage.query.LogQueryResult;
 import com.fasterxml.jackson.databind.JavaType;
@@ -34,13 +35,17 @@ import org.elasticsearch.common.xcontent.XContentType;
 import org.elasticsearch.index.query.BoolQueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.index.query.TermsQueryBuilder;
+import org.elasticsearch.indices.IndexClosedException;
 import org.elasticsearch.search.SearchHit;
+import org.elasticsearch.search.aggregations.Aggregation;
 import org.elasticsearch.search.aggregations.AggregationBuilders;
-import org.elasticsearch.search.aggregations.Aggregations;
-import org.elasticsearch.search.aggregations.bucket.terms.Terms;
+import org.elasticsearch.search.aggregations.bucket.histogram.DateHistogramInterval;
+import org.elasticsearch.search.aggregations.bucket.histogram.Histogram;
+import org.elasticsearch.search.aggregations.bucket.histogram.ParsedDateHistogram;
 import org.elasticsearch.search.builder.SearchSourceBuilder;
 import org.elasticsearch.search.sort.SortOrder;
 import org.elasticsearch.transport.client.PreBuiltTransportClient;
+import org.joda.time.DateTimeZone;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.util.CollectionUtils;
@@ -50,7 +55,6 @@ import javax.annotation.PostConstruct;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.*;
-import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  * Created by Caedmon on 2017/4/26.
@@ -148,11 +152,24 @@ public class ElasticSearchStorage implements StorageComponent {
         //全部失败,将不会更新kafka的offset，表明很可能是es服务问题
         if(responses.hasFailures()){
             log.warn("Message save to es has failures");
+            int indexCloseCount = 0;
+            int failureCount = 0;
             for (int i = 0; i < responses.getItems().length; i++) {
                 BulkItemResponse response = responses.getItems()[i];
+                if(response.getFailure()!=null){
+                    failureCount++;
+                    Exception e = response.getFailure().getCause() ;
+                    //针对特殊情况
+                    if(e instanceof IndexClosedException){
+                        indexCloseCount++;
+                    }
+                }
                 if (!response.isFailed()) {
                     return;
                 }
+            }
+            if(indexCloseCount==failureCount){
+                return ;
             }
             throw new Exception("Message all failed save to es");
         }
@@ -166,37 +183,62 @@ public class ElasticSearchStorage implements StorageComponent {
      */
     @Override
     public LogQueryResult query(LogSearchRequest request) {
-        if(request.endTs==null){
-            request.endTs=System.currentTimeMillis();
+        if(request.getEnd()==null){
+            request.setEnd(System.currentTimeMillis());
         }
-        if(request.lookback==null) {
-            request.lookback = Long.valueOf(24 * 3600 * 1000);
-        }
-        if(request.getPageIndex()>30){
+        //request.set
+        if(request.getPage()>30){
             return null;
         }
+        SearchRequestBuilder searchRequestBuilder = builder(request);
 
-        List<String> indices=indexNameFormatter.formatTypeAndRange(null,request.endTs-request.lookback,request.endTs);
+        searchRequestBuilder.highlighter(SearchSourceBuilder.highlight().preTags("<span class='highlight'>").postTags("</span>").field("message"));
+        searchRequestBuilder.setFrom(request.getFrom()).setSize(request.getSize());
+        searchRequestBuilder.addSort("timestamp", SortOrder.ASC);
+        //
+        SearchResponse response=searchRequestBuilder.execute().actionGet();
+        response.getTook();
+        LogQueryResult result = new LogQueryResult();
+        SearchHit[] hits=response.getHits().getHits();
+        List<SkyeLogEntity> logs=new LinkedList<>();
+        for(SearchHit hit:hits){
+            SkyeLogEntity entity = JacksonConvert.readValue(hit.getSourceAsString(),SkyeLogEntity.class);
+            //reset the highlighted text
+            if(hit.getHighlightFields()!=null&&hit.getHighlightFields().get("message")!=null){
+                String highlighText = Arrays.toString(hit.getHighlightFields().get("message").getFragments());
+                entity.setMessage(highlighText.substring(1,highlighText.length()-1));
+            }
+            logs.add(entity);
+        }
+        //resultBuilder.content(entities);
+        //resultBuilder.total((int) response.getHits().totalHits);
+        result.setLogs(logs);
+        return result;
+    }
+
+
+    SearchRequestBuilder builder(LogSearchRequest request){
+        List<String> indices=indexNameFormatter.formatTypeAndRange(null,request.getStart(),request.getEnd());
         String[] indicess=new String[indices.size()];
         indices.toArray(indicess);
         SearchRequestBuilder searchRequestBuilder=transportClient.prepareSearch(indicess)
                 .setIndicesOptions(DefaultOptions.defaultIndicesOptions());
         BoolQueryBuilder root= QueryBuilders.boolQuery();
         root.filter(QueryBuilders.rangeQuery("timestamp")
-                .gt(request.endTs-request.lookback).lte(request.endTs));
-        if(StringUtils.hasText(request.serviceName)){
-            root.filter(QueryBuilders.termsQuery("serviceName",request.serviceName));
+                .gt(request.getStart()).lte(request.getEnd()));
+        if(StringUtils.hasText(request.getService())){
+            root.filter(QueryBuilders.termsQuery("serviceName",request.getService()));
         }
-        if(!CollectionUtils.isEmpty(request.levels)){
-            root.filter(QueryBuilders.termsQuery("level",request.levels));
+        if(!CollectionUtils.isEmpty(request.getLevel())){
+            root.filter(QueryBuilders.termsQuery("level",request.getLevel()));
         }
         if (!Strings.isNullOrEmpty(request.traceId)) {
             root.filter(QueryBuilders.termsQuery("traceId", request.traceId));
         }
-        if(!Strings.isNullOrEmpty(request.message)){
+        if(!Strings.isNullOrEmpty(request.getKeyword())){
             //terms 查询是单词项精准查询，存储时使用了标准分析器，会统一成小写词项倒排索引中
             //短语搜索
-            root.filter(QueryBuilders.matchPhraseQuery("message",request.message));
+            root.filter(QueryBuilders.matchPhraseQuery("message",request.getKeyword()));
         }
         if(!Strings.isNullOrEmpty(request.getMdc())){
             JavaType javaType= JacksonConvert.mapper()
@@ -209,61 +251,29 @@ public class ElasticSearchStorage implements StorageComponent {
             }
         }
         searchRequestBuilder.setQuery(root);
-        searchRequestBuilder.highlighter(SearchSourceBuilder.highlight().preTags("<span class='highlight'>").postTags("</span>").field("message"));
-        searchRequestBuilder.setFrom(request.getFrom()).setSize(request.getPageSize());
-        searchRequestBuilder.addSort("timestamp", SortOrder.ASC);
-        SearchResponse response=searchRequestBuilder.execute().actionGet();
-        response.getTook();
-        LogQueryResult.Builder resultBuilder=LogQueryResult.newBuilder();
-        resultBuilder.took(response.getTook().getSeconds());
-        resultBuilder.error(response.getShardFailures().toString());
-        SearchHit[] hits=response.getHits().getHits();
-        List<SkyeLogEntity> entities=new LinkedList<>();
-        for(SearchHit hit:hits){
-            SkyeLogEntity entity = JacksonConvert.readValue(hit.getSourceAsString(),SkyeLogEntity.class);
-            //reset the highlighted text
-            if(hit.getHighlightFields()!=null&&hit.getHighlightFields().get("message")!=null){
-                String highlighText = Arrays.toString(hit.getHighlightFields().get("message").getFragments());
-                entity.setMessage(highlighText.substring(1,highlighText.length()-1));
-            }
-
-            entities.add(entity);
-        }
-        resultBuilder.content(entities);
-        resultBuilder.total((int) response.getHits().totalHits);
-        return resultBuilder.build();
+        return searchRequestBuilder;
     }
 
-
-    public void page(){
-
-    }
-
-
+    /**
+     * 50 个点
+     * @param request
+     * @return
+     */
     @Override
-    public Set<String> getServices() {
-        long endTs=System.currentTimeMillis();
-        long startTs=System.currentTimeMillis()-esConfig.getDefaultLookback();
-        List<String> indices=indexNameFormatter.formatTypeAndRange(null,startTs,endTs);
-        String[] indicess=new String[indices.size()];
-        indices.toArray(indicess);
-        SearchRequestBuilder searchRequestBuilder=transportClient.prepareSearch(indicess)
-                .setIndicesOptions(DefaultOptions.defaultIndicesOptions());
-        searchRequestBuilder.addAggregation(AggregationBuilders.terms("service_terms")
-                .field("serviceName").size(200));
-        searchRequestBuilder.setSize(0);
-        SearchResponse response=searchRequestBuilder.execute().actionGet();
-        Aggregations aggregations=response.getAggregations();
-        Set<String> services=new HashSet<>();
-        if(aggregations!=null){
-            Terms terms=aggregations.get("service_terms");
-            for(Terms.Bucket bucket:terms.getBuckets()){
-                String service=bucket.getKeyAsString();
-                services.add(service);
-            }
-        }
+    public List<CountMetric> countSeries(LogSearchRequest request) {
 
-        return services;
+        SearchRequestBuilder searchRequestBuilder = builder(request);
+        searchRequestBuilder.addAggregation(AggregationBuilders.dateHistogram("counts").field("timestamp")
+                    .dateHistogramInterval(new DateHistogramInterval(request.getTimeInterval())).timeZone(DateTimeZone.forID("Asia/Shanghai")));
+
+        SearchResponse response=searchRequestBuilder.execute().actionGet();
+        Histogram counts  = response.getAggregations().get("counts");
+        List<CountMetric> result = new ArrayList<>(counts.getBuckets().size());
+        for(Histogram.Bucket bucket : counts.getBuckets()){
+            result.add(new CountMetric(Long.parseLong(bucket.getKeyAsString()),bucket.getDocCount()));
+        }
+        return result;
     }
+
 
 }

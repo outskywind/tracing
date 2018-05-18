@@ -2,7 +2,6 @@ package com.dafy.skye.common.util;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.concurrent.TimeUnit;
 
 /**
  * Created by quanchengyun on 2017/7/5.

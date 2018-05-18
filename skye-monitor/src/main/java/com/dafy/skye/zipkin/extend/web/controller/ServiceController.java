@@ -24,25 +24,32 @@ import java.util.*;
 public class ServiceController extends BaseSessionController{
 
     @Autowired
-    ServiceRefreshHolder holder;
+    private ServiceRefreshHolder holder;
 
     @Autowired
-    RulesRefreshHolder rulesRefreshHolder;
+    private RulesRefreshHolder rulesRefreshHolder;
 
     @Autowired
-    UserService userService;
+    private UserService userService;
 
     @Autowired
-    ZipkinExtendService zipkinExtendService;
+    private ZipkinExtendService zipkinExtendService;
 
     @Autowired
     @Qualifier("ruleService")
-    RuleService ruleService;
+    private RuleService ruleService;
 
 
     @RequestMapping("/closeIndex")
     public void closeIndex(@RequestParam("index.prefix") String indexPrefix){
 
+    }
+
+
+    @RequestMapping("/hosts")
+    @ResponseBody
+    public Response getHosts(@RequestBody Map<String,String> service){
+        return null;
     }
 
     @RequestMapping("/list/all")
@@ -65,7 +72,7 @@ public class ServiceController extends BaseSessionController{
     @ResponseBody
     public Response listInterfaces(@RequestBody Map<String,String> param){
         String service = param.get("service");
-        List<String> result= holder.getServiceInterfaces(service);
+        Set<String> result= holder.getServiceInterfaces(service);
         return new Response("0",result);
     }
 
@@ -180,14 +187,12 @@ public class ServiceController extends BaseSessionController{
         queryRequest.setLimit(200);
 
         List<Trace> traces = zipkinExtendService.getInterfaceTraces(queryRequest);
-        //TODO
         Rule[] rules  = rulesRefreshHolder.getRules(request.getService(),request.getName());
         for(Trace trace: traces){
             ruleService.decideStat(trace,rules);
         }
         return new Response("0",traces);
     }
-
 
 
 

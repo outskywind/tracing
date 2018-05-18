@@ -6,15 +6,19 @@ import java.util.List;
  * Created by Caedmon on 2017/4/26.
  */
 public class LogSearchRequest {
+
+    public String service;
+    public List<String> hosts;
+    public List<String> level;
     public String traceId;
-    public String message;
-    public Long lookback;
-    public Long endTs;
-    public List<String> levels;
-    public String serviceName;
     public String mdc;
-    public Integer pageIndex;
-    public Integer pageSize;
+    public Long start;
+    public Long end;
+    public String keyword;
+    public String timeInterval;
+
+    public Integer page;
+    public Integer size;
     public String getTraceId() {
         return traceId;
     }
@@ -23,44 +27,44 @@ public class LogSearchRequest {
         this.traceId = traceId;
     }
 
-    public String getMessage() {
-        return message;
+    public String getKeyword() {
+        return keyword;
     }
 
-    public void setMessage(String message) {
-        this.message = message;
+    public void setKeyword(String keyword) {
+        this.keyword = keyword;
     }
 
-    public Long getLookback() {
-        return lookback;
+    public List<String> getHosts() {
+        return hosts;
     }
 
-    public void setLookback(Long lookback) {
-        this.lookback = lookback;
+    public void setHosts(List<String> hosts) {
+        this.hosts = hosts;
     }
 
-    public Long getEndTs() {
-        return endTs;
+    public Long getStart() {
+        return start;
     }
 
-    public void setEndTs(Long endTs) {
-        this.endTs = endTs;
+    public void setStart(Long start) {
+        this.start = start;
     }
 
-    public List<String> getLevels() {
-        return levels;
+    public Long getEnd() {
+        return end;
     }
 
-    public void setLevels(List<String> levels) {
-        this.levels = levels;
+    public void setEnd(Long end) {
+        this.end = end;
     }
 
-    public String getServiceName() {
-        return serviceName;
+    public String getService() {
+        return service;
     }
 
-    public void setServiceNames(String serviceName) {
-        this.serviceName = serviceName;
+    public void setService(String service) {
+        this.service = service;
     }
 
     public String getMdc() {
@@ -71,51 +75,70 @@ public class LogSearchRequest {
         this.mdc = mdc;
     }
 
-    public Integer getPageIndex() {
-        return pageIndex;
+    public Integer getPage() {
+        return page;
     }
 
-    public void setPageIndex(Integer pageIndex) {
-        this.pageIndex = pageIndex;
+    public void setPage(Integer page) {
+        this.page = page;
     }
 
-    public Integer getPageSize() {
-        return pageSize;
+    public Integer getSize() {
+        return size;
     }
 
-    public void setPageSize(Integer pageSize) {
-        this.pageSize = pageSize;
+    public void setSize(Integer size) {
+        this.size = size;
     }
     public int getFrom(){
-        if(pageIndex<=0){
-            pageIndex=1;
+        if(page <=0){
+            page =1;
         }
-        if(pageSize<=0){
-            pageSize=100;
+        if(size <=0){
+            size =100;
         }
-        return (pageIndex-1)*pageSize;
+        return (page -1)* size;
     }
     public int getTo(){
-        if(pageIndex<=0){
-            pageIndex=1;
+        if(page <=0){
+            page =1;
         }
-        if(pageSize<=0){
-            pageSize=100;
+        if(size <=0){
+            size =100;
         }
-        return pageIndex*pageSize;
+        return page * size;
     }
+
+    public List<String> getLevel() {
+        return level;
+    }
+
+    public void setLevel(List<String> level) {
+        this.level = level;
+    }
+
+    public String getTimeInterval() {
+        return timeInterval;
+    }
+
+    public void setTimeInterval(String timeInterval) {
+        this.timeInterval = timeInterval;
+    }
+
     @Override
     public String toString() {
         return "LogSearchRequest{" +
-                "traceId='" + traceId + '\'' +
-                ", message='" + message + '\'' +
-                ", lookback=" + lookback +
-                ", endTs=" + endTs +
-                ", levels=" + levels +
-                ", serviceNames=" + serviceName +
+                "service='" + service + '\'' +
+                ", hosts=" + hosts +
+                ", level=" + level +
+                ", traceId='" + traceId + '\'' +
                 ", mdc='" + mdc + '\'' +
-                ", pageIndex=" + pageIndex +
-                ", pageSize=" + pageSize +
+                ", start=" + start +
+                ", end=" + end +
+                ", keyword='" + keyword + '\'' +
+                ", timeInterval='" + timeInterval + '\'' +
+                ", page=" + page +
+                ", size=" + size +
                 '}';
     }
 }

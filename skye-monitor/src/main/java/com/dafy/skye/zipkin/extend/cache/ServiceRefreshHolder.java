@@ -1,6 +1,7 @@
 package com.dafy.skye.zipkin.extend.cache;
 
 import com.dafy.skye.zipkin.extend.dto.BasicQueryRequest;
+import com.dafy.skye.zipkin.extend.dto.ServiceInfo;
 import com.dafy.skye.zipkin.extend.service.ZipkinExtendService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -32,10 +33,12 @@ public class ServiceRefreshHolder {
     @Value("${monitor.cache.expire}")
     long expire ;
 
-    Set<String> servicesName = new HashSet<>();
+    Set<String> servicesName = new HashSet<>();//定时刷新
+
+    //Map<String,CacheItem<List<String>>> hosts = new HashMap<>();//无定时刷新
 
     //不会内存泄露，无需删除过期数据
-    Map<String,CacheItem<List<String>>> interfaces = new HashMap<>();
+    Map<String,CacheItem<ServiceInfo>> serviceInfo = new HashMap<>();//无定时刷新
 
     AtomicBoolean done = new AtomicBoolean(false);
 
@@ -46,9 +49,19 @@ public class ServiceRefreshHolder {
         return servicesName.toArray(new String[0]);
     }
 
-    public List<String> getServiceInterfaces(String serviceName){
-        CacheItem<List<String>> _cache = interfaces.get(serviceName);
-        if(_cache!=null && !CollectionUtils.isEmpty(_cache.element)){
+    public Set<String> getServiceInterfaces(String serviceName){
+        ServiceInfo info = getServiceInfo(serviceName);
+        return info.getInterfaces();
+    }
+
+    public Set<String> getServiceHosts(String serviceName){
+        ServiceInfo info = getServiceInfo(serviceName);
+        return info.getHosts();
+    }
+
+    protected ServiceInfo getServiceInfo(String serviceName){
+        CacheItem<ServiceInfo> _cache = serviceInfo.get(serviceName);
+        if(_cache!=null){
             boolean isExpire = false;
             //缓存已过期
             if(_cache.expire> 0 && _cache.expire < System.currentTimeMillis()){
@@ -60,13 +73,14 @@ public class ServiceRefreshHolder {
         }
         synchronized (serviceName.intern()){
             if(done.compareAndSet(false,true)){
-                List<String> element = zipkinExtendService.getServiceInterfaces(serviceName);
-                interfaces.put(serviceName,new CacheItem<>(element,System.currentTimeMillis()+expire*1000));
+                ServiceInfo element = zipkinExtendService.getserviceinfo(serviceName);
+                serviceInfo.put(serviceName,new CacheItem<>(element,System.currentTimeMillis()+expire*1000));
                 done.compareAndSet(true,false);
             }
         }
-        return interfaces.get(serviceName).element;
+        return serviceInfo.get(serviceName).element;
     }
+
 
     @PostConstruct
     public void start(){

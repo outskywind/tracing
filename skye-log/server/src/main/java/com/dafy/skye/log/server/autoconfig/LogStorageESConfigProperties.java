@@ -16,7 +16,7 @@ public class LogStorageESConfigProperties {
     private String index ="skye";
     private String type ="skye-log";
     private boolean ensureIndex=true;
-    private Integer indexShards=5;
+    private Integer indexShards=3;
     private Integer indexReplicas=1;
     private Long defaultLookback=86400000L;
     private String clusterName="skye";

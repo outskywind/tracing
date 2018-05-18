@@ -262,8 +262,8 @@ public class ZipkinExtendServiceImpl implements ZipkinExtendService {
 
 
     @Override
-    public List<String> getServiceInterfaces(String serviceName) {
-        List<String> result = new ArrayList<>();
+    public ServiceInfo getserviceinfo(String serviceName) {
+        ServiceInfo result = new ServiceInfo();
         try{
             BasicQueryRequest request = new BasicQueryRequest();
             request.endTs=System.currentTimeMillis();
@@ -273,14 +273,20 @@ public class ZipkinExtendServiceImpl implements ZipkinExtendService {
             searchRequest.indices(indices);
             searchRequest.indicesOptions(IndicesOptions.lenientExpandOpen());
             SearchSourceBuilder searchSourceBuilder = ZipkinElasticsearchQuery.searchSourceBuilder(request);
-            searchSourceBuilder.aggregation(AggregationBuilders.terms("interfaces").field("name").order(BucketOrder.count(false)));
+            searchSourceBuilder.aggregation(AggregationBuilders.terms("interfaces").field("name").order(BucketOrder.count(false)))
+                                .aggregation(AggregationBuilders.terms("hosts").field("localEndpoint.ipv4").order(BucketOrder.count(false)));
             searchRequest.source(searchSourceBuilder);
             //
             SearchResponse  response = restClient.search(searchRequest);
             ParsedStringTerms interfaces = response.getAggregations().get("interfaces");
             for(Terms.Bucket bucket: interfaces.getBuckets()){
                 String interfaceName = (String)bucket.getKey();
-                result.add(interfaceName);
+                result.addInterface(interfaceName);
+            }
+            ParsedStringTerms hosts = response.getAggregations().get("hosts");
+            for(Terms.Bucket bucket: interfaces.getBuckets()){
+                String host = (String)bucket.getKey();
+                result.addHost(host);
             }
         }catch (Exception e){
             log.error("服务接口查询异常",e);

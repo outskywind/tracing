@@ -155,9 +155,8 @@ skye.log.server:
       cluster-name: skye
   kafka:
     topic: skye-log
-    groupId: skye-log
-    parallel: 2
     properties:
+      group.id: skye-log
       #kafka 地址
       bootstrap.servers: kafka1.skye.dafy.com:9092
       #zookeeper 地址

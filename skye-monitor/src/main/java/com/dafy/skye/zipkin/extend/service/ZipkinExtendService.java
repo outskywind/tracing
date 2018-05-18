@@ -15,7 +15,7 @@ public interface ZipkinExtendService {
 
     List<ServiceMonitorMetric> getServiceMonitorMetrics(BasicQueryRequest request);
 
-    List<String> getServiceInterfaces(String serviceName);
+    ServiceInfo getserviceinfo(String serviceName);
 
     Collection<TimeSeriesResult> getServiceSeries(ServiceSeriesRequest request);
 

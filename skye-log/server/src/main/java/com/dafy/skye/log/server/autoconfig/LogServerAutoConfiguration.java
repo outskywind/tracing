@@ -60,11 +60,11 @@ public class LogServerAutoConfiguration {
         return new KafkaConfigurationProperties();
     }
 
-    @Bean(initMethod = "start")
-    public KafkaConsumer kafkaConsumer(SkyeLogMessageConsumer qpsMessageConsumer){
+    @Bean(name="skye.log.kafkaConsumer",initMethod = "start")
+    public KafkaConsumer kafkaConsumer(SkyeLogMessageConsumer skyeLogMessageConsumer){
         KafkaConsumer consumer = new KafkaConsumer();
         consumer.setKafkaConfig(kafkaConfigurationProperties());
-        consumer.setMessageConsumer(qpsMessageConsumer);
+        consumer.setMessageConsumer(skyeLogMessageConsumer);
         return consumer;
     }
 
