@@ -49,7 +49,8 @@ public class ServiceController extends BaseSessionController{
     @RequestMapping("/hosts")
     @ResponseBody
     public Response getHosts(@RequestBody Map<String,String> service){
-        return null;
+        Set<String> hosts =  holder.getServiceHosts(service.get("service"));
+        return new Response("0",hosts);
     }
 
     @RequestMapping("/list/all")

@@ -284,7 +284,7 @@ public class ZipkinExtendServiceImpl implements ZipkinExtendService {
                 result.addInterface(interfaceName);
             }
             ParsedStringTerms hosts = response.getAggregations().get("hosts");
-            for(Terms.Bucket bucket: interfaces.getBuckets()){
+            for(Terms.Bucket bucket: hosts.getBuckets()){
                 String host = (String)bucket.getKey();
                 result.addHost(host);
             }
