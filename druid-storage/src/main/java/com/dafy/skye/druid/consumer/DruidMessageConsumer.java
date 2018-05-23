@@ -54,7 +54,7 @@ public class DruidMessageConsumer implements MessageConsumer {
                 sender.sendAsync(metric, "service-span-metric", new DruidCallback() {
                     @Override
                     public void success() {
-                        log.info("----success store to druid---");
+                        //log.info("----success store to druid---");
                     }
                     @Override
                     public void failed() {
