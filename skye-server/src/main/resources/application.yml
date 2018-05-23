@@ -41,11 +41,10 @@ zipkin:
       kafka:
         # Name of topic to poll for spans
         topic: ${KAFKA_TOPIC:zipkin}
-        # Consumer group this process is consuming on behalf of.
-        group: ${KAFKA_GROUP_ID:druid}
         #是否自动ack
         properties:
             #kafka 地址
+            group.id: druid
             bootstrap.servers: ${KAFKA_SERVER:kafka1.skye.dafy.com:9092,kafka2.skye.dafy.com:9092,kafka3.skye.dafy.com:9092}
             max.poll.records: 100
             max.poll.interval.ms: 60000

@@ -10,6 +10,7 @@ import java.util.List;
  */
 public class LogQueryResult {
     private List<SkyeLogEntity> logs = new ArrayList<>();
+    private boolean  has_more;
 
 
     public void addLogs(SkyeLogEntity skyeLogEntity){
@@ -24,4 +25,11 @@ public class LogQueryResult {
         this.logs = logs;
     }
 
+    public boolean isHas_more() {
+        return has_more;
+    }
+
+    public void setHas_more(boolean has_more) {
+        this.has_more = has_more;
+    }
 }

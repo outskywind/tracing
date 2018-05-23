@@ -19,8 +19,8 @@ public class LogSearchRequest {
 
     public String timeInterval;
 
-    public Integer page;
-    public Integer size;
+    public int page=1;
+    public int size=100;
     public String getTraceId() {
         return traceId;
     }
@@ -77,19 +77,19 @@ public class LogSearchRequest {
         this.mdc = mdc;
     }
 
-    public Integer getPage() {
+    public int getPage() {
         return page;
     }
 
-    public void setPage(Integer page) {
+    public void setPage(int page) {
         this.page = page;
     }
 
-    public Integer getSize() {
+    public int getSize() {
         return size;
     }
 
-    public void setSize(Integer size) {
+    public void setSize(int size) {
         this.size = size;
     }
     public int getFrom(){

@@ -31,6 +31,7 @@ import org.elasticsearch.search.aggregations.metrics.cardinality.ParsedCardinali
 import org.elasticsearch.search.builder.SearchSourceBuilder;
 import org.elasticsearch.search.sort.SortOrder;
 import org.joda.time.DateTime;
+import org.joda.time.DateTimeZone;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -180,7 +181,7 @@ public class ZipkinExtendServiceImpl implements ZipkinExtendService {
         builder.dataSource("service-span-metric").dimensions(new String[]{"spanName"})
                 .filter(Filter.builder().type(LogicType.selector).dimension("serviceName").value(request.getService()))
                 .granularity(TimeUtil.parseTimeInterval(request.getTimeInterval()),new DateTime(request.getStart()))
-                .timeRange(TimeInterval.builder().start(new DateTime(request.getStart())).end(new DateTime(request.getEnd())))
+                .timeRange(TimeInterval.builder().start(new DateTime(request.getStart()).toDateTime(DateTimeZone.UTC)).end(new DateTime(request.getEnd()).toDateTime(DateTimeZone.UTC)))
                 .addAggregation(com.dafy.skye.druid.rest.Aggregation.builder().name("latency").type(AggregationType.longSum).fieldName("duration"))
                 .addAggregation(com.dafy.skye.druid.rest.Aggregation.builder().name("_count").type(AggregationType.longSum).fieldName("count"))
                 .addPostAggregation(PostAggregation.builder().name("avg_latency").fn(Fn.div)

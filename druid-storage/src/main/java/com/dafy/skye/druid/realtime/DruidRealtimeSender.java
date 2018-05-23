@@ -43,7 +43,6 @@ public class DruidRealtimeSender {
                     @Override
                     public void onSuccess(BoxedUnit value)
                     {
-                        log.info("Sent message: {}", obj);
                         callback.success();
                     }
 

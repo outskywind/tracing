@@ -186,9 +186,14 @@ public class ElasticSearchStorage implements StorageComponent {
         if(request.getEnd()==null){
             request.setEnd(System.currentTimeMillis());
         }
+        if(request.getStart()==null){
+            request.setStart(request.getEnd()-7*24*3600000);
+        }
         //request.set
-        if(request.getPage()>30){
-            return null;
+        LogQueryResult result = new LogQueryResult();
+        if(request.getPage()>10){
+            result.setHas_more(false);
+            return result;
         }
         SearchRequestBuilder searchRequestBuilder = builder(request);
 
@@ -198,7 +203,6 @@ public class ElasticSearchStorage implements StorageComponent {
         //
         SearchResponse response=searchRequestBuilder.execute().actionGet();
         response.getTook();
-        LogQueryResult result = new LogQueryResult();
         SearchHit[] hits=response.getHits().getHits();
         List<SkyeLogEntity> logs=new LinkedList<>();
         for(SearchHit hit:hits){
@@ -210,6 +214,7 @@ public class ElasticSearchStorage implements StorageComponent {
             }
             logs.add(entity);
         }
+        result.setHas_more(response.getHits().getTotalHits()-request.getTo()>0);
         //resultBuilder.content(entities);
         //resultBuilder.total((int) response.getHits().totalHits);
         result.setLogs(logs);
