@@ -2,6 +2,9 @@ package com.dafy.skye.zipkin.extend.dto;
 
 import com.dafy.skye.zipkin.extend.enums.Stat;
 
+import java.util.HashMap;
+import java.util.Map;
+
 /**
  * Created by quanchengyun on 2018/5/17.
  */
@@ -17,7 +20,7 @@ public class Trace {
 
     private boolean isSuccess;
 
-    private Stat stat;
+    private Map<String,Stat> stat=new HashMap<>();
 
     public String getTraceId() {
         return traceId;
@@ -59,12 +62,11 @@ public class Trace {
         isSuccess = success;
     }
 
-    public Stat getStat() {
+    public Map<String, Stat> getStat() {
         return stat;
     }
 
-    public void setStat(Stat stat) {
+    public void setStat(Map<String, Stat> stat) {
         this.stat = stat;
     }
-
 }

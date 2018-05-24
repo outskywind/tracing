@@ -114,19 +114,22 @@ public class RuleService{
      */
     public void decideStat(Trace trace, Rule[] rules){
         //多个维度的规则，状态取最差的那一个
-        Stat stat = Stat.green;
+        //Stat stat = Stat.green;
         if(!trace.isSuccess()){
-            stat = Stat.red;
+            //stat = Stat.red;
+            trace.getStat().put(Demension.SUCCESS_RATE.value(),Stat.red);
         }
         else{
             for(Rule rule:rules){
+                Stat stat = trace.getStat().get(rule.getDimension());
                 Stat decided = doDecide(trace,rule);
-                if(decided.value()>stat.value()){
+                if(stat==null || decided.value()>stat.value()){
                     stat = decided;
+                    trace.getStat().put(rule.getDimension(),stat);
                 }
             }
         }
-        trace.setStat(stat);
+        //trace.setStat(stat);
     }
 
     /**
