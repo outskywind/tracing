@@ -17,6 +17,7 @@ import org.springframework.dao.DuplicateKeyException;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 /**
@@ -155,14 +156,16 @@ public class RuleService{
      */
     public void decideStat(MonitorMetric metric, Rule[] rules){
         //多个维度的规则，状态取最差的那一个
-        Stat stat = Stat.green;
+        //Stat stat = Stat.green;
         for(Rule rule:rules){
+            Stat stat = metric.getStat().get(rule.getDimension());
             Stat decided = doDecide(metric,rule);
-            if(decided.value()>stat.value()){
+            if(stat==null || decided.value()>stat.value()){
                 stat = decided;
+                metric.getStat().put(rule.getDimension(),stat);
             }
         }
-        metric.setStat(stat);
+        //metric.setStat(stat);
     }
 
 

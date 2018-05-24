@@ -3,6 +3,9 @@ package com.dafy.skye.zipkin.extend.dto;
 import com.dafy.skye.zipkin.extend.enums.Stat;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
+import java.util.HashMap;
+import java.util.Map;
+
 /**
  * Created by quanchengyun on 2018/4/23.
  */
@@ -18,7 +21,7 @@ public class MonitorMetric {
     private long latency;
     private long count;
     //jackson 序列化枚举类型时，使用的是枚举类型的名字
-    private Stat stat=Stat.green;
+    private Map<String,Stat> stat = new HashMap<>();
 
     public String getName() {
         return name;
@@ -52,14 +55,6 @@ public class MonitorMetric {
         this.latency = latency;
     }
 
-    public Stat getStat() {
-        return stat;
-    }
-
-    public void setStat(Stat stat) {
-        this.stat = stat;
-    }
-
     public double getSuccessPercent() {
         return successPercent;
     }
@@ -82,5 +77,14 @@ public class MonitorMetric {
 
     public void setCount(long count) {
         this.count = count;
+    }
+
+
+    public Map<String, Stat> getStat() {
+        return stat;
+    }
+
+    public void setStat(Map<String, Stat> stat) {
+        this.stat = stat;
     }
 }
