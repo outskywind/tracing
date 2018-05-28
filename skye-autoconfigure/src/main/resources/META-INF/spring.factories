@@ -1,0 +1,7 @@
+org.springframework.context.ApplicationListener=\
+com.dafy.skye.log.LogConfigurationExtendListener
+
+
+org.springframework.boot.autoconfigure.EnableAutoConfiguration=\
+com.dafy.skye.autoconfigure.BraveAutoConfiguration,\
+com.dafy.skye.brave.spring.mvc.SpringMVCAutoConfiguration

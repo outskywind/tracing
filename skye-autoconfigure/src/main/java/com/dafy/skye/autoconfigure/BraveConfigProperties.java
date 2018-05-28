@@ -1,4 +1,4 @@
-package com.dafy.skye.brave.autoconfigure;
+package com.dafy.skye.autoconfigure;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
 

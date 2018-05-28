@@ -14,7 +14,6 @@
     <modules>
         <module>skye-brave-dubbo</module>
         <module>skye-brave-springmvc</module>
-        <module>skye-brave-autoconfigure</module>
     </modules>
     <dependencies>
         <dependency>

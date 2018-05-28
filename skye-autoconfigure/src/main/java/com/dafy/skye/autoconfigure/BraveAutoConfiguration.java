@@ -1,4 +1,4 @@
-package com.dafy.skye.brave.autoconfigure;
+package com.dafy.skye.autoconfigure;
 
 import com.github.kristofa.brave.Brave;
 import com.github.kristofa.brave.Sampler;
@@ -16,8 +16,6 @@ import zipkin.reporter.kafka10.KafkaSender;
  * Created by Caedmon on 2017/6/26.
  */
 @Configuration
-//the problem is
-//@ConditionalOnProperty(prefix="skye.brave")
 @EnableConfigurationProperties({BraveConfigProperties.class})
 public class BraveAutoConfiguration {
 

@@ -6,7 +6,6 @@ import com.github.kristofa.brave.ServerResponseAdapter;
 import com.github.kristofa.brave.ServerResponseInterceptor;
 import com.github.kristofa.brave.http.*;
 import org.slf4j.MDC;
-import org.springframework.stereotype.Component;
 import org.springframework.web.servlet.handler.HandlerInterceptorAdapter;
 
 import javax.servlet.http.HttpServletRequest;
