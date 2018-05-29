@@ -4,7 +4,7 @@ import com.github.kristofa.brave.Brave;
 import com.github.kristofa.brave.Sampler;
 import com.google.common.base.Strings;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
-import org.springframework.boot.context.properties.EnableConfigurationProperties;
+import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Lazy;
@@ -16,8 +16,13 @@ import zipkin.reporter.kafka10.KafkaSender;
  * Created by Caedmon on 2017/6/26.
  */
 @Configuration
-@EnableConfigurationProperties({BraveConfigProperties.class})
 public class BraveAutoConfiguration {
+
+    @Bean
+    @ConfigurationProperties("skye")
+    public BraveConfigProperties braveConfigProperties(){
+        return new BraveConfigProperties();
+    }
 
     @Bean
     @ConditionalOnClass(Brave.class)

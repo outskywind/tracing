@@ -5,7 +5,6 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 /**
  * Created by Caedmon on 2017/6/27.
  */
-@ConfigurationProperties("skye")
 public class BraveConfigProperties {
     private String serviceName;
     private Float samplerRate;
