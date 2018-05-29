@@ -11,6 +11,7 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurerAdapter
  * Created by quanchengyun on 2017/8/3.
  */
 @Configuration
+@ConditionalOnClass({WebMvcConfigurerAdapter.class})
 public class SpringMVCAutoConfiguration extends WebMvcConfigurerAdapter {
 
     /**

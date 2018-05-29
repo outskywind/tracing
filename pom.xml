@@ -32,7 +32,7 @@
         <guava.version>19.0</guava.version>
         <jedis.version>2.8.2</jedis.version>
         <junit.version>4.12</junit.version>
-        <sl4j.version>1.7.21</sl4j.version>
+        <sl4j.version>1.7.25</sl4j.version>
         <elasticsearch.version>6.1.1</elasticsearch.version>
         <jedis.spring-boot.version>1.0.0-SNAPSHOT</jedis.spring-boot.version>
         <zipkin.version>2.5.0</zipkin.version>
@@ -94,6 +94,17 @@
                 <groupId>com.squareup.okhttp3</groupId>
                 <artifactId>okhttp</artifactId>
                 <version>${okhttp.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.kafka</groupId>
+                <artifactId>kafka-clients</artifactId>
+                <version>${kafka.version}</version>
+                <exclusions>
+                    <exclusion>
+                        <artifactId>slf4j-api</artifactId>
+                        <groupId>org.slf4j</groupId>
+                    </exclusion>
+                </exclusions>
             </dependency>
         </dependencies>
     </dependencyManagement>

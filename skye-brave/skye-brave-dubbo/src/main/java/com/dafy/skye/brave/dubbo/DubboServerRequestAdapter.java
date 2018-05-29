@@ -4,15 +4,12 @@ import com.alibaba.dubbo.rpc.Invocation;
 import com.alibaba.dubbo.rpc.Invoker;
 import com.alibaba.dubbo.rpc.RpcContext;
 import com.github.kristofa.brave.*;
-import com.twitter.zipkin.gen.BinaryAnnotation;
-import com.twitter.zipkin.gen.Endpoint;
-import zipkin.Constants;
 
 import java.net.InetSocketAddress;
-import java.util.ArrayList;
+
 import java.util.Collection;
 import java.util.Collections;
-import java.util.List;
+
 
 /**
  * Created by Caedmon on 2017/4/11.

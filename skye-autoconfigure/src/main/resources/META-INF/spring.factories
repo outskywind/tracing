@@ -1,5 +1,5 @@
 org.springframework.context.ApplicationListener=\
-com.dafy.skye.log.LogConfigurationExtendListener
+com.dafy.skye.autoconfigure.LogConfigurationExtendListener
 
 
 org.springframework.boot.autoconfigure.EnableAutoConfiguration=\

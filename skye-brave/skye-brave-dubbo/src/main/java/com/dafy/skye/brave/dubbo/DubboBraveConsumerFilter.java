@@ -3,9 +3,6 @@ package com.dafy.skye.brave.dubbo;
 import com.alibaba.dubbo.common.extension.Activate;
 import com.alibaba.dubbo.rpc.*;
 import com.github.kristofa.brave.*;
-import com.twitter.zipkin.gen.Span;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * Created by Caedmon on 2017/4/11.
