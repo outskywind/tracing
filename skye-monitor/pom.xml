@@ -24,10 +24,10 @@
             </exclusions>
         </dependency>
 
-        <dependency>
+        <!--<dependency>
             <groupId>org.springframework</groupId>
             <artifactId>spring-websocket</artifactId>
-        </dependency>
+        </dependency>-->
 
         <dependency>
             <groupId>io.zipkin.java</groupId>
@@ -46,7 +46,7 @@
 
         <dependency>
             <groupId>com.dafy.skye</groupId>
-            <artifactId>zipkin-autoconfiguration</artifactId>
+            <artifactId>zipkin-autoconfigure</artifactId>
             <version>1.0.0-SNAPSHOT</version>
         </dependency>
 
