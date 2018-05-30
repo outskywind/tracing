@@ -3,6 +3,7 @@ import com.dafy.setcd.spring.SetcdPropertySource;
 import com.dafy.skye.log.server.autoconfig.EnableSkyeLogServer;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.util.StringUtils;
 import zipkin.server.EnableZipkinServer;
 
 /**
@@ -17,6 +18,9 @@ import zipkin.server.EnableZipkinServer;
 public class SkyeServerApplicaiton {
     public static void main(String[] args) {
         SpringApplication application=new SpringApplication(SkyeServerApplicaiton.class);
+        if(!StringUtils.hasText(System.getProperty("env"))){
+            System.setProperty("env","dev");
+        }
         //运行启动写pid
         //application.addListeners(new ApplicationPidFileWriter("skye-server.pid"));
         application.run(args);
