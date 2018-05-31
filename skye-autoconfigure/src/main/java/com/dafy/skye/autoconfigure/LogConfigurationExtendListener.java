@@ -5,15 +5,14 @@ import com.dafy.skye.log.appender.LogKafkaAppender;
 import org.slf4j.ILoggerFactory;
 import org.slf4j.Logger;
 import org.slf4j.impl.StaticLoggerBinder;
-import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.context.event.ApplicationPreparedEvent;
-import org.springframework.boot.context.event.ApplicationReadyEvent;
 import org.springframework.boot.logging.LoggingApplicationListener;
 import org.springframework.boot.logging.LoggingSystem;
 import org.springframework.boot.logging.logback.LogbackLoggingSystem;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationEvent;
+import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.context.event.GenericApplicationListener;
 import org.springframework.core.ResolvableType;
 import org.springframework.util.Assert;
@@ -29,7 +28,7 @@ public class LogConfigurationExtendListener implements GenericApplicationListene
     //!important attention the order
     public static final int ORDER= LoggingApplicationListener.DEFAULT_ORDER+1;
 
-    private static Class<?>[] EVENT_TYPES = {ApplicationPreparedEvent.class, ApplicationReadyEvent.class};
+    private static Class<?>[] EVENT_TYPES = {ApplicationPreparedEvent.class, ContextRefreshedEvent.class};
 
     private static Class<?>[] SOURCE_TYPES = { SpringApplication.class,
             ApplicationContext.class };
@@ -62,18 +61,15 @@ public class LogConfigurationExtendListener implements GenericApplicationListene
         if(event instanceof ApplicationPreparedEvent){
             onApplicationPreparedEvent((ApplicationPreparedEvent) event);
         }
-        else if(event instanceof  ApplicationReadyEvent){
-            onApplicationReadyEvent((ApplicationReadyEvent) event);
+        else if(event instanceof  ContextRefreshedEvent){
+            onContextRefreshedEvent((ContextRefreshedEvent) event);
         }
 
     }
 
-    //此时applicationContext 已经启动完成.但是会错过在这之前已经启动运行的bean的日志。
-    //还是应该要在bean初始化前完成日志的配置
-    private void onApplicationReadyEvent(ApplicationReadyEvent event) {
-        ConfigurableListableBeanFactory beanFactory = event.getApplicationContext()
-                .getBeanFactory();
-        LoggingSystem loggingSystem = (LoggingSystem)beanFactory.getSingleton(LoggingApplicationListener.LOGGING_SYSTEM_BEAN_NAME);
+    private void onContextRefreshedEvent(ContextRefreshedEvent event) {
+        ApplicationContext context = event.getApplicationContext();
+        LoggingSystem loggingSystem = (LoggingSystem)context.getBean(LoggingApplicationListener.LOGGING_SYSTEM_BEAN_NAME);
         if(loggingSystem instanceof LogbackLoggingSystem){
             LoggerContext loggerContext =getLoggerContext();
             //
