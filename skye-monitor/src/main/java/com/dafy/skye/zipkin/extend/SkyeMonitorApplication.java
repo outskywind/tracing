@@ -13,7 +13,6 @@ import zipkin.server.EnableZipkinServer;
  * Created by Caedmon on 2017/6/15.
  */
 @SpringBootApplication
-@Import(ZipkinAutoConfiguration.class)
 @EnableZipkinServer
 //配置此注解会覆盖默认的配置文件读取
 @SetcdPropertySource(
