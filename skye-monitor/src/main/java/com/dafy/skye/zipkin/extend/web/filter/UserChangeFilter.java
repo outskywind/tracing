@@ -2,11 +2,13 @@ package com.dafy.skye.zipkin.extend.web.filter;
 
 import com.dafy.skye.zipkin.extend.dto.UserInfo;
 import com.dafy.skye.zipkin.extend.service.UserService;
+import com.dafy.skye.zipkin.extend.web.HttpServletRequestHelper;
 import com.dafy.skye.zipkin.extend.web.session.UserSessionHolder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import javax.servlet.*;
+import javax.servlet.http.HttpServletRequest;
 import java.io.IOException;
 import java.util.HashSet;
 import java.util.List;
@@ -30,8 +32,9 @@ public class UserChangeFilter implements Filter {
         chain.doFilter(request,response);
         UserInfo user = UserSessionHolder.getUser();
         List<String> follow = userService.listFollowServices(user.getEmail());
-        user.setFavServices(new HashSet<String>(follow));
-        UserSessionHolder.setUser(user);
+        user.setFavServices(new HashSet<>(follow));
+        //一进来都是从session获取的，所以也要更新session
+        HttpServletRequestHelper.setUserSession((HttpServletRequest) request,user);
     }
 
     @Override

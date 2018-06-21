@@ -11,6 +11,7 @@ import com.dafy.skye.zipkin.extend.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Controller;
+import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.*;
 
@@ -127,12 +128,15 @@ public class ServiceController extends BaseSessionController{
         }
         //
         UserInfo userInfo = getUser();
+        if(CollectionUtils.isEmpty(userInfo.getFavServices())){
+            return new Response("未关注服务",null);
+        }
         BasicQueryRequest request = new BasicQueryRequest();
         request.setEndTs(end);
         request.setLookback(end-start);
         request.setServices(Arrays.asList(userInfo.getFavServices().toArray(new String[0])));
         List<ServiceMonitorMetric> result = zipkinExtendService.getServiceMonitorMetrics(request);
-        Rule[] rules = null;
+        Rule[] rules;
         //因为是 服务面板数据，因此使用默认的或者服务粒度的
         for(ServiceMonitorMetric monitorMetric:result){
             rules = rulesRefreshHolder.getRules(monitorMetric.getName());

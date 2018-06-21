@@ -13,7 +13,7 @@
     </delete>
 
     <insert id="addUserFollow">
-        INSERT ignore INTO user_service ( `user`, service)
+        INSERT ignore INTO user_service ( user, service)
         VALUES
         <foreach collection="services" separator="," item="service">
             (#{user}, #{service})

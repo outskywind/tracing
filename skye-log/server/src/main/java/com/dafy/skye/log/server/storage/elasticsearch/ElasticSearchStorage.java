@@ -243,6 +243,9 @@ public class ElasticSearchStorage implements StorageComponent {
         if (!Strings.isNullOrEmpty(request.exception)) {
             root.filter(QueryBuilders.matchPhraseQuery("message",request.exception));
         }
+        if (request.hosts!=null && !request.hosts.isEmpty()) {
+            root.filter(QueryBuilders.termsQuery("address",request.hosts));
+        }
         if(!Strings.isNullOrEmpty(request.getKeyword())){
             //terms 查询是单词项精准查询，存储时使用了标准分析器，会统一成小写词项倒排索引中
             //短语搜索

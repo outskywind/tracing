@@ -36,8 +36,8 @@ public class UserFilter implements Filter {
     public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain) throws IOException, ServletException {
         final UserInfo user = HttpServletRequestHelper.getUserfromSessionCookie((HttpServletRequest) request, new FilterCallback<UserInfo>() {
             @Override
-            public void callback(UserInfo data) {
-                data.getFavServices().addAll(userService.listFollowServices(data.getEmail()));
+            public void callback(UserInfo user) {
+                user.getFavServices().addAll(userService.listFollowServices(user.getEmail()));
             }
         });
         if(user == null){

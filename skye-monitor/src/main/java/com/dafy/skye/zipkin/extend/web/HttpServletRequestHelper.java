@@ -64,4 +64,13 @@ public class HttpServletRequestHelper {
         return u;
     }
 
+    public static void setUserSession(HttpServletRequest request, UserInfo userInfo){
+        HttpSession session = request.getSession();
+        if(session!=null){
+            session.setAttribute("user",userInfo);
+        }
+    }
+
+
+
 }

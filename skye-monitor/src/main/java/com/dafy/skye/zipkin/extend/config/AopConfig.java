@@ -1,7 +1,7 @@
 package com.dafy.skye.zipkin.extend.config;
 
-import com.dafy.skye.zipkin.extend.aop.CacheRefreshAdvice;
 import com.dafy.skye.zipkin.extend.aop.DynamicProxyAop;
+import com.dafy.skye.zipkin.extend.aop.RuleCacheRefreshAdvice;
 import com.dafy.skye.zipkin.extend.service.RuleService;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -25,8 +25,8 @@ public class AopConfig {
     }
 
     @Bean
-    public CacheRefreshAdvice<RuleService> cacheRefreshAdvice(){
-        CacheRefreshAdvice<RuleService> refreshAdvice = new CacheRefreshAdvice<>();
+    public RuleCacheRefreshAdvice<RuleService> cacheRefreshAdvice(){
+        RuleCacheRefreshAdvice<RuleService> refreshAdvice = new RuleCacheRefreshAdvice<>();
         refreshAdvice.setPointCut(new String[]{"add","modify","delete"});
         refreshAdvice.setTarget(ruleService(),RuleService.class);
         return refreshAdvice;

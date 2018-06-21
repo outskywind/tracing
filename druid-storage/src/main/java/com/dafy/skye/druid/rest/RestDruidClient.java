@@ -77,7 +77,7 @@ public class RestDruidClient {
         return null;
     }
 
-    //because we are running in the mvc mode , the mvc mode is synchronized mode
+    //because we are running in the servlet, the servlet is synchronized mode
     // respectively servlet 3.1 has async mode?
     protected  Future<Response> sendQuery(String requestBody,String contentType){
         try{

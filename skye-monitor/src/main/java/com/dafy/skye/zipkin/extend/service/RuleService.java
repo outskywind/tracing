@@ -17,7 +17,6 @@ import org.springframework.dao.DuplicateKeyException;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 
 /**
@@ -113,23 +112,18 @@ public class RuleService{
      * @param rules 这里已经是整合之后的规则列表，只需直接判断即可
      */
     public void decideStat(Trace trace, Rule[] rules){
-        //多个维度的规则，状态取最差的那一个
         //Stat stat = Stat.green;
-        if(!trace.isSuccess()){
-            //stat = Stat.red;
-            trace.getStat().put(Demension.SUCCESS_RATE.value(),Stat.red);
-        }
-        else{
-            for(Rule rule:rules){
-                Stat stat = trace.getStat().get(rule.getDimension());
-                Stat decided = doDecide(trace,rule);
-                if(stat==null || decided.value()>stat.value()){
-                    stat = decided;
-                    trace.getStat().put(rule.getDimension(),stat);
-                }
+        for(Rule rule:rules){
+            Stat stat = trace.getStat().get(rule.getDimension());
+            Stat decided = doDecide(trace,rule);
+            if(stat==null || decided.value()>stat.value()){
+                stat = decided;
+                trace.getStat().put(rule.getDimension(),stat);
             }
         }
-        //trace.setStat(stat);
+        if(!trace.isSuccess()){
+            trace.getStat().put(Demension.SUCCESS_RATE.value(),Stat.red);
+        }
     }
 
     /**
@@ -158,7 +152,6 @@ public class RuleService{
      * @param rules 这里已经是整合之后的规则列表，只需直接判断即可
      */
     public void decideStat(MonitorMetric metric, Rule[] rules){
-        //多个维度的规则，状态取最差的那一个
         //Stat stat = Stat.green;
         for(Rule rule:rules){
             Stat stat = metric.getStat().get(rule.getDimension());
