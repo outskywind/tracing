@@ -7,7 +7,7 @@ public enum ResponseCode {
 
     SUCCESS("0"),
     SYSTEM_ERROR("系统错误")
-    ,RULE_DUPLICATE("");
+    ,RULE_DUPLICATE("规则重复");
 
     private String value;
 
