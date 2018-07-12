@@ -197,7 +197,7 @@ public class ElasticSearchStorage implements StorageComponent {
         }
         SearchRequestBuilder searchRequestBuilder = builder(request);
 
-        searchRequestBuilder.highlighter(SearchSourceBuilder.highlight().preTags("<span class='highlight'>").postTags("</span>").field("message"));
+        searchRequestBuilder.highlighter(SearchSourceBuilder.highlight().preTags("<span style='display:inline-block;color:#0f0f0f;background:#f4eb33;'>").postTags("</span>").field("message"));
         searchRequestBuilder.setFrom(request.getFrom()).setSize(request.getSize());
         searchRequestBuilder.addSort("timestamp", SortOrder.ASC);
         //
@@ -249,7 +249,10 @@ public class ElasticSearchStorage implements StorageComponent {
         if(!Strings.isNullOrEmpty(request.getKeyword())){
             //terms 查询是单词项精准查询，存储时使用了标准分析器，会统一成小写词项倒排索引中
             //短语搜索
-            root.filter(QueryBuilders.matchPhraseQuery("message",request.getKeyword()));
+            //root.filter(QueryBuilders.matchPhraseQuery("message",request.getKeyword()));
+            root.should(QueryBuilders.matchPhraseQuery("message",request.getKeyword()));
+            root.should(QueryBuilders.matchPhraseQuery("exception",request.getKeyword()));
+            root.minimumShouldMatch(1);
         }
         if(!Strings.isNullOrEmpty(request.getMdc())){
             JavaType javaType= JacksonConvert.mapper()
@@ -261,6 +264,7 @@ public class ElasticSearchStorage implements StorageComponent {
                 root.filter(QueryBuilders.nestedQuery("mdc",childTermsQuery, ScoreMode.None));
             }
         }
+
         searchRequestBuilder.setQuery(root);
         return searchRequestBuilder;
     }

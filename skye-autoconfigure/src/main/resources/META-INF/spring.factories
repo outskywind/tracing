@@ -4,4 +4,5 @@ com.dafy.skye.autoconfigure.LogConfigurationExtendListener
 
 org.springframework.boot.autoconfigure.EnableAutoConfiguration=\
 com.dafy.skye.autoconfigure.BraveAutoConfiguration,\
-com.dafy.skye.brave.spring.mvc.SpringMVCAutoConfiguration
+com.dafy.skye.autoconfigure.SpringWebMvcAutoConfiguration,\
+com.dafy.skye.autoconfigure.SpringWebMvcTracingAutoConfiguration

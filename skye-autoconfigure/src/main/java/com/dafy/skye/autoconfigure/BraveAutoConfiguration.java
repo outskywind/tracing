@@ -3,6 +3,8 @@ package com.dafy.skye.autoconfigure;
 import com.github.kristofa.brave.Brave;
 import com.github.kristofa.brave.Sampler;
 import com.google.common.base.Strings;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Bean;
@@ -18,6 +20,8 @@ import zipkin.reporter.kafka10.KafkaSender;
 @Configuration
 public class BraveAutoConfiguration {
 
+    static Logger log  = LoggerFactory.getLogger(BraveAutoConfiguration.class);
+
     @Bean
     @ConfigurationProperties("skye")
     public BraveConfigProperties braveConfigProperties(){
@@ -32,11 +36,11 @@ public class BraveAutoConfiguration {
     //@ConditionalOnBean(BraveConfigProperties.class)
     public Brave brave(BraveConfigProperties configProperties){
         if(Strings.isNullOrEmpty(configProperties.getServiceName())){
-            System.out.println("Brave service name is empty");
+            log.warn("Brave service name is empty");
             return null;
         }
         if(Strings.isNullOrEmpty(configProperties.getKafkaServers())){
-            System.out.println("Brave kafkaServers empty");
+            log.warn("Brave kafkaServers empty");
             return null;
         }
         Brave.Builder builder=new Brave.Builder(configProperties.getServiceName());
@@ -57,9 +61,5 @@ public class BraveAutoConfiguration {
         builder.reporter(reporter.build());
         return builder.build();
     }
-
-
-
-
 
 }

@@ -45,7 +45,7 @@
         },
         "exception":{
           "type":"text",
-          "analyzer":"standard"
+          "analyzer":"simple"
         }
       }
 }

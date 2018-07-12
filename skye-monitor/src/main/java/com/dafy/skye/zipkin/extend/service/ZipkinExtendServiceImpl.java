@@ -267,15 +267,15 @@ public class ZipkinExtendServiceImpl implements ZipkinExtendService {
         ServiceInfo result = new ServiceInfo();
         try{
             BasicQueryRequest request = new BasicQueryRequest();
-            request.endTs=System.currentTimeMillis();
+            //request.endTs=System.currentTimeMillis();
             request.setServices(Arrays.asList(serviceName));
             String[] indices=indices(request.endTs,request.lookback);
             SearchRequest searchRequest = new SearchRequest();
             searchRequest.indices(indices);
             searchRequest.indicesOptions(IndicesOptions.lenientExpandOpen());
             SearchSourceBuilder searchSourceBuilder = ZipkinElasticsearchQuery.searchSourceBuilder(request);
-            searchSourceBuilder.aggregation(AggregationBuilders.terms("interfaces").field("name").order(BucketOrder.count(false)))
-                                .aggregation(AggregationBuilders.terms("hosts").field("localEndpoint.ipv4").order(BucketOrder.count(false)));
+            searchSourceBuilder.aggregation(AggregationBuilders.terms("interfaces").field("name").order(BucketOrder.count(false)).size(100))
+                                .aggregation(AggregationBuilders.terms("hosts").field("localEndpoint.ipv4").order(BucketOrder.count(false)).size(100));
             searchRequest.source(searchSourceBuilder);
             //
             SearchResponse  response = restClient.search(searchRequest);

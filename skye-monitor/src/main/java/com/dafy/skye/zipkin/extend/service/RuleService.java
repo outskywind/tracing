@@ -4,7 +4,7 @@ import com.dafy.skye.zipkin.extend.dto.MonitorMetric;
 import com.dafy.skye.zipkin.extend.dto.Rule;
 import com.dafy.skye.zipkin.extend.dto.Threshold;
 import com.dafy.skye.zipkin.extend.dto.Trace;
-import com.dafy.skye.zipkin.extend.enums.Demension;
+import com.dafy.skye.zipkin.extend.enums.Dimension;
 import com.dafy.skye.zipkin.extend.enums.ResponseCode;
 import com.dafy.skye.zipkin.extend.enums.Stat;
 import com.dafy.skye.zipkin.extend.mapper.RuleMapper;
@@ -122,7 +122,7 @@ public class RuleService{
             }
         }
         if(!trace.isSuccess()){
-            trace.getStat().put(Demension.SUCCESS_RATE.value(),Stat.red);
+            trace.getStat().put(Dimension.SUCCESS_RATE.value(),Stat.red);
         }
     }
 
@@ -132,7 +132,7 @@ public class RuleService{
      * @param rule
      */
     private Stat doDecide(Trace trace, Rule rule){
-        if(Demension.LATENCY.value().equals(rule.getDimension())){
+        if(Dimension.LATENCY.value().equals(rule.getDimension())){
             Threshold threshold  = rule.getThreshold();
             if(trace.getLatency() >= threshold.getRed()){
                 return Stat.red;
@@ -171,7 +171,7 @@ public class RuleService{
      * @param rule
      */
     private Stat doDecide(MonitorMetric metric, Rule rule){
-        if(Demension.LATENCY.value().equals(rule.getDimension())){
+        if(Dimension.LATENCY.value().equals(rule.getDimension())){
             Threshold threshold  = rule.getThreshold();
             if(metric.getLatency() >= threshold.getRed()){
                 return Stat.red;
@@ -180,7 +180,7 @@ public class RuleService{
                 return Stat.yellow;
             }
         }
-        else if(Demension.SUCCESS_RATE.value().equals(rule.getDimension())){
+        else if(Dimension.SUCCESS_RATE.value().equals(rule.getDimension())){
             Threshold threshold  = rule.getThreshold();
             if(metric.getSuccessPercent() <= threshold.getRed()){
                 return Stat.red;

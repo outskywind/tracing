@@ -3,7 +3,9 @@ package com.dafy.skye.zipkin.extend.web.controller;
 import com.dafy.skye.zipkin.extend.cache.RulesRefreshHolder;
 import com.dafy.skye.zipkin.extend.cache.ServiceRefreshHolder;
 import com.dafy.skye.zipkin.extend.dto.*;
+import com.dafy.skye.zipkin.extend.enums.Dimension;
 import com.dafy.skye.zipkin.extend.enums.ResponseCode;
+import com.dafy.skye.zipkin.extend.enums.Stat;
 import com.dafy.skye.zipkin.extend.service.RuleService;
 import com.dafy.skye.zipkin.extend.service.ZipkinExtendService;
 import com.dafy.skye.zipkin.extend.util.TimeUtil;
@@ -196,7 +198,43 @@ public class ServiceController extends BaseSessionController{
         for(Trace trace: traces){
             ruleService.decideStat(trace,rules);
         }
+        //sort, failed first , then stats red  , then left
+        // we need two pointers here pointing at failed tail , red tail ,then next
+        // so the data is expandable , we need the link list
+        sort(traces);
         return new Response("0",traces);
+    }
+
+
+    private void sort(List<Trace> traces){
+        int tail= 0;
+        LinkedList<Trace> failed  = new LinkedList();
+        LinkedList<Trace> red  = new LinkedList();
+        LinkedList<Trace> other  = new LinkedList();
+
+        for(int i=0;i<traces.size();i++){
+            Trace e = traces.get(i);
+            if(!e.isSuccess()){
+                failed.add(e);
+                continue;
+            }
+            Map<String, Stat> stats =  e.getStat();
+            if(Stat.red ==stats.get(Dimension.LATENCY.value()) || Stat.red ==stats.get(Dimension.SUCCESS_RATE.value()) ){
+                red.add(e);
+                continue;
+            }
+            other.add(e);
+        }
+        //merge
+        for(int i=tail;i<failed.size();i++,tail++){
+            traces.set(i,failed.get(i));
+        }
+        for(int i=tail;i<red.size();i++,tail++){
+            traces.set(i,red.get(i));
+        }
+        for(int i=tail;i<other.size();i++,tail++){
+            traces.set(i,other.get(i));
+        }
     }
 
 
