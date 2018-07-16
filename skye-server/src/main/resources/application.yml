@@ -32,7 +32,6 @@ zipkin:
     names-max-age: 300
     # CORS allowed-origins.
     allowed-origins: "*"
-
   druid:
       zk:
         host: druid-zk1.dafy.com:2181
@@ -53,7 +52,6 @@ zipkin:
             auto.offset.reset: earliest
             key.deserializer: org.apache.kafka.common.serialization.ByteArrayDeserializer
             value.deserializer: org.apache.kafka.common.serialization.ByteArrayDeserializer
-
   storage:
     strict-trace-id: ${STRICT_TRACE_ID:true}
     type: ${STORAGE_TYPE:elasticsearch}

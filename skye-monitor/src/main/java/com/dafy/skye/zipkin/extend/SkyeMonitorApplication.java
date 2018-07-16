@@ -16,7 +16,7 @@ import zipkin.server.EnableZipkinServer;
 @EnableZipkinServer
 //配置此注解会覆盖默认的配置文件读取
 @SetcdPropertySource(
-        etcdKeys={"/server-config/skye/application-${env}.yml"},localOverride = true
+        etcdKeys={"/server-config/skye/application-${env}.yml"}
 )
 public class SkyeMonitorApplication {
     public static void main(String[] args) {
