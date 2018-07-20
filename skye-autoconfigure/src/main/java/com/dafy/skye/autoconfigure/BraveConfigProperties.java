@@ -1,7 +1,5 @@
 package com.dafy.skye.autoconfigure;
 
-import org.springframework.boot.context.properties.ConfigurationProperties;
-
 /**
  * Created by Caedmon on 2017/6/27.
  */

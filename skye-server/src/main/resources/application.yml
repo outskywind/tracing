@@ -32,26 +32,6 @@ zipkin:
     names-max-age: 300
     # CORS allowed-origins.
     allowed-origins: "*"
-  druid:
-      zk:
-        host: druid-zk1.dafy.com:2181
-        path: /druid/discovery/druid:broker
-        namespace: druid-broker-service-discovery
-      kafka:
-        # Name of topic to poll for spans
-        topic: ${KAFKA_TOPIC:zipkin}
-        #是否自动ack
-        properties:
-            #kafka 地址
-            group.id: druid
-            bootstrap.servers: ${KAFKA_SERVER:kafka1.skye.dafy.com:9092,kafka2.skye.dafy.com:9092,kafka3.skye.dafy.com:9092}
-            max.poll.records: 100
-            max.poll.interval.ms: 60000
-            #是否自动ack
-            enable.auto.commit: false
-            auto.offset.reset: earliest
-            key.deserializer: org.apache.kafka.common.serialization.ByteArrayDeserializer
-            value.deserializer: org.apache.kafka.common.serialization.ByteArrayDeserializer
   storage:
     strict-trace-id: ${STRICT_TRACE_ID:true}
     type: ${STORAGE_TYPE:elasticsearch}
@@ -67,7 +47,6 @@ zipkin:
       username: ${ES_USERNAME:}
       password: ${ES_PASSWORD:}
       index-template: zipkin-es-template.json
-
   ui:
     ## Values below here are mapped to ZipkinUiProperties, served as /config.json
     # Default limit for Find Traces
@@ -83,6 +62,27 @@ zipkin:
     # - .*example2.com
     # Default is "match all websites"
     instrumented: .*
+
+druid:
+    zk:
+      host: druid-zk1.dafy.com:2181
+      path: /druid/discovery/druid:broker
+      namespace: druid-broker-service-discovery
+    kafka:
+      # Name of topic to poll for spans
+      topic: ${KAFKA_TOPIC:zipkin}
+      #是否自动ack
+      properties:
+          #kafka 地址
+          group.id: druid
+          bootstrap.servers: ${KAFKA_SERVER:kafka1.skye.dafy.com:9092,kafka2.skye.dafy.com:9092,kafka3.skye.dafy.com:9092}
+          max.poll.records: 100
+          max.poll.interval.ms: 60000
+          #是否自动ack
+          enable.auto.commit: false
+          auto.offset.reset: earliest
+          key.deserializer: org.apache.kafka.common.serialization.ByteArrayDeserializer
+          value.deserializer: org.apache.kafka.common.serialization.ByteArrayDeserializer
 
 server:
   port: ${QUERY_PORT:9411}

@@ -20,9 +20,6 @@ import java.io.IOException;
 public class UserFilter implements Filter {
 
     //#{} 这里注入的需要是注册的bean的属性表达式 ${}才是占位符，使用propertysourceholderconfigurar解析注入
-    @NotNull
-    @Value("${login.url}")
-    String loginUrl;
 
     @Autowired
     UserService userService;

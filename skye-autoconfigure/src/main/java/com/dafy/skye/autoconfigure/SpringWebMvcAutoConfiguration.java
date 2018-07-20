@@ -3,6 +3,7 @@ package com.dafy.skye.autoconfigure;
 import com.dafy.skye.brave.spring.mvc.SimpleBraveTracingInterceptor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.AutoConfigureAfter;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurerAdapter;
@@ -12,6 +13,7 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurerAdapter
  */
 @Configuration
 @AutoConfigureAfter(SpringWebMvcTracingAutoConfiguration.class)
+@ConditionalOnClass(WebMvcConfigurerAdapter.class)
 public class SpringWebMvcAutoConfiguration extends WebMvcConfigurerAdapter {
 
     @Autowired(required = false)
