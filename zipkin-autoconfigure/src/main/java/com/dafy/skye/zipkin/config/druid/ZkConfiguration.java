@@ -20,11 +20,11 @@ import org.springframework.context.annotation.Configuration;
  */
 //be careful with @EnableAutoConfiguration ， only can be used in root Configuration class
 @Configuration
-@ConditionalOnProperty(prefix="zipkin.druid.zk",name={"host","path"})
+@ConditionalOnProperty(prefix="druid.zk",name={"host","path"})
 public class ZkConfiguration {
 
     @Bean
-    @ConfigurationProperties(prefix="zipkin.druid.zk",ignoreInvalidFields=true,exceptionIfInvalid=false)
+    @ConfigurationProperties(prefix="druid.zk",ignoreInvalidFields=true,exceptionIfInvalid=false)
     public ZKConfigurationProperties zkConfigurationProperties(){
         return  new ZKConfigurationProperties();
     }

@@ -39,7 +39,7 @@ import java.util.List;
  */
 @Configuration
 @Import(ZkConfiguration.class)
-@ConditionalOnProperty(prefix="zipkin.druid",name={"zk.host"})
+@ConditionalOnProperty(prefix="druid",name={"zk.host"})
 public class ZipkinDruidStorageAutoConfiguration {
 
     @ConditionalOnMissingBean(name="zipkin.restDruidClient")
@@ -128,7 +128,7 @@ public class ZipkinDruidStorageAutoConfiguration {
 
 
     @Bean(name="zipkin.druidKafkaConfig")
-    @ConfigurationProperties(prefix="zipkin.druid.kafka")
+    @ConfigurationProperties(prefix="druid.kafka")
     public KafkaConfigurationProperties  druidKafkaConfig(){
         return new KafkaConfigurationProperties();
     }
