@@ -1,6 +1,8 @@
 package com.dafy.skye.autoconfigure;
 
 import ch.qos.logback.classic.LoggerContext;
+import ch.qos.logback.classic.spi.ILoggingEvent;
+import ch.qos.logback.core.Appender;
 import com.dafy.skye.log.appender.LogKafkaAppender;
 import org.slf4j.ILoggerFactory;
 import org.slf4j.Logger;
@@ -19,6 +21,7 @@ import org.springframework.util.Assert;
 
 import java.security.CodeSource;
 import java.security.ProtectionDomain;
+import java.util.Iterator;
 
 /**
  * Created by quanchengyun on 2018/5/28.
@@ -76,15 +79,25 @@ public class LogConfigurationExtendListener implements GenericApplicationListene
             Logger rootLogger = loggerContext.getLogger(Logger.ROOT_LOGGER_NAME);
             if(rootLogger instanceof ch.qos.logback.classic.Logger){
                 ch.qos.logback.classic.Logger logbackLogger = (ch.qos.logback.classic.Logger)rootLogger;
-                LogKafkaAppender appender = new LogKafkaAppender();
-                logbackLogger.addAppender(appender);
-                String kafkaServers = event.getApplicationContext().getEnvironment().getProperty("skye.kafkaServers");
-                String serviceName = event.getApplicationContext().getEnvironment().getProperty("skye.serviceName");
-                appender.setKafkaAddress(kafkaServers);
-                appender.setServiceName(serviceName);
-                appender.setContext(loggerContext);
-                appender.setName("skye");
-                appender.start();
+                Iterator<Appender<ILoggingEvent>> appenders = logbackLogger.iteratorForAppenders();
+                boolean isAttached = false;
+                while(appenders.hasNext()){
+                    if(appenders.next() instanceof LogKafkaAppender){
+                        isAttached = true;
+                        break;
+                    }
+                }
+                if(!isAttached){
+                    LogKafkaAppender appender = new LogKafkaAppender();
+                    logbackLogger.addAppender(appender);
+                    String kafkaServers = event.getApplicationContext().getEnvironment().getProperty("skye.kafkaServers");
+                    String serviceName = event.getApplicationContext().getEnvironment().getProperty("skye.serviceName");
+                    appender.setKafkaAddress(kafkaServers);
+                    appender.setServiceName(serviceName);
+                    appender.setContext(loggerContext);
+                    appender.setName("skye");
+                    appender.start();
+                }
             }
         }
     }
