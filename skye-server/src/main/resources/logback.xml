@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<configuration scan="true" scanPeriod="30 seconds">
-
+<configuration>
     <contextListener class="ch.qos.logback.classic.jul.LevelChangePropagator">
         <resetJUL>true</resetJUL>
     </contextListener>
@@ -10,12 +9,11 @@
             <pattern>%-20(%d{HH:mm:ss.SSS} [%thread]) %-5level [%X{braveTraceId}] %logger{80}:%line - %msg%n</pattern>
         </encoder>
     </appender>
-    <appender name="file"
-              class="ch.qos.logback.core.rolling.RollingFileAppender">
+    <appender name="file" class="ch.qos.logback.core.rolling.RollingFileAppender">
         <file>/opt/logs/base/skye-server.log</file>
         <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
-            <FileNamePattern>/opt/logs/base/skye-server.%d{yyyy-MM-dd}.log
-            </FileNamePattern>
+            <FileNamePattern>/opt/logs/base/skye-server.%d{yyyy-MM-dd}.log</FileNamePattern>
+            <maxHistory>30</maxHistory>
         </rollingPolicy>
         <encoder>
             <pattern>%-20(%d{HH:mm:ss.SSS} [%thread]) %-5level [%X{braveTraceId}] %logger{80}:%line - %msg%n</pattern>
@@ -26,7 +24,7 @@
     <logger name="org.apache.zookeeper" level="INFO"/>
     <logger name="kafka" level="WARN"></logger>
     <root level="INFO">
-        <appender-ref ref="console" />
+        <!--<appender-ref ref="console" />-->
         <appender-ref ref="file" />
     </root>
 </configuration>
