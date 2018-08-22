@@ -48,7 +48,7 @@ public class PrometheusListener implements ApplicationListener<EmbeddedServletCo
 
             client.agentServiceRegister(newService);
             logger.info("register service to consul successfully! serviceName={}, consulHost={}, consulPort={}, appHost={}, appPort={}",
-                    serviceName, consulHost, appHost, appPort);
+                    serviceName, consulHost, consulPort, appHost, appPort);
 
             DefaultExports.initialize();
             logger.info("prometheus exports initialized!");
