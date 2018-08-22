@@ -33,9 +33,11 @@ public class PrometheusListener implements ApplicationListener<EmbeddedServletCo
             int appPort = event.getEmbeddedServletContainer().getPort();
             String serviceName = env.getProperty("skye.serviceName");
             String checkInterval = env.getProperty("skye.consulCheckInterval");
+            String serviceId = serviceName + "-" + appHost + "-" + appPort;
 
             ConsulClient client = new ConsulClient(consulHost, consulPort);
             NewService newService = new NewService();
+            newService.setId(serviceId);
             newService.setName(serviceName);
             newService.setAddress(appHost);
             newService.setPort(appPort);
