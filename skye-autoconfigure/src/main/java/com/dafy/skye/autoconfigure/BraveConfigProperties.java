@@ -7,6 +7,8 @@ public class BraveConfigProperties {
     private String serviceName;
     private Float samplerRate;
     private String kafkaServers;
+    private String consulServer;
+    private String consulCheckInterval = "5s";
 
     public String getServiceName() {
         return serviceName;
@@ -30,5 +32,21 @@ public class BraveConfigProperties {
 
     public void setKafkaServers(String kafkaServers) {
         this.kafkaServers = kafkaServers;
+    }
+
+    public String getConsulServer() {
+        return consulServer;
+    }
+
+    public void setConsulServer(String consulServer) {
+        this.consulServer = consulServer;
+    }
+
+    public String getConsulCheckInterval() {
+        return consulCheckInterval;
+    }
+
+    public void setConsulCheckInterval(String consulCheckInterval) {
+        this.consulCheckInterval = consulCheckInterval;
     }
 }
