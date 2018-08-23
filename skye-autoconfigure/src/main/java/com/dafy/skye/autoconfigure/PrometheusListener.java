@@ -11,9 +11,13 @@ import org.springframework.boot.context.embedded.EmbeddedServletContainerInitial
 import org.springframework.context.ApplicationListener;
 import org.springframework.core.env.Environment;
 
+import java.util.Collections;
+
 public class PrometheusListener implements ApplicationListener<EmbeddedServletContainerInitializedEvent> {
 
     private static final Logger logger = LoggerFactory.getLogger(PrometheusListener.class);
+
+    private static final String TAG = "app-service";
 
     @Override
     public void onApplicationEvent(EmbeddedServletContainerInitializedEvent event) {
@@ -41,6 +45,7 @@ public class PrometheusListener implements ApplicationListener<EmbeddedServletCo
             newService.setName(serviceName);
             newService.setAddress(appHost);
             newService.setPort(appPort);
+            newService.setTags(Collections.singletonList(TAG));
 
             NewService.Check check = new NewService.Check();
             check.setTcp(appHost + ':' + appPort);
