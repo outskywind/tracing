@@ -1,5 +1,6 @@
 package com.dafy.skye.autoconfigure;
 
+import com.dafy.skye.brave.ReporterDelegate;
 import com.github.kristofa.brave.Brave;
 import com.github.kristofa.brave.Sampler;
 import com.google.common.base.Strings;
@@ -12,7 +13,9 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Lazy;
 import zipkin.Component;
 import zipkin.reporter.AsyncReporter;
+import zipkin.reporter.Reporter;
 import zipkin.reporter.kafka10.KafkaSender;
+import zipkin2.Span;
 
 /**
  * Created by Caedmon on 2017/6/26.
@@ -35,15 +38,21 @@ public class BraveAutoConfiguration {
     //因为spring 先处理加载完 BeanMethod 的信息，再加载Registrar的Bean信息
     //@ConditionalOnBean(BraveConfigProperties.class)
     public Brave brave(BraveConfigProperties configProperties){
-        if(Strings.isNullOrEmpty(configProperties.getServiceName())){
-            log.warn("Brave service name is empty");
-            return null;
+        Brave.Builder builder;
+        if(!configProperties.isReport()){
+            builder=new Brave.Builder("##");
+        } else{
+            if(Strings.isNullOrEmpty(configProperties.getServiceName())){
+                log.warn("Brave service name is empty");
+                return null;
+            }
+            if(Strings.isNullOrEmpty(configProperties.getKafkaServers())){
+                log.warn("Brave kafkaServers empty");
+                return null;
+            }
+            builder=new Brave.Builder(configProperties.getServiceName());
         }
-        if(Strings.isNullOrEmpty(configProperties.getKafkaServers())){
-            log.warn("Brave kafkaServers empty");
-            return null;
-        }
-        Brave.Builder builder=new Brave.Builder(configProperties.getServiceName());
+
         //
         if(configProperties.getSamplerRate()!=null){
             builder.traceSampler(Sampler.create(configProperties.getSamplerRate()));
@@ -51,14 +60,17 @@ public class BraveAutoConfiguration {
             //默认监控统计全部数据
             builder.traceSampler(Sampler.ALWAYS_SAMPLE);
         }
-        KafkaSender kafkaSender=KafkaSender.create(configProperties.getKafkaServers());
-        Component.CheckResult checkResult=kafkaSender.check();
-        if(!checkResult.ok){
-            System.out.println("Kafka Sender check error:   " + checkResult.exception);
-            return null;
+        Reporter<zipkin.Span> reporter = null;
+        if(configProperties.isReport()){
+            KafkaSender kafkaSender=KafkaSender.create(configProperties.getKafkaServers());
+            Component.CheckResult checkResult=kafkaSender.check();
+            if(!checkResult.ok){
+                log.warn("Kafka Sender check error:   " + checkResult.exception);
+                return null;
+            }
+             reporter= AsyncReporter.builder(kafkaSender).build();
         }
-        AsyncReporter.Builder reporter= AsyncReporter.builder(kafkaSender);
-        builder.reporter(reporter.build());
+        builder.reporter( new ReporterDelegate(reporter,configProperties.isReport()));
         return builder.build();
     }
 

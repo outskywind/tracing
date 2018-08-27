@@ -102,7 +102,7 @@ public class LogConfigurationExtendListener implements GenericApplicationListene
         }
     }
 
-    // 根据 配置中心的引入策略，此时无法获取到，需要修改引入的方案
+    // 根据 配置中心客户端的引入策略，此时无法获取到，需要修改引入的方案
     private void onApplicationPreparedEvent(ApplicationPreparedEvent event) {
         //...
     }

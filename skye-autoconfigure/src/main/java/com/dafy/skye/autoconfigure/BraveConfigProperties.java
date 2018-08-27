@@ -7,6 +7,15 @@ public class BraveConfigProperties {
     private String serviceName;
     private Float samplerRate;
     private String kafkaServers;
+    private boolean report=true;
+
+    public boolean isReport() {
+        return report;
+    }
+
+    public void setReport(boolean report) {
+        this.report = report;
+    }
 
     public String getServiceName() {
         return serviceName;

@@ -10,7 +10,7 @@
     <modelVersion>4.0.0</modelVersion>
 
     <artifactId>skye-autoconfigure</artifactId>
-    <version>1.5.0-SNAPSHOT</version>
+    <version>1.6.0-SNAPSHOT</version>
 
     <dependencies>
         <dependency>
@@ -41,6 +41,11 @@
         <dependency>
             <groupId>com.dafy.skye</groupId>
             <artifactId>skye-log-appender</artifactId>
+            <version>1.0.0-SNAPSHOT</version>
+        </dependency>
+        <dependency>
+            <groupId>com.dafy.skye</groupId>
+            <artifactId>brave-reporter</artifactId>
             <version>1.0.0-SNAPSHOT</version>
         </dependency>
 
