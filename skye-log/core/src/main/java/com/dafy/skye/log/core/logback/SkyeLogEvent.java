@@ -57,11 +57,9 @@ public class SkyeLogEvent implements ILoggingEvent,Serializable{
         ledo.timeStamp = le.getTimeStamp();
         ledo.throwableProxy = ThrowableProxyVO.build(le.getThrowableProxy());
         ledo.traceId = le.getMDCPropertyMap().get("traceId");
-        String systemAddress=null;
-        try{
-            systemAddress= SkyeLogUtil.getLocalHost();
-        }catch (SocketException e){
-            e.printStackTrace();
+        String systemAddress = SkyeLogUtil.getPublicIp();
+        if(systemAddress == null) {
+            systemAddress = SkyeLogUtil.getPrivateIp();
         }
         ledo.address=systemAddress==null?"Not specify":systemAddress;
         ledo.pid= SkyeLogUtil.getPid();

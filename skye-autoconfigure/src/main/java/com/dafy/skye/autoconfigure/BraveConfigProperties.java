@@ -7,6 +7,8 @@ public class BraveConfigProperties {
     private String serviceName;
     private Float samplerRate;
     private String kafkaServers;
+    private String consulServer;
+    private String consulCheckInterval = "5s";
     private boolean report=true;
 
     public boolean isReport() {
@@ -16,6 +18,7 @@ public class BraveConfigProperties {
     public void setReport(boolean report) {
         this.report = report;
     }
+
 
     public String getServiceName() {
         return serviceName;

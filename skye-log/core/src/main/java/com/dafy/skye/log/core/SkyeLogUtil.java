@@ -7,45 +7,72 @@ import java.lang.management.ManagementFactory;
 import java.net.Inet4Address;
 import java.net.InetAddress;
 import java.net.NetworkInterface;
-import java.net.SocketException;
+import java.util.ArrayList;
 import java.util.Enumeration;
+import java.util.List;
 
-/**
- * Created by Administrator on 2016/4/1.
- */
 public class SkyeLogUtil {
-    private static final Logger log= LoggerFactory.getLogger(SkyeLogUtil.class);
-    private volatile static String localhost=null;
+    private static final Logger log = LoggerFactory.getLogger(SkyeLogUtil.class);
+    private volatile static String privateIp;
+    private volatile static String publicIp;
     private volatile static String pid;
-    public static String getLocalHost() throws SocketException {
-        if(localhost!=null){
-            return localhost;
+
+    public static String getPublicIp() {
+        if(publicIp != null){
+            return publicIp;
         }
-        for (Enumeration<NetworkInterface> interfaces = NetworkInterface.getNetworkInterfaces(); interfaces.hasMoreElements();) {
-            NetworkInterface networkInterface = interfaces.nextElement();
-            if (networkInterface.isLoopback()|| !networkInterface.isUp()) {
-                continue;
+
+        for (InetAddress inetAddress : getAllIpv4Address()) {
+            if(!inetAddress.isSiteLocalAddress()) {
+                publicIp = inetAddress.getHostAddress();
+                return publicIp;
             }
-            Enumeration<InetAddress> enumeration = networkInterface.getInetAddresses();
-            while (enumeration.hasMoreElements()) {
-                InetAddress inetAddress=enumeration.nextElement();
-                if(inetAddress instanceof Inet4Address){
-                    String hostAddress=inetAddress.getHostAddress();
-                    if(isValidAddress(hostAddress)){
-                        log.debug("Get local host {}",hostAddress);
-                        localhost=hostAddress;
-                        return localhost;
+        }
+
+        return null;
+    }
+
+    public static String getPrivateIp() {
+        if(privateIp != null){
+            return privateIp;
+        }
+
+        for (InetAddress inetAddress : getAllIpv4Address()) {
+            if(inetAddress.isSiteLocalAddress()) {
+                privateIp = inetAddress.getHostAddress();
+                return privateIp;
+            }
+        }
+
+        return null;
+    }
+
+    private static List<InetAddress> getAllIpv4Address() {
+        List<InetAddress> ipList = new ArrayList<>(2);
+        try {
+            for (Enumeration<NetworkInterface> interfaces = NetworkInterface.getNetworkInterfaces(); interfaces.hasMoreElements();) {
+                NetworkInterface networkInterface = interfaces.nextElement();
+                if (networkInterface.isLoopback()
+                        || !networkInterface.isUp()
+                        || networkInterface.isVirtual()
+                        || networkInterface.getDisplayName().contains("Host-Only")) {
+                    continue;
+                }
+                Enumeration<InetAddress> enumeration = networkInterface.getInetAddresses();
+                while (enumeration.hasMoreElements()) {
+                    InetAddress inetAddress = enumeration.nextElement();
+                    if(inetAddress instanceof Inet4Address){
+                        ipList.add(inetAddress);
                     }
                 }
             }
+        } catch (Exception e) {
+            log.error("getAllIpv4Address error!", e);
         }
-        return null;
+
+        return ipList;
     }
-    public static boolean isValidAddress(String address){
-        return !address.equals("0.0.0.0")
-                &&!address.contains("localhost")
-                &&!address.contains("127.0.0.1");
-    }
+
     public static String getPid(){
         if(pid==null){
             String name = ManagementFactory.getRuntimeMXBean().getName();
