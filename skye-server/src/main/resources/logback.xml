@@ -24,7 +24,7 @@
     <logger name="org.apache.zookeeper" level="INFO"/>
     <logger name="kafka" level="WARN"></logger>
     <root level="INFO">
-        <!--<appender-ref ref="console" />-->
+        <appender-ref ref="console" />
         <appender-ref ref="file" />
     </root>
 </configuration>
