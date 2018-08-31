@@ -15,6 +15,7 @@ import org.springframework.web.servlet.handler.HandlerInterceptorAdapter;
 @Configuration
 @AutoConfigureAfter(BraveAutoConfiguration.class)
 @ConditionalOnClass({HandlerInterceptorAdapter.class})
+@Deprecated
 public class SpringWebMvcTracingAutoConfiguration {
     @Bean
     @ConditionalOnBean(Brave.class)

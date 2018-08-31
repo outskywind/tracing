@@ -50,7 +50,7 @@ public class ZipkinElasticsearchQuery {
         }
         root.filter(QueryBuilders.termQuery("kind","SERVER"));
 
-        if(!Strings.isNullOrEmpty(request.sortField)&&!Strings.isNullOrEmpty(request.sortField)){
+        if(!Strings.isNullOrEmpty(request.sortField)){
             requestBuilder.sort(request.sortField, SortOrder.fromString(request.sortOrder));
         }
         requestBuilder.size(0);

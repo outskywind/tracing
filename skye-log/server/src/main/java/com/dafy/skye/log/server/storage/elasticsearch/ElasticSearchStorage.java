@@ -237,19 +237,21 @@ public class ElasticSearchStorage implements StorageComponent {
         if(!CollectionUtils.isEmpty(request.getLevel())){
             root.filter(QueryBuilders.termsQuery("level",request.getLevel()));
         }
-        if (!Strings.isNullOrEmpty(request.traceId)) {
+        if (StringUtils.hasText(request.traceId)) {
+            request.traceId = StringUtils.trimWhitespace(request.traceId);
             root.filter(QueryBuilders.termsQuery("traceId", request.traceId));
         }
-        if (!Strings.isNullOrEmpty(request.exception)) {
+        if (StringUtils.hasText(request.exception)) {
             root.filter(QueryBuilders.matchPhraseQuery("message",request.exception));
         }
         if (request.hosts!=null && !request.hosts.isEmpty()) {
             root.filter(QueryBuilders.termsQuery("address",request.hosts));
         }
-        if(!Strings.isNullOrEmpty(request.getKeyword())){
+        if(StringUtils.hasText(request.getKeyword())){
             //terms 查询是单词项精准查询，存储时使用了标准分析器，会统一成小写词项倒排索引中
             //短语搜索
             //root.filter(QueryBuilders.matchPhraseQuery("message",request.getKeyword()));
+            request.keyword=StringUtils.trimWhitespace(request.getKeyword());
             root.should(QueryBuilders.matchPhraseQuery("message",request.getKeyword()));
             root.should(QueryBuilders.matchPhraseQuery("exception",request.getKeyword()));
             root.minimumShouldMatch(1);

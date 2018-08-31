@@ -14,6 +14,8 @@ import org.apache.kafka.clients.producer.ProducerRecord;
 import org.apache.kafka.clients.producer.RecordMetadata;
 import org.apache.kafka.common.errors.InterruptException;
 import org.apache.kafka.common.serialization.StringSerializer;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.Properties;
 import java.util.concurrent.BlockingQueue;
@@ -39,6 +41,8 @@ public class LogKafkaAppender extends UnsynchronizedAppenderBase<ILoggingEvent> 
         PatternLayout.defaultConverterMap.put("addr", SkyeLogConverter.AddressConvert.class.getName());
         PatternLayout.defaultConverterMap.put("pid", SkyeLogConverter.AddressConvert.class.getName());
     }
+    private static Logger logger = LoggerFactory.getLogger(LogKafkaAppender.class);
+
     @Override
     public void start() {
         if(!this.isStarted()) {
@@ -92,7 +96,7 @@ public class LogKafkaAppender extends UnsynchronizedAppenderBase<ILoggingEvent> 
             return false;
         }
 
-        this.addInfo("KafkaProducer init success:kafkaAddress="+kafkaAddress);
+        logger.info("skye-log-appender init success. kafka.address={}",kafkaAddress);
         return true;
     }
     @Override
@@ -113,8 +117,7 @@ public class LogKafkaAppender extends UnsynchronizedAppenderBase<ILoggingEvent> 
                 ProducerRecord record = new ProducerRecord(this.kafkaTopic, this.serviceName, event);
                 Future<RecordMetadata> future=kafkaProducer.send(record);
             }catch (Exception e){
-                e.printStackTrace();
-                this.addInfo(this.kafkaAddress+":"+e);
+                this.addWarn("kafka Sending error,"+this.kafkaAddress+":"+e);
             }
 
         }

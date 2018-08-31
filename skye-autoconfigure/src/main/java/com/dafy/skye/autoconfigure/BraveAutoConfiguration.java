@@ -15,7 +15,6 @@ import zipkin.Component;
 import zipkin.reporter.AsyncReporter;
 import zipkin.reporter.Reporter;
 import zipkin.reporter.kafka10.KafkaSender;
-import zipkin2.Span;
 
 /**
  * Created by Caedmon on 2017/6/26.
@@ -39,20 +38,15 @@ public class BraveAutoConfiguration {
     //@ConditionalOnBean(BraveConfigProperties.class)
     public Brave brave(BraveConfigProperties configProperties){
         Brave.Builder builder;
-        if(!configProperties.isReport()){
-            builder=new Brave.Builder("##");
-        } else{
-            if(Strings.isNullOrEmpty(configProperties.getServiceName())){
-                log.warn("Brave service name is empty");
-                return null;
-            }
-            if(Strings.isNullOrEmpty(configProperties.getKafkaServers())){
-                log.warn("Brave kafkaServers empty");
-                return null;
-            }
-            builder=new Brave.Builder(configProperties.getServiceName());
+        if(Strings.isNullOrEmpty(configProperties.getServiceName())){
+            log.warn("Brave service name is empty");
+            return null;
         }
-
+        if(Strings.isNullOrEmpty(configProperties.getKafkaServers())){
+            log.warn("Brave kafkaServers empty");
+            return null;
+        }
+        builder=new Brave.Builder(configProperties.getServiceName());
         //
         if(configProperties.getSamplerRate()!=null){
             builder.traceSampler(Sampler.create(configProperties.getSamplerRate()));
@@ -61,15 +55,14 @@ public class BraveAutoConfiguration {
             builder.traceSampler(Sampler.ALWAYS_SAMPLE);
         }
         Reporter<zipkin.Span> reporter = null;
-        if(configProperties.isReport()){
-            KafkaSender kafkaSender=KafkaSender.create(configProperties.getKafkaServers());
-            Component.CheckResult checkResult=kafkaSender.check();
-            if(!checkResult.ok){
-                log.warn("Kafka Sender check error:   " + checkResult.exception);
-                return null;
-            }
-             reporter= AsyncReporter.builder(kafkaSender).build();
+        KafkaSender kafkaSender=KafkaSender.create(configProperties.getKafkaServers());
+        Component.CheckResult checkResult=kafkaSender.check();
+        if(!checkResult.ok){
+            log.warn("Kafka Sender check error:   " + checkResult.exception);
+            return null;
         }
+        reporter= AsyncReporter.builder(kafkaSender).build();
+
         builder.reporter( new ReporterDelegate(reporter,configProperties.isReport()));
         return builder.build();
     }

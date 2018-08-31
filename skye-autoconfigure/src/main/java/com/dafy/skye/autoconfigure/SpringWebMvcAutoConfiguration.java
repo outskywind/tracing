@@ -14,6 +14,7 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurerAdapter
 @Configuration
 @AutoConfigureAfter(SpringWebMvcTracingAutoConfiguration.class)
 @ConditionalOnClass(WebMvcConfigurerAdapter.class)
+@Deprecated
 public class SpringWebMvcAutoConfiguration extends WebMvcConfigurerAdapter {
 
     @Autowired(required = false)
@@ -25,4 +26,5 @@ public class SpringWebMvcAutoConfiguration extends WebMvcConfigurerAdapter {
             registry.addInterceptor(tracingInterceptor);
         }
     }
+
 }

@@ -237,6 +237,9 @@ public class ZipkinExtendServiceImpl implements ZipkinExtendService {
             SearchRequest searchRequest = new SearchRequest();
             searchRequest.indices(indices);
             searchRequest.indicesOptions(IndicesOptions.lenientExpandOpen());
+            //重写排序规则，按照响应时间长的排序
+            //request.sortField="";
+            //request.sortOrder="desc";
             SearchSourceBuilder searchSourceBuilder = ZipkinElasticsearchQuery.searchSourceBuilder(request);
             searchSourceBuilder.fetchSource(new String[]{"traceId","duration","timestamp_millis","localEndpoint.ipv4","tags.status"},new String[]{});
             searchRequest.source(searchSourceBuilder);

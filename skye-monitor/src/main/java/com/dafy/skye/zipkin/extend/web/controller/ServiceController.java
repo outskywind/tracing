@@ -191,7 +191,7 @@ public class ServiceController extends BaseSessionController{
         queryRequest.setLookback(request.getEnd()-request.getStart());
         queryRequest.setServices(Arrays.asList(request.getService()));
         queryRequest.setSpans(Arrays.asList(request.getName()));
-        queryRequest.setLimit(200);
+        queryRequest.setLimit(1000);
 
         List<Trace> traces = zipkinExtendService.getInterfaceTraces(queryRequest);
         Rule[] rules  = rulesRefreshHolder.getRules(request.getService(),request.getName());
@@ -202,7 +202,7 @@ public class ServiceController extends BaseSessionController{
         // we need two pointers here pointing at failed tail , red tail ,then next
         // so the data is expandable , we need the link list
         sort(traces);
-        return new Response("0",traces);
+        return new Response("0",traces.subList(0,300));
     }
 
 
@@ -236,8 +236,5 @@ public class ServiceController extends BaseSessionController{
             traces.set(i,other.get(i));
         }
     }
-
-
-
 
 }

@@ -28,11 +28,17 @@ public class DubboBraveProviderFilter implements Filter {
             serverRequestInterceptor.handle(new DubboServerRequestAdapter(invoker,invocation,brave.serverTracer()));
             //put the traceId into MDC
             MDC.put(Constants.MDC_TRACE_ID_KEY,Long.toHexString(brave.serverSpanThreadBinder().getCurrentServerSpan().getSpan().getTrace_id()));
-            Result result = invoker.invoke(invocation);
-            serverResponseInterceptor.handle(new DubboServerResponseAdapter(result));
-            //请求处理完毕清除TraceId
-            MDC.remove(Constants.MDC_TRACE_ID_KEY);
-            return result;
+            try{
+                Result result = invoker.invoke(invocation);
+                serverResponseInterceptor.handle(new DubboServerResponseAdapter(result));
+                return result;
+            }catch(Exception e){
+                serverResponseInterceptor.handle(new DubboServerResponseAdapter(e));
+                throw  new RpcException(e);
+            }finally {
+                //请求处理完毕清除TraceId
+                MDC.remove(Constants.MDC_TRACE_ID_KEY);
+            }
         }
     }
 
