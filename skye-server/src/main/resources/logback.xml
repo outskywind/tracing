@@ -10,9 +10,9 @@
         </encoder>
     </appender>
     <appender name="file" class="ch.qos.logback.core.rolling.RollingFileAppender">
-        <file>/opt/logs/base/skye-server.log</file>
+        <file>/data/logs/sz-app-skye-server/server.log</file>
         <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
-            <FileNamePattern>/opt/logs/base/skye-server.%d{yyyy-MM-dd}.log</FileNamePattern>
+            <FileNamePattern>/data/logs/sz-app-skye-server/server.%d{yyyy-MM-dd}.log</FileNamePattern>
             <maxHistory>30</maxHistory>
         </rollingPolicy>
         <encoder>

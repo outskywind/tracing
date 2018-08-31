@@ -59,7 +59,7 @@ public class PrometheusListener implements ApplicationListener<EmbeddedServletCo
 
             DefaultExports.initialize();
             logger.info("prometheus exports initialized!");
-        } catch (Exception e) {
+        } catch (Throwable e) {
             logger.error("PrometheusListener onApplicationEvent error!", e);
         }
     }
