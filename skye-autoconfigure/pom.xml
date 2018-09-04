@@ -32,10 +32,10 @@
             <scope>provided</scope>
         </dependency>
 
-        <!-- dubbo调用 -->
+        <!-- brave -->
         <dependency>
             <groupId>com.dafy.skye</groupId>
-            <artifactId>skye-brave-dubbo</artifactId>
+            <artifactId>skye-brave</artifactId>
             <version>1.1.0-SNAPSHOT</version>
         </dependency>
         <dependency>
@@ -43,11 +43,7 @@
             <artifactId>skye-log-appender</artifactId>
             <version>1.0.0-SNAPSHOT</version>
         </dependency>
-        <dependency>
-            <groupId>com.dafy.skye</groupId>
-            <artifactId>brave-reporter</artifactId>
-            <version>1.0.0-SNAPSHOT</version>
-        </dependency>
+
 
         <dependency>
             <groupId>io.prometheus</groupId>
