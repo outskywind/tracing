@@ -6,7 +6,7 @@
     <jmxConfigurator />
     <appender name="console" class="ch.qos.logback.core.ConsoleAppender">
         <encoder>
-            <pattern>%-20(%d{HH:mm:ss.SSS} [%thread]) %-5level [%X{braveTraceId}] %logger{80}:%line - %msg%n</pattern>
+            <pattern>%-20(%d{HH:mm:ss.SSS} [%thread]) %-5level [%X{traceId}] %logger{80}:%line - %msg%n</pattern>
         </encoder>
     </appender>
     <appender name="file" class="ch.qos.logback.core.rolling.RollingFileAppender">
@@ -16,7 +16,7 @@
             <maxHistory>30</maxHistory>
         </rollingPolicy>
         <encoder>
-            <pattern>%-20(%d{HH:mm:ss.SSS} [%thread]) %-5level [%X{braveTraceId}] %logger{80}:%line - %msg%n</pattern>
+            <pattern>%-20(%d{HH:mm:ss.SSS} [%thread]) %-5level [%X{traceId}] %logger{80}:%line - %msg%n</pattern>
         </encoder>
     </appender>
     <logger name="org.apache.tomcat" level="WARN"/>

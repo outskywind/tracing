@@ -202,7 +202,8 @@ public class ServiceController extends BaseSessionController{
         // we need two pointers here pointing at failed tail , red tail ,then next
         // so the data is expandable , we need the link list
         sort(traces);
-        return new Response("0",traces.subList(0,300));
+        List<Trace> result = traces.size()>300?traces.subList(0,300):traces;
+        return new Response("0",result);
     }
 
 
