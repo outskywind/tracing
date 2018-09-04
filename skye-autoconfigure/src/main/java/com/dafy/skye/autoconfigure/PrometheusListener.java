@@ -23,23 +23,19 @@ public class PrometheusListener implements ApplicationListener<EmbeddedServletCo
     public void onApplicationEvent(EmbeddedServletContainerInitializedEvent event) {
         try {
             Environment env = event.getApplicationContext().getEnvironment();
-            String consulAddress = env.getProperty("skye.consulServer");
-            if(StringUtils.isEmpty(consulAddress) || !consulAddress.contains(":")) {
-                logger.error("skye.consulServer is invalid! skye.consulServer={}", consulAddress);
+            String consulAddresses = env.getProperty("skye.consulServer");
+            if(StringUtils.isEmpty(consulAddresses) || !consulAddresses.contains(":")) {
+                logger.error("skye.consulServer is invalid! skye.consulServer={}", consulAddresses);
                 return;
             }
 
-            String[] consulAddressArr = consulAddress.split(":");
-            String consulHost = consulAddressArr[0];
-            int consulPort = Integer.parseInt(consulAddressArr[1]);
-
-            String appHost = SkyeLogUtil.getPrivateIp();
-            int appPort = event.getEmbeddedServletContainer().getPort();
             String serviceName = env.getProperty("skye.serviceName");
             String checkInterval = env.getProperty("skye.consulCheckInterval");
+            String appHost = SkyeLogUtil.getPrivateIp();
+            int appPort = event.getEmbeddedServletContainer().getPort();
             String serviceId = serviceName + "-" + appHost + "-" + appPort;
+            String tcpAddr = appHost + ':' + appPort;
 
-            ConsulClient client = new ConsulClient(consulHost, consulPort);
             NewService newService = new NewService();
             newService.setId(serviceId);
             newService.setName(serviceName);
@@ -48,14 +44,21 @@ public class PrometheusListener implements ApplicationListener<EmbeddedServletCo
             newService.setTags(Collections.singletonList(TAG));
 
             NewService.Check check = new NewService.Check();
-            check.setTcp(appHost + ':' + appPort);
+            check.setTcp(tcpAddr);
             check.setInterval(checkInterval);
 
             newService.setCheck(check);
 
-            client.agentServiceRegister(newService);
-            logger.info("register service to consul successfully! serviceName={}, consulHost={}, consulPort={}, appHost={}, appPort={}",
-                    serviceName, consulHost, consulPort, appHost, appPort);
+            for(String addr : consulAddresses.split(",")) {
+                String[] addrArr = addr.trim().split(":");
+                String consulHost = addrArr[0];
+                int consulPort = Integer.parseInt(addrArr[1]);
+
+                ConsulClient client = new ConsulClient(consulHost, consulPort);
+                client.agentServiceRegister(newService);
+                logger.info("register service to consul successfully! serviceName={}, consulHost={}, consulPort={}, appHost={}, appPort={}",
+                        serviceName, consulHost, consulPort, appHost, appPort);
+            }
 
             DefaultExports.initialize();
             logger.info("prometheus exports initialized!");
