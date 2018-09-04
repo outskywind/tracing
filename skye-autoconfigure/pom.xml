@@ -21,11 +21,6 @@
         </dependency>
         <!-- springmvc 调用  -->
         <dependency>
-            <groupId>com.dafy.skye</groupId>
-            <artifactId>skye-brave-springmvc</artifactId>
-            <version>1.2.0-SNAPSHOT</version>
-        </dependency>
-        <dependency>
             <groupId>org.springframework</groupId>
             <artifactId>spring-webmvc</artifactId>
             <version>${spring.version}</version>
