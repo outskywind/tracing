@@ -25,6 +25,7 @@ public class DubboBraveProviderFilter implements Filter {
             //String traceId=invocation.getAttachment("traceId");
             ServerRequestInterceptor serverRequestInterceptor=brave.serverRequestInterceptor();
             ServerResponseInterceptor serverResponseInterceptor=brave.serverResponseInterceptor();
+
             serverRequestInterceptor.handle(new DubboServerRequestAdapter(invoker,invocation,brave.serverTracer()));
             //put the traceId into MDC
             MDC.put(Constants.MDC_TRACE_ID_KEY,Long.toHexString(brave.serverSpanThreadBinder().getCurrentServerSpan().getSpan().getTrace_id()));

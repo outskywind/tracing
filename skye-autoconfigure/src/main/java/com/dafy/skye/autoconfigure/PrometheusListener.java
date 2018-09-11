@@ -30,7 +30,13 @@ public class PrometheusListener implements ApplicationListener<EmbeddedServletCo
             }
 
             String serviceName = env.getProperty("skye.serviceName");
+            if(StringUtils.isEmpty(serviceName)){
+                serviceName = env.getProperty("skye.service-name");
+            }
             String checkInterval = env.getProperty("skye.consulCheckInterval");
+            if(StringUtils.isEmpty(checkInterval)){
+                checkInterval = env.getProperty("skye.consul-check-interval");
+            }
             String appHost = SkyeLogUtil.getPrivateIp();
             int appPort = event.getEmbeddedServletContainer().getPort();
             String serviceId = serviceName + "-" + appHost + "-" + appPort;

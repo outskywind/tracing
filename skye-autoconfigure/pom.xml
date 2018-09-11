@@ -33,6 +33,7 @@
             <artifactId>skye-brave</artifactId>
             <version>1.1.0-SNAPSHOT</version>
         </dependency>
+        <!-- log -->
         <dependency>
             <groupId>com.dafy.skye</groupId>
             <artifactId>skye-log-appender</artifactId>
@@ -53,10 +54,10 @@
             <groupId>com.ecwid.consul</groupId>
             <artifactId>consul-api</artifactId>
         </dependency>
-        <dependency>
+        <!--<dependency>
             <groupId>org.apache.httpcomponents</groupId>
             <artifactId>httpclient</artifactId>
-        </dependency>
+        </dependency>-->
         <dependency>
             <groupId>javax.servlet</groupId>
             <artifactId>javax.servlet-api</artifactId>

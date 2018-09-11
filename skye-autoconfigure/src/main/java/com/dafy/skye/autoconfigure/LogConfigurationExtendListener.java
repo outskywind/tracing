@@ -4,6 +4,7 @@ import ch.qos.logback.classic.LoggerContext;
 import ch.qos.logback.classic.spi.ILoggingEvent;
 import ch.qos.logback.core.Appender;
 import com.dafy.skye.log.appender.LogKafkaAppender;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.ILoggerFactory;
 import org.slf4j.Logger;
 import org.slf4j.impl.StaticLoggerBinder;
@@ -97,6 +98,12 @@ public class LogConfigurationExtendListener implements GenericApplicationListene
                     logbackLogger.addAppender(appender);
                     String kafkaServers = event.getApplicationContext().getEnvironment().getProperty("skye.kafkaServers");
                     String serviceName = event.getApplicationContext().getEnvironment().getProperty("skye.serviceName");
+                    if(StringUtils.isEmpty(kafkaServers)){
+                        kafkaServers = event.getApplicationContext().getEnvironment().getProperty("skye.kafka-servers");
+                    }
+                    if(StringUtils.isEmpty(serviceName)){
+                        serviceName = event.getApplicationContext().getEnvironment().getProperty("skye.service-name");
+                    }
                     appender.setKafkaAddress(kafkaServers);
                     appender.setServiceName(serviceName);
                     appender.setContext(loggerContext);
