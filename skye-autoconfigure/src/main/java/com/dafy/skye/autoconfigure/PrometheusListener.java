@@ -58,7 +58,7 @@ public class PrometheusListener implements ApplicationListener<EmbeddedServletCo
             for(String addr : consulAddresses.split(",")) {
                 String[] addrArr = addr.trim().split(":");
                 String consulHost = addrArr[0];
-                int consulPort = Integer.parseInt(addrArr[1]);
+                int consulPort = addrArr.length == 1 ? 80 : Integer.parseInt(addrArr[1]);
 
                 ConsulClient client = new ConsulClient(consulHost, consulPort);
                 client.agentServiceRegister(newService);
