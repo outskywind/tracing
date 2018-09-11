@@ -74,9 +74,7 @@ public class LogConfigurationExtendListener implements GenericApplicationListene
     private void onContextRefreshedEvent(ContextRefreshedEvent event) {
 
         String report = event.getApplicationContext().getEnvironment().getProperty("skye.report");
-        if("false".equalsIgnoreCase(report)){
-            return;
-        }
+
         ApplicationContext context = event.getApplicationContext();
         LoggingSystem loggingSystem = (LoggingSystem)context.getBean(LoggingApplicationListener.LOGGING_SYSTEM_BEAN_NAME);
         if(loggingSystem instanceof LogbackLoggingSystem){
@@ -103,6 +101,9 @@ public class LogConfigurationExtendListener implements GenericApplicationListene
                     }
                     if(StringUtils.isEmpty(serviceName)){
                         serviceName = event.getApplicationContext().getEnvironment().getProperty("skye.service-name");
+                    }
+                    if("false".equalsIgnoreCase(report)){
+                        appender.setReport(false);
                     }
                     appender.setKafkaAddress(kafkaServers);
                     appender.setServiceName(serviceName);
