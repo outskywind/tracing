@@ -1,6 +1,7 @@
 org.springframework.context.ApplicationListener=\
 com.dafy.skye.autoconfigure.LogConfigurationExtendListener,\
-com.dafy.skye.autoconfigure.PrometheusListener
+com.dafy.skye.autoconfigure.PrometheusListener,\
+com.dafy.skye.autoconfigure.EnvironmentInitListener
 
 
 org.springframework.boot.autoconfigure.EnableAutoConfiguration=\
