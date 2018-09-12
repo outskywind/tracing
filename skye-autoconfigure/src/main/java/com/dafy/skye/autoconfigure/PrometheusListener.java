@@ -24,7 +24,7 @@ public class PrometheusListener implements ApplicationListener<EmbeddedServletCo
         try {
             Environment env = event.getApplicationContext().getEnvironment();
             String consulAddresses = env.getProperty("skye.consulServer");
-            if(StringUtils.isEmpty(consulAddresses) || !consulAddresses.contains(":")) {
+            if(StringUtils.isEmpty(consulAddresses)) {
                 logger.error("skye.consulServer is invalid! skye.consulServer={}", consulAddresses);
                 return;
             }
