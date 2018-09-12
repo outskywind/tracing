@@ -1,29 +1,37 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <configuration>
+    <!--最大保存天数-->
+    <property name="MAX_DAY" value="60" />
+    <property name="TOTAL_SIZE" value="3GB" />
+    <!--日志存放目录-->
+    <property name="LOG_FILE_HOME" value="/data/logs/"/>
+    <!--服务名,各项目需要配置该参数值-->
+    <property name="PROJECT_NAME" value="sz-app-skye-server"/>
+    <property name="LOG_PATTERN" value="%-20(%d{yy-MM-dd HH:mm:ss.SSS} [%thread]) %-5level [%X{traceId}] %logger{80}:%line - %msg%n" />
     <contextListener class="ch.qos.logback.classic.jul.LevelChangePropagator">
         <resetJUL>true</resetJUL>
     </contextListener>
     <jmxConfigurator />
-    <appender name="console" class="ch.qos.logback.core.ConsoleAppender">
-        <encoder>
-            <pattern>%-20(%d{HH:mm:ss.SSS} [%thread]) %-5level [%X{traceId}] %logger{80}:%line - %msg%n</pattern>
-        </encoder>
-    </appender>
-    <appender name="file" class="ch.qos.logback.core.rolling.RollingFileAppender">
-        <file>/data/logs/sz-app-skye-server/server.log</file>
+    <appender name="FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <file>${LOG_FILE_HOME}${PROJECT_NAME}/server.log</file>
         <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
-            <FileNamePattern>/data/logs/sz-app-skye-server/server.%d{yyyy-MM-dd}.log</FileNamePattern>
-            <maxHistory>30</maxHistory>
+            <!--日志压缩-->
+            <FileNamePattern>${LOG_FILE_HOME}${PROJECT_NAME}/server.%d{yyyy-MM-dd}.log.gz</FileNamePattern>
+            <maxHistory>${MAX_DAY}</maxHistory>
+            <totalSizeCap>${TOTAL_SIZE}</totalSizeCap>
         </rollingPolicy>
         <encoder>
-            <pattern>%-20(%d{HH:mm:ss.SSS} [%thread]) %-5level [%X{traceId}] %logger{80}:%line - %msg%n</pattern>
+            <pattern>${LOG_PATTERN}</pattern>
         </encoder>
     </appender>
-    <logger name="org.apache.tomcat" level="WARN"/>
-    <logger name="org.apache.kafka" level="INFO"/>
-    <logger name="org.apache.zookeeper" level="INFO"/>
+    <!-- 控制台日志 -->
+    <appender name="console" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder>
+            <pattern>${LOG_PATTERN}</pattern>
+        </encoder>
+    </appender>
     <root level="INFO">
+        <appender-ref ref="FILE" />
         <appender-ref ref="console" />
-        <appender-ref ref="file" />
     </root>
 </configuration>
