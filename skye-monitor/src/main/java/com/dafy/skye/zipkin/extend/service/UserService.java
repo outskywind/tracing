@@ -26,7 +26,7 @@ public class UserService {
         try{
             serviceMapper.addUserFollow(user,set);
             return ResponseCode.SUCCESS;
-        }catch(Exception e){
+        }catch(Throwable e){
             log.error("关注服务 error.",e);
             return ResponseCode.SYSTEM_ERROR;
         }
@@ -36,7 +36,7 @@ public class UserService {
         try{
             serviceMapper.deleteUserFollow(user,set);
             return ResponseCode.SUCCESS;
-        }catch(Exception e){
+        }catch(Throwable e){
             log.error("取消关注服务 error.",e);
             return ResponseCode.SYSTEM_ERROR;
         }

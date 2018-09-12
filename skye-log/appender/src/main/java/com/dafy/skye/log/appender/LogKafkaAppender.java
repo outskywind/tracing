@@ -43,6 +43,12 @@ public class LogKafkaAppender extends UnsynchronizedAppenderBase<ILoggingEvent> 
     }
     private static Logger logger = LoggerFactory.getLogger(LogKafkaAppender.class);
 
+
+    private boolean report=true;
+    public void setReport(boolean report){
+        this.report =report;
+    }
+
     @Override
     public void start() {
         if(!this.isStarted()) {
@@ -69,7 +75,6 @@ public class LogKafkaAppender extends UnsynchronizedAppenderBase<ILoggingEvent> 
                     super.start();
                 }
             }
-
         }
     }
     private boolean buildKafkaProducer(){
@@ -128,7 +133,7 @@ public class LogKafkaAppender extends UnsynchronizedAppenderBase<ILoggingEvent> 
     }
     @Override
     protected void append(ILoggingEvent event) {
-        if(event.getLevel()== Level.DEBUG || event.getLevel()== Level.TRACE){
+        if(event.getLevel()== Level.DEBUG || event.getLevel()== Level.TRACE || !report){
             return;
         }
         //kafka 连接失败，就不会appender发送记录

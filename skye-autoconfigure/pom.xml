@@ -10,7 +10,7 @@
     <modelVersion>4.0.0</modelVersion>
 
     <artifactId>skye-autoconfigure</artifactId>
-    <version>1.7.0-SNAPSHOT</version>
+    <version>1.7.0.1.RELEASE</version>
 
     <dependencies>
         <dependency>
@@ -33,13 +33,14 @@
             <artifactId>skye-brave</artifactId>
             <version>1.1.0-SNAPSHOT</version>
         </dependency>
+        <!-- log -->
         <dependency>
             <groupId>com.dafy.skye</groupId>
             <artifactId>skye-log-appender</artifactId>
-            <version>1.0.0-SNAPSHOT</version>
+            <version>1.1.0</version>
         </dependency>
 
-
+        <!--  prometheus  client -->
         <dependency>
             <groupId>io.prometheus</groupId>
             <artifactId>simpleclient_spring_boot</artifactId>
@@ -48,7 +49,6 @@
             <groupId>io.prometheus</groupId>
             <artifactId>simpleclient_hotspot</artifactId>
         </dependency>
-
         <dependency>
             <groupId>com.ecwid.consul</groupId>
             <artifactId>consul-api</artifactId>
@@ -57,6 +57,7 @@
             <groupId>org.apache.httpcomponents</groupId>
             <artifactId>httpclient</artifactId>
         </dependency>
+        <!--  prometheus client -->
         <dependency>
             <groupId>javax.servlet</groupId>
             <artifactId>javax.servlet-api</artifactId>

@@ -5,6 +5,5 @@ com.dafy.skye.autoconfigure.PrometheusListener
 
 org.springframework.boot.autoconfigure.EnableAutoConfiguration=\
 com.dafy.skye.autoconfigure.BraveAutoConfiguration,\
-com.dafy.skye.autoconfigure.SpringServletFilterAutoConfiguration
-# com.dafy.skye.autoconfigure.SpringWebMvcAutoConfiguration,\
-# com.dafy.skye.autoconfigure.SpringWebMvcTracingAutoConfiguration
+com.dafy.skye.autoconfigure.SpringServletFilterAutoConfiguration,\
+io.prometheus.client.spring.boot.PrometheusEndpointConfiguration
