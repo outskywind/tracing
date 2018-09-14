@@ -92,7 +92,8 @@ public class ZipkinExtendServiceImpl implements ZipkinExtendService {
             SearchRequest searchRequest = new SearchRequest();
             searchRequest.indices(indices);
             SearchSourceBuilder searchSourceBuilder = ZipkinElasticsearchQuery.searchSourceBuilder(request);
-            searchSourceBuilder.aggregation(AggregationBuilders.terms("localServiceName").field("localEndpoint.serviceName"));
+            //需要设置大小
+            searchSourceBuilder.aggregation(AggregationBuilders.terms("localServiceName").field("localEndpoint.serviceName").size(128));
             searchRequest.source(searchSourceBuilder);
             searchRequest.indicesOptions(IndicesOptions.lenientExpandOpen());
             SearchResponse response =  restClient.search(searchRequest);

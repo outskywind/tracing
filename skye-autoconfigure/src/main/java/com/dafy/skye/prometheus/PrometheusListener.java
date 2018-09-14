@@ -1,24 +1,20 @@
-package com.dafy.skye.autoconfigure;
+package com.dafy.skye.prometheus;
 
 import com.dafy.skye.log.core.SkyeLogUtil;
 import com.ecwid.consul.v1.ConsulClient;
 import com.ecwid.consul.v1.agent.model.NewService;
 import com.google.common.base.Joiner;
-import io.prometheus.client.exporter.MetricsServlet;
 import io.prometheus.client.hotspot.DefaultExports;
 import org.apache.commons.lang3.StringUtils;
-import org.eclipse.jetty.server.Server;
-import org.eclipse.jetty.servlet.ServletContextHandler;
-import org.eclipse.jetty.servlet.ServletHolder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.boot.context.embedded.EmbeddedServletContainerInitializedEvent;
+import org.springframework.boot.context.event.ApplicationReadyEvent;
 import org.springframework.context.ApplicationListener;
 import org.springframework.core.env.Environment;
 
 import java.util.Collections;
 
-public class PrometheusListener implements ApplicationListener<EmbeddedServletContainerInitializedEvent> {
+public class PrometheusListener implements ApplicationListener<ApplicationReadyEvent> {
 
     private static final Logger logger = LoggerFactory.getLogger(PrometheusListener.class);
 
@@ -29,12 +25,12 @@ public class PrometheusListener implements ApplicationListener<EmbeddedServletCo
     private static final int DEFAULT_PORT = 12432;
 
     @Override
-    public void onApplicationEvent(EmbeddedServletContainerInitializedEvent event) {
+    public void onApplicationEvent(ApplicationReadyEvent event) {
         try {
             Environment env = event.getApplicationContext().getEnvironment();
             String portStr = env.getProperty("skye.prometheus.port");
             int appPort = StringUtils.isEmpty(portStr) ? DEFAULT_PORT : Integer.parseInt(portStr);
-            startHttpServer(appPort);
+            startHttpServer(appPort,PATH_SPEC);
 
             String consulAddresses = env.getProperty("skye.consulServer");
             if(StringUtils.isEmpty(consulAddresses)) {
@@ -77,7 +73,6 @@ public class PrometheusListener implements ApplicationListener<EmbeddedServletCo
                 logger.info("register service to consul successfully! serviceName={}, consulHost={}, consulPort={}, appHost={}, appPort={}",
                         serviceName, consulHost, consulPort, appHost, appPort);
             }
-
             DefaultExports.initialize();
             logger.info("prometheus exports initialized!");
         } catch (Throwable e) {
@@ -85,14 +80,15 @@ public class PrometheusListener implements ApplicationListener<EmbeddedServletCo
         }
     }
 
-    private void startHttpServer(int port) throws Exception {
-        ServletContextHandler context = new ServletContextHandler();
-        context.setContextPath(CONTEXT_PATH);
-        context.addServlet(new ServletHolder(new MetricsServlet()), PATH_SPEC);
-
-        Server server = new Server(port);
-        server.setHandler(context);
-
-        server.start();
+    private void startHttpServer(int port,String contextPath) throws Exception {
+        Thread t = new Thread(()->{
+            try{
+                new PrometheusServer(port,contextPath);
+            }catch (Throwable ex){
+                logger.warn("prometheus server start failed" , ex);
+            }
+            logger.info("prometheus server start successfully");
+        });
+        t.start();
     }
 }
