@@ -86,6 +86,9 @@ public class ServiceController extends BaseSessionController{
     @ResponseBody
     public Response followServices(@RequestBody List<String> services) {
         UserInfo user = getUser();
+        if(CollectionUtils.isEmpty(services)){
+            return new Response("no data error",null);
+        }
         Set<String> set = new HashSet<>(services);
         ResponseCode code = userService.followServices(user.getEmail(),set);
         return new Response(code.value(),null);
