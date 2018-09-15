@@ -10,7 +10,11 @@
     <modelVersion>4.0.0</modelVersion>
 
     <artifactId>skye-autoconfigure</artifactId>
-    <version>1.7.0.5.RELEASE</version>
+    <version>1.7.0.7.RELEASE</version>
+
+    <properties>
+        <prometheus.client.version>0.5.0</prometheus.client.version>
+    </properties>
 
     <dependencies>
         <dependency>
@@ -26,6 +30,7 @@
             <artifactId>spring-webmvc</artifactId>
             <version>${spring.version}</version>
             <scope>provided</scope>
+            <optional>true</optional>
         </dependency>
 
         <!-- brave -->
@@ -43,24 +48,31 @@
         </dependency>
 
         <!--  prometheus  client -->
-        <dependency>
+        <!--<dependency>  服务方冲突
             <groupId>io.prometheus</groupId>
             <artifactId>simpleclient_spring_boot</artifactId>
-        </dependency>
+        </dependency>-->
         <dependency>
             <groupId>io.prometheus</groupId>
             <artifactId>simpleclient_hotspot</artifactId>
+            <version>${prometheus.client.version}</version>
         </dependency>
+        <!-- jetty 服务方冲突
         <dependency>
             <groupId>io.prometheus</groupId>
             <artifactId>simpleclient_jetty_jdk8</artifactId>
         </dependency>
+        -->
         <dependency>
             <groupId>io.prometheus</groupId>
-            <artifactId>simpleclient_servlet</artifactId>
+            <artifactId>simpleclient_httpserver</artifactId>
+            <version>${prometheus.client.version}</version>
         </dependency>
-
-
+        <dependency>
+            <groupId>io.prometheus</groupId>
+            <artifactId>simpleclient</artifactId>
+            <version>${prometheus.client.version}</version>
+        </dependency>
         <!-- consul client -->
         <dependency>
             <groupId>com.ecwid.consul</groupId>
@@ -87,6 +99,11 @@
             <groupId>io.zipkin.reporter</groupId>
             <artifactId>zipkin-sender-kafka10</artifactId>
             <version>0.10.0</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.commons</groupId>
+            <artifactId>commons-lang3</artifactId>
+            <version>3.6</version>
         </dependency>
 
 

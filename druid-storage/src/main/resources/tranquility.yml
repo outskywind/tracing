@@ -40,6 +40,6 @@ dataSources:
 
 properties:
   task.partitions: 1
-  zookeeper.connect: druid-zk1.dafy.com:2181,druid-zk2.dafy.com:2181,druid-zk3.dafy.com:2181
+  zookeeper.connect: druid-zk1.7d.cn:2181,druid-zk2.7d.cn:2181,druid-zk3.7d.cn:2181
   reportDropsAsExceptions: true
   tranquility.lingerMillis: 1000
