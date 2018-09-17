@@ -10,7 +10,11 @@
     <modelVersion>4.0.0</modelVersion>
 
     <artifactId>skye-autoconfigure</artifactId>
-    <version>1.7.0.8.RELEASE</version>
+    <version>1.7.0.7.RELEASE</version>
+
+    <properties>
+        <prometheus.client.version>0.5.0</prometheus.client.version>
+    </properties>
 
     <dependencies>
         <dependency>
@@ -44,24 +48,31 @@
         </dependency>
 
         <!--  prometheus  client -->
-        <dependency>
+        <!--<dependency>  业务方冲突
             <groupId>io.prometheus</groupId>
             <artifactId>simpleclient_spring_boot</artifactId>
-        </dependency>
+        </dependency>-->
         <dependency>
             <groupId>io.prometheus</groupId>
             <artifactId>simpleclient_hotspot</artifactId>
+            <version>${prometheus.client.version}</version>
         </dependency>
+        <!-- jetty 业务方冲突
         <dependency>
             <groupId>io.prometheus</groupId>
             <artifactId>simpleclient_jetty_jdk8</artifactId>
         </dependency>
+        -->
         <dependency>
             <groupId>io.prometheus</groupId>
-            <artifactId>simpleclient_servlet</artifactId>
+            <artifactId>simpleclient_httpserver</artifactId>
+            <version>${prometheus.client.version}</version>
         </dependency>
-
-
+        <dependency>
+            <groupId>io.prometheus</groupId>
+            <artifactId>simpleclient</artifactId>
+            <version>${prometheus.client.version}</version>
+        </dependency>
         <!-- consul client -->
         <dependency>
             <groupId>com.ecwid.consul</groupId>
@@ -74,14 +85,6 @@
 
 
         <!-- others -->
-        <dependency>
-            <groupId>org.eclipse.jetty</groupId>
-            <artifactId>jetty-server</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.eclipse.jetty</groupId>
-            <artifactId>jetty-servlet</artifactId>
-        </dependency>
         <dependency>
             <groupId>javax.servlet</groupId>
             <artifactId>javax.servlet-api</artifactId>
