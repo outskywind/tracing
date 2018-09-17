@@ -105,8 +105,11 @@ public class LogConfigurationExtendListener implements GenericApplicationListene
                     if("false".equalsIgnoreCase(report)){
                         appender.setReport(false);
                     }
+                    if(StringUtils.isEmpty(serviceName)){
+                        return ;
+                    }
                     appender.setKafkaAddress(kafkaServers);
-                    appender.setServiceName(serviceName);
+                    appender.setServiceName(serviceName.trim());
                     appender.setContext(loggerContext);
                     appender.setName("skye");
                     appender.start();
