@@ -244,19 +244,17 @@ public class ServiceController extends BaseSessionController{
         insertionSortByCount(metric$L,false);
         //move red to head
         for(int i=1;i<metric$L.length;i++){
-            MonitorMetric e = metric$L[i];
-            Map<String, Stat> stats =  e.getStat();
-            Map<String, Stat> stats_front =  metric$L[i-1].getStat();
             //成功率first
-            for(int j=i; j>0 && Stat.red ==stats.get(Dimension.SUCCESS_RATE.value()) && Stat.red !=stats_front.get(Dimension.SUCCESS_RATE.value());j--){
+            for(int j=i; j>0 && Stat.red ==metric$L[j].getStat().get(Dimension.SUCCESS_RATE.value())
+                        && Stat.red !=metric$L[j-1].getStat().get(Dimension.SUCCESS_RATE.value());j--){
                 MonitorMetric tmp = metric$L[j-1];
                 metric$L[j-1] = metric$L[j];
                 metric$L[j]  = tmp;
             }
             //then append 延迟red
-            for(int j=i; j>0 && Stat.red ==stats.get(Dimension.LATENCY.value())
-                         && Stat.red !=stats_front.get(Dimension.SUCCESS_RATE.value())
-                            && Stat.red !=stats_front.get(Dimension.LATENCY.value());j--){
+            for(int j=i; j>0 && Stat.red ==metric$L[j].getStat().get(Dimension.LATENCY.value())
+                         && Stat.red !=metric$L[j-1].getStat().get(Dimension.SUCCESS_RATE.value())
+                            && Stat.red !=metric$L[j-1].getStat().get(Dimension.LATENCY.value());j--){
                 MonitorMetric tmp = metric$L[j-1];
                 metric$L[j-1] = metric$L[j];
                 metric$L[j]  = tmp;
