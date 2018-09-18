@@ -46,7 +46,7 @@ public class BraveAutoConfiguration {
             log.warn("Brave kafkaServers empty");
             return null;
         }
-        builder=new Brave.Builder(configProperties.getServiceName());
+        builder=new Brave.Builder(configProperties.getServiceName().trim());
         //
         if(configProperties.getSamplerRate()!=null){
             builder.traceSampler(Sampler.create(configProperties.getSamplerRate()));

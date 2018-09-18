@@ -10,7 +10,11 @@
     <modelVersion>4.0.0</modelVersion>
 
     <artifactId>skye-autoconfigure</artifactId>
-    <version>1.7.0.2.RELEASE</version>
+    <version>1.7.0.7.RELEASE</version>
+
+    <properties>
+        <prometheus.client.version>0.5.0</prometheus.client.version>
+    </properties>
 
     <dependencies>
         <dependency>
@@ -19,12 +23,14 @@
             <version>${spring-boot.version}</version>
             <scope>provided</scope>
         </dependency>
-        <!-- springmvc 调用  -->
+
+        <!-- springmvc  -->
         <dependency>
             <groupId>org.springframework</groupId>
             <artifactId>spring-webmvc</artifactId>
             <version>${spring.version}</version>
             <scope>provided</scope>
+            <optional>true</optional>
         </dependency>
 
         <!-- brave -->
@@ -33,6 +39,7 @@
             <artifactId>skye-brave</artifactId>
             <version>1.1.0-SNAPSHOT</version>
         </dependency>
+
         <!-- log -->
         <dependency>
             <groupId>com.dafy.skye</groupId>
@@ -41,14 +48,32 @@
         </dependency>
 
         <!--  prometheus  client -->
-        <dependency>
+        <!--<dependency>  业务方冲突
             <groupId>io.prometheus</groupId>
             <artifactId>simpleclient_spring_boot</artifactId>
-        </dependency>
+        </dependency>-->
         <dependency>
             <groupId>io.prometheus</groupId>
             <artifactId>simpleclient_hotspot</artifactId>
+            <version>${prometheus.client.version}</version>
         </dependency>
+        <!-- jetty 业务方冲突
+        <dependency>
+            <groupId>io.prometheus</groupId>
+            <artifactId>simpleclient_jetty_jdk8</artifactId>
+        </dependency>
+        -->
+        <dependency>
+            <groupId>io.prometheus</groupId>
+            <artifactId>simpleclient_httpserver</artifactId>
+            <version>${prometheus.client.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>io.prometheus</groupId>
+            <artifactId>simpleclient</artifactId>
+            <version>${prometheus.client.version}</version>
+        </dependency>
+        <!-- consul client -->
         <dependency>
             <groupId>com.ecwid.consul</groupId>
             <artifactId>consul-api</artifactId>
@@ -57,7 +82,9 @@
             <groupId>org.apache.httpcomponents</groupId>
             <artifactId>httpclient</artifactId>
         </dependency>
-        <!--  prometheus client -->
+
+
+        <!-- others -->
         <dependency>
             <groupId>javax.servlet</groupId>
             <artifactId>javax.servlet-api</artifactId>
@@ -73,6 +100,12 @@
             <artifactId>zipkin-sender-kafka10</artifactId>
             <version>0.10.0</version>
         </dependency>
+        <dependency>
+            <groupId>org.apache.commons</groupId>
+            <artifactId>commons-lang3</artifactId>
+            <version>3.6</version>
+        </dependency>
+
 
     </dependencies>
 
@@ -81,12 +114,28 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
-                <version>3.1</version>
+                <version>3.8.0</version>
                 <configuration>
-                    <source>1.7</source>
-                    <target>1.7</target>
-                    <encoding>UTF8</encoding>
+                    <encoding>UTF-8</encoding>
+                    <compilerVersion>1.8</compilerVersion>
+                    <source>1.8</source>
+                    <target>1.8</target>
                 </configuration>
+            </plugin>
+
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-source-plugin</artifactId>
+                <version>3.0.1</version>
+                <executions>
+                    <execution>
+                        <id>attach-sources</id>
+                        <phase>verify</phase>
+                        <goals>
+                            <goal>jar-no-fork</goal>
+                        </goals>
+                    </execution>
+                </executions>
             </plugin>
         </plugins>
     </build>
