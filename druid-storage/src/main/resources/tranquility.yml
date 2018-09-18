@@ -32,7 +32,7 @@ dataSources:
         type: realtime
         maxRowsInMemory: 1000
         intermediatePersistPeriod: PT45S
-        windowPeriod: PT1H
+        windowPeriod: PT50M
 
     properties:
       task.partitions: 1
