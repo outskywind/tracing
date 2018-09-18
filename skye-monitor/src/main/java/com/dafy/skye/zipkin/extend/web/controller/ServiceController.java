@@ -154,8 +154,6 @@ public class ServiceController extends BaseSessionController{
         return new Response("0",result);
     }
 
-
-
     @RequestMapping("/series")
     @ResponseBody
     public Response  series(@RequestBody ServiceSeriesRequest request){
@@ -174,9 +172,9 @@ public class ServiceController extends BaseSessionController{
             rules = rulesRefreshHolder.getRules(request.getService(),monitorMetric.getName());
             ruleService.decideStat(monitorMetric,rules);
         }
-        return  new Response("0",monitorMetrics);
+        MonitorMetric[] result = sortMetric(monitorMetrics);
+        return  new Response("0",result);
     }
-
 
     @RequestMapping("/interface/series")
     @ResponseBody
@@ -184,7 +182,6 @@ public class ServiceController extends BaseSessionController{
         Collection<SeriesMetric> seriesMetrics = zipkinExtendService.getInterfaceSeries(request);
         return  new Response("0",seriesMetrics);
     }
-
 
     @RequestMapping("/interface/traces")
     @ResponseBody
@@ -204,13 +201,13 @@ public class ServiceController extends BaseSessionController{
         //sort, failed first , then stats red  , then left
         // we need two pointers here pointing at failed tail , red tail ,then next
         // so the data is expandable , we need the link list
-        sort(traces);
+        sortTrace(traces);
         List<Trace> result = traces.size()>300?traces.subList(0,300):traces;
         return new Response("0",result);
     }
 
 
-    private void sort(List<Trace> traces){
+    private void sortTrace(List<Trace> traces){
         int tail= 0;
         LinkedList<Trace> failed  = new LinkedList();
         LinkedList<Trace> red  = new LinkedList();
@@ -238,6 +235,58 @@ public class ServiceController extends BaseSessionController{
         }
         for(int i=tail;i<other.size();i++,tail++){
             traces.set(i,other.get(i));
+        }
+    }
+
+    //标红的排前面，并且调用量大的靠前
+    private MonitorMetric[] sortMetric(Collection<MonitorMetric> metrics){
+        MonitorMetric[] metric$L = metrics.toArray(new MonitorMetric[0]);
+        insertionSortByCount(metric$L,false);
+        //move red to head
+        for(int i=1;i<metric$L.length;i++){
+            MonitorMetric e = metric$L[i];
+            Map<String, Stat> stats =  e.getStat();
+            Map<String, Stat> stats_front =  metric$L[i-1].getStat();
+            //成功率first
+            for(int j=i; j>0 && Stat.red ==stats.get(Dimension.SUCCESS_RATE.value()) && Stat.red !=stats_front.get(Dimension.SUCCESS_RATE.value());j--){
+                MonitorMetric tmp = metric$L[j-1];
+                metric$L[j-1] = metric$L[j];
+                metric$L[j]  = tmp;
+            }
+            //then append 延迟red
+            for(int j=i; j>0 && Stat.red ==stats.get(Dimension.LATENCY.value())
+                         && Stat.red !=stats_front.get(Dimension.SUCCESS_RATE.value())
+                            && Stat.red !=stats_front.get(Dimension.LATENCY.value());j--){
+                MonitorMetric tmp = metric$L[j-1];
+                metric$L[j-1] = metric$L[j];
+                metric$L[j]  = tmp;
+            }
+        }
+        return metric$L;
+    }
+
+    /**
+     *
+     * @param metrics
+     * @param asc
+     */
+    private void insertionSortByCount(MonitorMetric[] metrics, boolean asc){
+        if(asc){
+            for(int i=0 ; i<metrics.length;i++){
+                for(int j=i; j>0 && metrics[j].getCount()<metrics[j-1].getCount();j--){
+                    MonitorMetric tmp = metrics[j-1];
+                    metrics[j-1] = metrics[j];
+                    metrics[j]  = tmp;
+                }
+            }
+        } else{
+            for(int i=0 ; i<metrics.length;i++){
+                for(int j=i; j>0 && metrics[j].getCount()>metrics[j-1].getCount();j--){
+                    MonitorMetric tmp = metrics[j-1];
+                    metrics[j-1] = metrics[j];
+                    metrics[j]  = tmp;
+                }
+            }
         }
     }
 
