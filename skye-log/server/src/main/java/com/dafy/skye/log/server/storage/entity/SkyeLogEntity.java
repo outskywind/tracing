@@ -22,6 +22,7 @@ public class SkyeLogEntity {
     private String pid;
     private String thread;
     private String loggerName;
+    private String loggerNameSimple;
     private String level;
     private Map<String,String> mdc;
     private String message;
@@ -129,6 +130,14 @@ public class SkyeLogEntity {
 
     public void setException(String exception) {
         this.exception = exception;
+    }
+
+    public String getLoggerNameSimple() {
+        return loggerNameSimple;
+    }
+
+    public void setLoggerNameSimple(String loggerNameSimple) {
+        this.loggerNameSimple = loggerNameSimple;
     }
 
     public static SkyeLogEntity build(SkyeLogEvent event){
