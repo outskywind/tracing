@@ -19,9 +19,7 @@ public class PrometheusListener implements ApplicationListener<ApplicationReadyE
     private static final Logger logger = LoggerFactory.getLogger(PrometheusListener.class);
 
     private static final String TAG = "app-service";
-
-    private static final String PATH_SPEC = "/prometheus";
-    private static final String CONTEXT_PATH = "/";
+    private static final String CONTEXT_PATH = "/prometheus";
     private static final int DEFAULT_PORT = 12432;
 
     @Override
@@ -30,7 +28,7 @@ public class PrometheusListener implements ApplicationListener<ApplicationReadyE
             Environment env = event.getApplicationContext().getEnvironment();
             String portStr = env.getProperty("skye.prometheus.port");
             int appPort = StringUtils.isEmpty(portStr) ? DEFAULT_PORT : Integer.parseInt(portStr);
-            startHttpServer(appPort,PATH_SPEC);
+            startHttpServer(appPort, CONTEXT_PATH);
 
             String consulAddresses = env.getProperty("skye.consulServer");
             if(StringUtils.isEmpty(consulAddresses)) {
@@ -80,10 +78,10 @@ public class PrometheusListener implements ApplicationListener<ApplicationReadyE
         }
     }
 
-    private void startHttpServer(int port,String contextPath) throws Exception {
+    private void startHttpServer(int port, String contextPath) throws Exception {
         Thread t = new Thread(()->{
             try{
-                new PrometheusServer(port,contextPath);
+                new PrometheusServer(port, contextPath);
             }catch (Throwable ex){
                 logger.warn("prometheus server start failed" , ex);
             }

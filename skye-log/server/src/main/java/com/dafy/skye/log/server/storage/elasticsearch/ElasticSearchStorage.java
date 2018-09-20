@@ -212,6 +212,10 @@ public class ElasticSearchStorage implements StorageComponent {
                 String highlighText = Arrays.toString(hit.getHighlightFields().get("message").getFragments());
                 entity.setMessage(highlighText.substring(1,highlighText.length()-1));
             }
+            //
+            String className = entity.getLoggerName();
+            String simpleName = className.lastIndexOf(".")>0?className.substring(className.lastIndexOf(".")+1):className;
+            entity.setLoggerNameSimple(simpleName);
             logs.add(entity);
         }
         result.setHas_more(response.getHits().getTotalHits()-request.getTo()>0);
