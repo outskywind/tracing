@@ -19,6 +19,10 @@ import java.util.concurrent.*;
 import java.util.zip.GZIPOutputStream;
 
 /**
+ * 这个类在 <code>simpleclient_httpserver</code> 依赖中类 <code>io.prometheus.client.exporter.HTTPServer</code> 的基础上
+ * 做了少许修改，这样做是因为类 <code>HTTPServer</code> 只会使用 <b>/</b> 和 <b>/metrics</b> 作为<b>context path</b>，而且不
+ * 支持自定义。<p>
+ *
  * Created by quanchengyun on 2018/9/14.
  * @see io.prometheus.client.exporter.HTTPServer
  */
