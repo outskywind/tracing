@@ -10,10 +10,12 @@
     <modelVersion>4.0.0</modelVersion>
 
     <artifactId>skye-autoconfigure</artifactId>
-    <version>1.7.0.7.RELEASE</version>
+    <version>1.7.1.RELEASE</version>
 
     <properties>
         <prometheus.client.version>0.5.0</prometheus.client.version>
+        <dynamic-conf-autoconfigure.version>1.0.0-SNAPSHOT</dynamic-conf-autoconfigure.version>
+        <skye-brave.version>1.2.0-SNAPSHOT</skye-brave.version>
     </properties>
 
     <dependencies>
@@ -37,7 +39,7 @@
         <dependency>
             <groupId>com.dafy.skye</groupId>
             <artifactId>skye-brave</artifactId>
-            <version>1.1.0-SNAPSHOT</version>
+            <version>${skye-brave.version}</version>
         </dependency>
 
         <!-- log -->
@@ -83,7 +85,6 @@
             <artifactId>httpclient</artifactId>
         </dependency>
 
-
         <!-- others -->
         <dependency>
             <groupId>javax.servlet</groupId>
@@ -91,19 +92,16 @@
             <scope>provided</scope>
         </dependency>
         <dependency>
-            <groupId>io.zipkin.brave</groupId>
-            <artifactId>brave-core</artifactId>
-            <version>4.1.1</version>
-        </dependency>
-        <dependency>
-            <groupId>io.zipkin.reporter</groupId>
-            <artifactId>zipkin-sender-kafka10</artifactId>
-            <version>0.10.0</version>
-        </dependency>
-        <dependency>
             <groupId>org.apache.commons</groupId>
             <artifactId>commons-lang3</artifactId>
             <version>3.6</version>
+        </dependency>
+
+        <dependency>
+            <groupId>com.dafy.base</groupId>
+            <artifactId>dynamic-conf-autoconfigure</artifactId>
+            <version>1.0.0-SNAPSHOT</version>
+            <!-- <scope>provided</scope> -->
         </dependency>
 
 

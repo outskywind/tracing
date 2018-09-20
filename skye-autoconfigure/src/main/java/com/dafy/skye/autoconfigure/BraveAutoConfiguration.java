@@ -1,11 +1,13 @@
 package com.dafy.skye.autoconfigure;
 
+import com.dafy.base.conf.DynamicConfig;
 import com.dafy.skye.brave.ReporterDelegate;
 import com.github.kristofa.brave.Brave;
 import com.github.kristofa.brave.Sampler;
 import com.google.common.base.Strings;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Bean;
@@ -29,6 +31,9 @@ public class BraveAutoConfiguration {
     public BraveConfigProperties braveConfigProperties(){
         return new BraveConfigProperties();
     }
+
+    @Autowired
+    DynamicConfig dynamicConfig;
 
     @Bean
     @ConditionalOnClass(Brave.class)
