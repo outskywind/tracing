@@ -3,6 +3,8 @@ package com.dafy.skye.autoconfigure;
 import ch.qos.logback.classic.LoggerContext;
 import ch.qos.logback.classic.spi.ILoggingEvent;
 import ch.qos.logback.core.Appender;
+import com.ctrip.framework.apollo.Config;
+import com.dafy.skye.conf.SkyeDynamicConf;
 import com.dafy.skye.log.appender.LogKafkaAppender;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.ILoggerFactory;
@@ -73,7 +75,7 @@ public class LogConfigurationExtendListener implements GenericApplicationListene
 
     private void onContextRefreshedEvent(ContextRefreshedEvent event) {
 
-        String report = event.getApplicationContext().getEnvironment().getProperty("skye.report");
+        String report = event.getApplicationContext().getEnvironment().getProperty(SkyeDynamicConf.log_collect_key);
 
         ApplicationContext context = event.getApplicationContext();
         LoggingSystem loggingSystem = (LoggingSystem)context.getBean(LoggingApplicationListener.LOGGING_SYSTEM_BEAN_NAME);
@@ -108,6 +110,13 @@ public class LogConfigurationExtendListener implements GenericApplicationListene
                     if(StringUtils.isEmpty(serviceName)){
                         return ;
                     }
+                    Config config = context.getBean(Config.class);
+                    //业务方尚未接入DynamicConfig 那么就会自行创建使用公共namespace IPO.skye
+                    //业务方没有配置
+                    if(config == null){
+                        config = SkyeDynamicConf.getInstance(serviceName);
+                    }
+                    appender.setDynamicConfig(config);
                     appender.setKafkaAddress(kafkaServers);
                     appender.setServiceName(serviceName.trim());
                     appender.setContext(loggerContext);

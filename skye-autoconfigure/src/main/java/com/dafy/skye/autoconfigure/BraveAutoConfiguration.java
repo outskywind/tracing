@@ -1,13 +1,15 @@
 package com.dafy.skye.autoconfigure;
 
-import com.dafy.base.conf.DynamicConfig;
+import com.ctrip.framework.apollo.Config;
 import com.dafy.skye.brave.ReporterDelegate;
+import com.dafy.skye.conf.SkyeDynamicConf;
 import com.github.kristofa.brave.Brave;
 import com.github.kristofa.brave.Sampler;
-import com.google.common.base.Strings;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Bean;
@@ -32,8 +34,11 @@ public class BraveAutoConfiguration {
         return new BraveConfigProperties();
     }
 
-    @Autowired
-    DynamicConfig dynamicConfig;
+    @Autowired(required = false)
+    Config dynamicConfig;
+
+    @Value("$appName")
+    String appName;
 
     @Bean
     @ConditionalOnClass(Brave.class)
@@ -43,14 +48,21 @@ public class BraveAutoConfiguration {
     //@ConditionalOnBean(BraveConfigProperties.class)
     public Brave brave(BraveConfigProperties configProperties){
         Brave.Builder builder;
-        if(Strings.isNullOrEmpty(configProperties.getServiceName())){
-            log.warn("Brave service name is empty");
+        //兼容1.7.1-
+        if(StringUtils.isNotBlank(appName)){
+            configProperties.setServiceName(appName);
+        }
+        if(StringUtils.isBlank(configProperties.getServiceName())){
+            log.warn("appName is empty");
             return null;
         }
-        if(Strings.isNullOrEmpty(configProperties.getKafkaServers())){
+
+        if(StringUtils.isBlank(configProperties.getKafkaServers())){
             log.warn("Brave kafkaServers empty");
             return null;
         }
+        //
+
         builder=new Brave.Builder(configProperties.getServiceName().trim());
         //
         if(configProperties.getSamplerRate()!=null){
@@ -59,7 +71,7 @@ public class BraveAutoConfiguration {
             //默认监控统计全部数据
             builder.traceSampler(Sampler.ALWAYS_SAMPLE);
         }
-        Reporter<zipkin.Span> reporter = null;
+        Reporter<zipkin.Span> reporter;
         KafkaSender kafkaSender=KafkaSender.create(configProperties.getKafkaServers());
         Component.CheckResult checkResult=kafkaSender.check();
         if(!checkResult.ok){
@@ -67,8 +79,12 @@ public class BraveAutoConfiguration {
             return null;
         }
         reporter= AsyncReporter.builder(kafkaSender).build();
-
-        builder.reporter( new ReporterDelegate(reporter,configProperties.isReport()));
+        ReporterDelegate reporterDelegate = new ReporterDelegate(reporter,configProperties.isReport());
+        if(dynamicConfig==null){
+            dynamicConfig = SkyeDynamicConf.getInstance(configProperties.getServiceName());
+        }
+        reporterDelegate.setDynamicConfig(dynamicConfig);
+        builder.reporter(reporterDelegate);
         return builder.build();
     }
 

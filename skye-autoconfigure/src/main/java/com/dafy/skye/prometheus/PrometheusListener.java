@@ -20,7 +20,7 @@ public class PrometheusListener implements ApplicationListener<ApplicationReadyE
 
     private static final String TAG = "app-service";
     private static final String CONTEXT_PATH = "/prometheus";
-    private static final int DEFAULT_PORT = 12432;
+    private static final int DEFAULT_PORT = 12431;
 
     @Override
     public void onApplicationEvent(ApplicationReadyEvent event) {
@@ -32,18 +32,17 @@ public class PrometheusListener implements ApplicationListener<ApplicationReadyE
 
             String consulAddresses = env.getProperty("skye.consulServer");
             if(StringUtils.isEmpty(consulAddresses)) {
-                logger.error("skye.consulServer is invalid! skye.consulServer={}", consulAddresses);
+                logger.warn("skye.consulServer is invalid! skye.consulServer={}", consulAddresses);
                 return;
             }
-
-            String serviceName = env.getProperty("skye.serviceName");
-            if(StringUtils.isEmpty(serviceName)){
-                serviceName = env.getProperty("skye.service-name");
+            String appName = env.getProperty("appName");
+            String serviceName = StringUtils.isNotBlank(env.getProperty("skye.serviceName"))?
+                    env.getProperty("skye.serviceName"):env.getProperty("skye.service-name") ;
+            if(StringUtils.isNotBlank(appName)){
+                serviceName = appName;
             }
-            String checkInterval = env.getProperty("skye.consulCheckInterval");
-            if(StringUtils.isEmpty(checkInterval)){
-                checkInterval = env.getProperty("skye.consul-check-interval");
-            }
+            String checkInterval = StringUtils.isNotBlank(env.getProperty("skye.consulCheckInterval"))?
+                    env.getProperty("skye.consulCheckInterval"):env.getProperty("skye.consul-check-interval");
             String appHost = SkyeLogUtil.getPrivateIp();
             String serviceId = Joiner.on('-').join(serviceName, appHost, appPort);
             String tcpAddr = Joiner.on(':').join(appHost, appPort);
@@ -74,7 +73,7 @@ public class PrometheusListener implements ApplicationListener<ApplicationReadyE
             DefaultExports.initialize();
             logger.info("prometheus exports initialized!");
         } catch (Throwable e) {
-            logger.error("PrometheusListener onApplicationEvent error!", e);
+            logger.warn("PrometheusListener onApplicationEvent error!", e);
         }
     }
 
@@ -82,10 +81,10 @@ public class PrometheusListener implements ApplicationListener<ApplicationReadyE
         Thread t = new Thread(()->{
             try{
                 new PrometheusServer(port, contextPath);
+                logger.info("prometheus server start successfully");
             }catch (Throwable ex){
                 logger.warn("prometheus server start failed" , ex);
             }
-            logger.info("prometheus server start successfully");
         });
         t.start();
     }
