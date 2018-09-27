@@ -3,6 +3,8 @@ package com.dafy.skye.autoconfigure;
 import ch.qos.logback.classic.LoggerContext;
 import ch.qos.logback.classic.spi.ILoggingEvent;
 import ch.qos.logback.core.Appender;
+import com.ctrip.framework.apollo.Config;
+import com.dafy.skye.conf.SkyeDynamicConf;
 import com.dafy.skye.log.appender.LogKafkaAppender;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.ILoggerFactory;
@@ -18,6 +20,7 @@ import org.springframework.context.ApplicationEvent;
 import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.context.event.GenericApplicationListener;
 import org.springframework.core.ResolvableType;
+import org.springframework.core.env.Environment;
 import org.springframework.util.Assert;
 
 import java.security.CodeSource;
@@ -72,50 +75,62 @@ public class LogConfigurationExtendListener implements GenericApplicationListene
     }
 
     private void onContextRefreshedEvent(ContextRefreshedEvent event) {
+        try{
+            Environment env =  event.getApplicationContext().getEnvironment();
+            String report = env.getProperty(SkyeDynamicConf.log_collect_key);
 
-        String report = event.getApplicationContext().getEnvironment().getProperty("skye.report");
+            ApplicationContext context = event.getApplicationContext();
+            LoggingSystem loggingSystem = (LoggingSystem)context.getBean(LoggingApplicationListener.LOGGING_SYSTEM_BEAN_NAME);
+            if(loggingSystem instanceof LogbackLoggingSystem){
+                LoggerContext loggerContext =getLoggerContext();
+                //
+                Logger rootLogger = loggerContext.getLogger(Logger.ROOT_LOGGER_NAME);
+                if(rootLogger instanceof ch.qos.logback.classic.Logger){
+                    ch.qos.logback.classic.Logger logbackLogger = (ch.qos.logback.classic.Logger)rootLogger;
+                    Iterator<Appender<ILoggingEvent>> appenders = logbackLogger.iteratorForAppenders();
+                    boolean isAttached = false;
+                    while(appenders.hasNext()){
+                        if(appenders.next() instanceof LogKafkaAppender){
+                            isAttached = true;
+                            break;
+                        }
+                    }
+                    if(!isAttached){
+                        LogKafkaAppender appender = new LogKafkaAppender();
+                        logbackLogger.addAppender(appender);
+                        //String kafkaServers = env.getProperty("skye.kafkaServers");
+                        String appName = env.getProperty("appName");
+                        String serviceName = StringUtils.isNotBlank(env.getProperty("skye.serviceName"))?
+                                env.getProperty("skye.serviceName"):env.getProperty("skye.service-name") ;
+                        if(StringUtils.isNotBlank(appName)){
+                            serviceName = appName;
+                        }
+                        String kafkaServers = StringUtils.isNotBlank(env.getProperty("skye.kafkaServers"))?
+                                env.getProperty("skye.kafkaServers"):env.getProperty("skye.kafka-servers") ;
+                        if("false".equalsIgnoreCase(report)){
+                            appender.setReport(false);
+                        }
+                        if(StringUtils.isBlank(serviceName) || StringUtils.isBlank(kafkaServers)){
+                            return ;
+                        }
+                        String[] names = context.getBeanNamesForType(Config.class);
+                        //业务方尚未接入DynamicConfig 那么就会自行创建使用公共namespace IPO.skye
+                        //业务方没有配置
+                        Config config = (names == null || names.length==0)? SkyeDynamicConf.getInstance(serviceName):context.getBean(Config.class);
 
-        ApplicationContext context = event.getApplicationContext();
-        LoggingSystem loggingSystem = (LoggingSystem)context.getBean(LoggingApplicationListener.LOGGING_SYSTEM_BEAN_NAME);
-        if(loggingSystem instanceof LogbackLoggingSystem){
-            LoggerContext loggerContext =getLoggerContext();
-            //
-            Logger rootLogger = loggerContext.getLogger(Logger.ROOT_LOGGER_NAME);
-            if(rootLogger instanceof ch.qos.logback.classic.Logger){
-                ch.qos.logback.classic.Logger logbackLogger = (ch.qos.logback.classic.Logger)rootLogger;
-                Iterator<Appender<ILoggingEvent>> appenders = logbackLogger.iteratorForAppenders();
-                boolean isAttached = false;
-                while(appenders.hasNext()){
-                    if(appenders.next() instanceof LogKafkaAppender){
-                        isAttached = true;
-                        break;
+                        appender.setDynamicConfig(config);
+                        appender.setKafkaAddress(kafkaServers);
+                        appender.setServiceName(serviceName.trim());
+                        appender.setContext(loggerContext);
+                        appender.setName("skye");
+                        appender.start();
                     }
-                }
-                if(!isAttached){
-                    LogKafkaAppender appender = new LogKafkaAppender();
-                    logbackLogger.addAppender(appender);
-                    String kafkaServers = event.getApplicationContext().getEnvironment().getProperty("skye.kafkaServers");
-                    String serviceName = event.getApplicationContext().getEnvironment().getProperty("skye.serviceName");
-                    if(StringUtils.isEmpty(kafkaServers)){
-                        kafkaServers = event.getApplicationContext().getEnvironment().getProperty("skye.kafka-servers");
-                    }
-                    if(StringUtils.isEmpty(serviceName)){
-                        serviceName = event.getApplicationContext().getEnvironment().getProperty("skye.service-name");
-                    }
-                    if("false".equalsIgnoreCase(report)){
-                        appender.setReport(false);
-                    }
-                    if(StringUtils.isEmpty(serviceName)){
-                        return ;
-                    }
-                    appender.setKafkaAddress(kafkaServers);
-                    appender.setServiceName(serviceName.trim());
-                    appender.setContext(loggerContext);
-                    appender.setName("skye");
-                    appender.start();
                 }
             }
+        }catch (Throwable ex){
+            //...
         }
+
     }
 
     // 根据 配置中心客户端的引入策略，此时无法获取到，需要修改引入的方案

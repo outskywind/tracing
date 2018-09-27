@@ -2,10 +2,8 @@ package com.dafy.skye.log.server.storage.entity;
 
 import ch.qos.logback.classic.spi.ThrowableProxyUtil;
 import com.dafy.skye.log.core.logback.SkyeLogEvent;
-import com.datastax.driver.core.utils.UUIDs;
-import com.fasterxml.jackson.annotation.JsonFormat;
+import org.elasticsearch.common.UUIDs;
 
-import java.util.Date;
 import java.util.Map;
 import java.util.Random;
 import java.util.UUID;
@@ -146,8 +144,8 @@ public class SkyeLogEntity {
         //skyeTraceId不再保存到mdc
         event.getMdc().remove("traceId");
         Random random=new Random();
-        UUID uuid = new UUID(UUIDs.startOf(event.getTimeStamp()).getMostSignificantBits(), random.nextLong());
-        entity.setTsUuid(uuid.toString());
+        //UUID uuid = new UUID(UUIDs.randomBase64UUID(), random.nextLong());
+        entity.setTsUuid(UUIDs.randomBase64UUID());
         entity.setTimestamp(event.getTimeStamp());
         entity.setServiceName(event.getServiceName());
         entity.setAddress(event.getAddress());

@@ -70,14 +70,6 @@
             <groupId>org.elasticsearch.client</groupId>
             <artifactId>elasticsearch-rest-high-level-client</artifactId>
         </dependency>
-
-
-        <dependency>
-            <groupId>com.dafy.base</groupId>
-            <artifactId>qywx-api</artifactId>
-            <version>1.0.0-SNAPSHOT</version>
-        </dependency>
-
         <!--
         <dependency>
             <groupId>org.elasticsearch.client</groupId>

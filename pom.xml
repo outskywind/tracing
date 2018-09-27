@@ -53,6 +53,7 @@
         <prometheus.client.version>0.5.0</prometheus.client.version>
         <jetty.version>9.4.4.v20170414</jetty.version>
         <httpclient.version>4.5.3</httpclient.version>
+        <dynamic-conf.version>1.0.0-SNAPSHOT</dynamic-conf.version>
     </properties>
     <dependencyManagement>
         <dependencies>

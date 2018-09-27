@@ -6,6 +6,9 @@ import ch.qos.logback.classic.spi.ILoggingEvent;
 import ch.qos.logback.core.UnsynchronizedAppenderBase;
 import ch.qos.logback.core.spi.PreSerializationTransformer;
 import ch.qos.logback.core.util.Duration;
+import com.ctrip.framework.apollo.Config;
+import com.dafy.base.conf.DynamicConfConstants;
+import com.dafy.base.conf.DynamicConfig;
 import com.dafy.skye.log.core.logback.SkyeLogConverter;
 import com.dafy.skye.log.core.logback.SkyeLogEvent;
 import org.apache.kafka.clients.producer.KafkaProducer;
@@ -47,6 +50,16 @@ public class LogKafkaAppender extends UnsynchronizedAppenderBase<ILoggingEvent> 
     private boolean report=true;
     public void setReport(boolean report){
         this.report =report;
+    }
+
+    private Config dynamicConfig;
+
+    public Config getDynamicConfig() {
+        return dynamicConfig;
+    }
+
+    public void setDynamicConfig(Config dynamicConfig) {
+        this.dynamicConfig = dynamicConfig;
     }
 
     @Override
@@ -93,15 +106,13 @@ public class LogKafkaAppender extends UnsynchronizedAppenderBase<ILoggingEvent> 
         kafkaProducer=new KafkaProducer(props);
         try{
             kafkaProducer.partitionsFor(this.kafkaTopic);
+            logger.info("skye-log-appender init success. kafka.address={}",kafkaAddress);
         }catch (Throwable e){
             //spring-boot-logging 检查 status 是否有错误，这会导致失败,spring 启动时抛出异常，启动失败
             //但这不是我们想要的，如果kafka appender失败，那么append不记录
-            //this.addError("KafkaProducer init error ",e);
-            e.printStackTrace();
+            logger.warn("skye-log-appender init failed. kafka.address={}",kafkaAddress);
             return false;
         }
-
-        logger.info("skye-log-appender init success. kafka.address={}",kafkaAddress);
         return true;
     }
     @Override
@@ -119,12 +130,11 @@ public class LogKafkaAppender extends UnsynchronizedAppenderBase<ILoggingEvent> 
         while(true) {
             try{
                 SkyeLogEvent event = queue.take();
-                ProducerRecord record = new ProducerRecord(this.kafkaTopic, this.serviceName, event);
-                Future<RecordMetadata> future=kafkaProducer.send(record);
+                ProducerRecord record = new ProducerRecord(this.kafkaTopic, event);
+                kafkaProducer.send(record);
             }catch (Exception e){
-                this.addWarn("kafka Sending error,"+this.kafkaAddress+":"+e);
+                logger.warn("kafka Sending error,"+this.kafkaAddress+":"+e);
             }
-
         }
     }
     @Override
@@ -133,7 +143,10 @@ public class LogKafkaAppender extends UnsynchronizedAppenderBase<ILoggingEvent> 
     }
     @Override
     protected void append(ILoggingEvent event) {
-        if(event.getLevel()== Level.DEBUG || event.getLevel()== Level.TRACE || !report){
+        if(event.getLevel()== Level.DEBUG || event.getLevel()== Level.TRACE){
+            return;
+        }
+        if(null!=dynamicConfig?!dynamicConfig.getBooleanProperty(DynamicConfConstants.skye_log_collect_key,report):!report){
             return;
         }
         //kafka 连接失败，就不会appender发送记录
@@ -146,10 +159,10 @@ public class LogKafkaAppender extends UnsynchronizedAppenderBase<ILoggingEvent> 
                 logEvent.setServiceName(this.serviceName);
                 boolean e = this.queue.offer(logEvent, this.eventDelayLimit.getMilliseconds(), TimeUnit.MILLISECONDS);
                 if(!e) {
-                    this.addInfo("Dropping event due to timeout limit of [" + this.eventDelayLimit + "] milliseconds being exceeded");
+                    logger.warn("Dropping event due to timeout limit of [" + this.eventDelayLimit + "] milliseconds being exceeded");
                 }
             } catch (InterruptedException var3) {
-                this.addError("Interrupted while appending event to KakfaProducerAppender", var3);
+                logger.warn("Interrupted while appending event to KakfaProducerAppender", var3);
             }
         }
     }
