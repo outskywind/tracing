@@ -37,7 +37,7 @@ public class BraveAutoConfiguration {
     @Autowired(required = false)
     Config dynamicConfig;
 
-    @Value("$appName")
+    @Value("${appName}")
     String appName;
 
     @Bean

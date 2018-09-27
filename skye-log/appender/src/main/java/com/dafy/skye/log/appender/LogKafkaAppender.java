@@ -130,7 +130,7 @@ public class LogKafkaAppender extends UnsynchronizedAppenderBase<ILoggingEvent> 
         while(true) {
             try{
                 SkyeLogEvent event = queue.take();
-                ProducerRecord record = new ProducerRecord(this.kafkaTopic, event.getAddress(), event);
+                ProducerRecord record = new ProducerRecord(this.kafkaTopic, event);
                 kafkaProducer.send(record);
             }catch (Exception e){
                 logger.warn("kafka Sending error,"+this.kafkaAddress+":"+e);
