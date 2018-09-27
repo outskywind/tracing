@@ -5,13 +5,13 @@
     <parent>
         <groupId>com.dafy.skye</groupId>
         <artifactId>skye</artifactId>
-        <version>1.0.0-SNAPSHOT</version>
+        <version>${project.version}</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
     <artifactId>skye-autoconfigure</artifactId>
     <!--<version>1.7.1.RELEASE</version>-->
-    <version>1.7.1-SNAPSHOT</version>
+    <version>${project.version}</version>
 
     <properties>
         <prometheus.client.version>0.5.0</prometheus.client.version>
@@ -118,6 +118,8 @@
                     </execution>
                 </executions>
             </plugin>
+
+
         </plugins>
     </build>
 
