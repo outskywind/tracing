@@ -5,7 +5,7 @@
     <parent>
         <artifactId>skye</artifactId>
         <groupId>com.dafy.skye</groupId>
-        <version>${revision}</version>
+        <version>1.7.2-SNAPSHOT</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
@@ -47,7 +47,7 @@
         <dependency>
             <groupId>com.dafy.skye</groupId>
             <artifactId>zipkin-autoconfigure</artifactId>
-            <version>1.0.0-SNAPSHOT</version>
+            <version>1.7.2-SNAPSHOT</version>
         </dependency>
 
         <dependency>

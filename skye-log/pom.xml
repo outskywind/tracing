@@ -6,7 +6,7 @@
     <parent>
         <artifactId>skye</artifactId>
         <groupId>com.dafy.skye</groupId>
-        <version>${revision}</version>
+        <version>1.7.2-SNAPSHOT</version>
     </parent>
     <artifactId>skye-log</artifactId>
 
