@@ -8,7 +8,7 @@
         <version>1.0.0-SNAPSHOT</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
-    <version>1.3.0-SNAPSHOT</version>
+    <version>${project.version}</version>
 
     <artifactId>skye-brave</artifactId>
     <packaging>jar</packaging>
@@ -84,7 +84,7 @@
         <dependency>
             <groupId>com.dafy.base</groupId>
             <artifactId>dynamic-conf-autoconfigure</artifactId>
-            <version>${dynamic-conf.version}</version>
+            <version>1.0.0-SNAPSHOT</version>
             <!-- <scope>provided</scope> -->
         </dependency>
 

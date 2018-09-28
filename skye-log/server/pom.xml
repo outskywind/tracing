@@ -9,12 +9,12 @@
     </parent>
     <modelVersion>4.0.0</modelVersion>
     <artifactId>skye-log-server</artifactId>
-    <version>${project.parent.version}</version>
+    <version>${project.version}</version>
     <dependencies>
         <dependency>
             <groupId>com.dafy.skye</groupId>
             <artifactId>skye-log-core</artifactId>
-            <version>${parent.version}</version>
+            <version>${project.version}</version>
         </dependency>
         <!--<dependency>
             <groupId>redis.clients</groupId>
