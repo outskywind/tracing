@@ -8,6 +8,8 @@ import com.dafy.base.conf.DynamicConfig;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.net.URL;
+import java.net.URLConnection;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -33,11 +35,18 @@ public class SkyeDynamicConf {
     public static ConfigWrapper getInstance(String appName) {
         //no lock with none blocking, just try it later
         try{
+            //loop util not null or
             while(instances.get(appName)==null){
                 if(initialize.compareAndSet(0,1)){
+                    //
+                    if(!isResolvable(DynamicConfig.meta_server)){
+                        initialize.compareAndSet(1,2);
+                        break;
+                    }
                     DynamicConfProperties props = new DynamicConfProperties();
                     props.setAppName(appName);
                     props.setNamespace(namespace);
+                    props.setConfServers(DynamicConfig.meta_server);
                     DynamicConfig delegate = new DynamicConfig(props);
                     SkyeConfigWrapper instance = new SkyeConfigWrapper(delegate,appName);
                     Set<String> keys =  new HashSet<>();
@@ -79,6 +88,24 @@ public class SkyeDynamicConf {
             log.warn("initialize dynamicConf failed ",ex);
         }
         return instances.get(appName);
+    }
+
+
+    private static boolean isResolvable(String meta_server){
+        String[] server_urls = meta_server.split(",");
+        boolean isResolvable = false;
+        try{
+            for(String config_url: server_urls){
+                URL url = new URL(config_url);
+                URLConnection conn = url.openConnection();
+                conn.setConnectTimeout(1000);
+                conn.connect();
+            }
+            isResolvable = true;
+        }catch (Throwable ex){
+            //ex.printStackTrace();
+        }
+        return isResolvable;
     }
 
 
