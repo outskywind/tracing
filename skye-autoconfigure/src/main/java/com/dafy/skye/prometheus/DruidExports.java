@@ -143,7 +143,11 @@ public class DruidExports extends Collector {
                 int resultCode = rootObj.getAsJsonPrimitive("ResultCode").getAsInt();
                 // resultCode为1表示请求成功
                 if(resultCode == 1) {
-                    JsonArray contentArray = rootObj.getAsJsonArray("Content");
+                    JsonElement contentElem = rootObj.get("Content");
+                    if(contentElem == null || contentElem.isJsonNull()) {
+                        return;
+                    }
+                    JsonArray contentArray = (JsonArray) contentElem;
                     JsonObject contentObj;
 
                     // executeCount：同一条SQL（可以包含占位符）被执行的总次数
