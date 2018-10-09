@@ -4,7 +4,6 @@ import com.dafy.skye.log.core.SkyeLogUtil;
 import com.ecwid.consul.v1.ConsulClient;
 import com.ecwid.consul.v1.agent.model.NewService;
 import com.google.common.base.Joiner;
-import io.prometheus.client.hotspot.DefaultExports;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -70,14 +69,14 @@ public class PrometheusListener implements ApplicationListener<ApplicationReadyE
                 logger.info("register service to consul successfully! serviceName={}, consulHost={}, consulPort={}, appHost={}, appPort={}",
                         serviceName, consulHost, consulPort, appHost, appPort);
             }
-            DefaultExports.initialize();
+            SkyeExports.initialize();
             logger.info("prometheus exports initialized!");
         } catch (Throwable e) {
             logger.warn("PrometheusListener onApplicationEvent error!", e);
         }
     }
 
-    private void startHttpServer(int port, String contextPath) throws Exception {
+    private void startHttpServer(int port, String contextPath) {
         Thread t = new Thread(()->{
             try{
                 new PrometheusServer(port, contextPath);
