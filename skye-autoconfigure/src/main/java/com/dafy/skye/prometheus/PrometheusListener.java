@@ -13,6 +13,8 @@ import org.springframework.core.env.Environment;
 
 import java.net.InetAddress;
 import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
 
 public class PrometheusListener implements ApplicationListener<ApplicationReadyEvent> {
 
@@ -48,12 +50,16 @@ public class PrometheusListener implements ApplicationListener<ApplicationReadyE
             String serviceId = Joiner.on('-').join(serviceName, hostName);
             String tcpAddr = Joiner.on(':').join(appHost, appPort);
 
+            Map<String, String> meta = new HashMap<>();
+            meta.put("hostname", hostName);
+
             NewService newService = new NewService();
             newService.setId(serviceId);
             newService.setName(serviceName);
             newService.setAddress(appHost);
             newService.setPort(appPort);
             newService.setTags(Collections.singletonList(TAG));
+            newService.setMeta(meta);
 
             NewService.Check check = new NewService.Check();
             check.setTcp(tcpAddr);
