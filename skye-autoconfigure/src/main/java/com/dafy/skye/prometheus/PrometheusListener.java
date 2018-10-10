@@ -11,6 +11,7 @@ import org.springframework.boot.context.event.ApplicationReadyEvent;
 import org.springframework.context.ApplicationListener;
 import org.springframework.core.env.Environment;
 
+import java.net.InetAddress;
 import java.util.Collections;
 
 public class PrometheusListener implements ApplicationListener<ApplicationReadyEvent> {
@@ -43,7 +44,8 @@ public class PrometheusListener implements ApplicationListener<ApplicationReadyE
             String checkInterval = StringUtils.isNotBlank(env.getProperty("skye.consulCheckInterval"))?
                     env.getProperty("skye.consulCheckInterval"):env.getProperty("skye.consul-check-interval");
             String appHost = SkyeLogUtil.getPrivateIp();
-            String serviceId = Joiner.on('-').join(serviceName, appHost, appPort);
+            String hostName = InetAddress.getLocalHost().getHostName();
+            String serviceId = Joiner.on('-').join(serviceName, hostName);
             String tcpAddr = Joiner.on(':').join(appHost, appPort);
 
             NewService newService = new NewService();
