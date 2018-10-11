@@ -2,10 +2,8 @@ package com.dafy.skye.zipkin.extend.config;
 
 import com.dafy.skye.zipkin.extend.web.filter.UserChangeFilter;
 import com.dafy.skye.zipkin.extend.web.filter.UserFilter;
-import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.SerializationFeature;
 import org.springframework.boot.web.servlet.FilterRegistrationBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

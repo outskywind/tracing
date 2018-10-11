@@ -87,6 +87,13 @@
             <version>3.6</version>
         </dependency>
 
+        <!--instrumentation -->
+        <dependency>
+            <groupId>io.zipkin.brave</groupId>
+            <artifactId>brave-instrumentation-mysql</artifactId>
+            <version>5.4.2</version>
+        </dependency>
+
     </dependencies>
 
     <build>

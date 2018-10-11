@@ -3,6 +3,9 @@ package com.dafy.skye.autoconfigure;
 import com.ctrip.framework.apollo.Config;
 import com.dafy.skye.brave.ReporterDelegate;
 import com.dafy.skye.conf.SkyeDynamicConf;
+import com.dafy.skye.context.EnvironmentInterceptor;
+import com.dafy.skye.context.EnvironmentRewritePostProcessor;
+import com.dafy.skye.context.JDBCEnvironmentInterceptor;
 import com.github.kristofa.brave.Brave;
 import com.github.kristofa.brave.Sampler;
 import org.apache.commons.lang3.StringUtils;
@@ -37,7 +40,7 @@ public class BraveAutoConfiguration {
     @Autowired(required = false)
     Config dynamicConfig;
 
-    @Value("${appName}")
+    @Value("${appName:#{null}}")
     String appName;
 
     @Bean
@@ -87,5 +90,17 @@ public class BraveAutoConfiguration {
         builder.reporter(reporterDelegate);
         return builder.build();
     }
+
+    //
+    @Bean
+    public EnvironmentRewritePostProcessor initEnvironmentRewritePostProcessor(){
+        return new EnvironmentRewritePostProcessor();
+    }
+
+    @Bean("jdbcRewrite")
+    public EnvironmentInterceptor interceptor(){
+        return new JDBCEnvironmentInterceptor();
+    }
+
 
 }

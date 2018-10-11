@@ -10,7 +10,8 @@ import org.springframework.context.annotation.Configuration;
 /**
  * Created by quanchengyun on 2017/7/10.
  */
-@Configuration
+//@Configuration
+@Deprecated
 public class JobConfig {
     @Autowired
     private ElasticConfigHelper elasticConfigHelper;
@@ -23,36 +24,4 @@ public class JobConfig {
         elasticConfigHelper.initSimpleJobScheduler(mySimpleJob,cron,shardingTotalCount,shardingItemParameters);
         return mySimpleJob;
     }
-
-    /*//@ConditionalOnMissingBean(name="qpsIndexFormatter")
-    @Bean("qpsIndexFormatter")
-    public IndexNameFormatter indexNameFormatter(){
-        IndexNameFormatter.Builder builder=IndexNameFormatter.newBuilder();
-        builder.dateSeparator('-');
-        builder.index("qps");
-        return builder.builder();
-    }
-
-    @Bean
-    public SpanQpsCountJob  spanQpsCountJob(@Value("${qps.simpleJob.cron}") final String cron,
-                                            @Value("${qps.simpleJob.shardingTotalCount}") final int shardingTotalCount,
-                                            @Value("${qps.simpleJob.shardingItemParameters}") final String shardingItemParameters,
-                                            @Qualifier("qpsIndexFormatter") IndexNameFormatter indexNameFormatter,
-                                            ResourceIndexTemplate indexTemplate){
-        SpanQpsCountJob spanQpsCountJob=new SpanQpsCountJob();
-        elasticConfigHelper.initSimpleJobScheduler(spanQpsCountJob,cron,shardingTotalCount,shardingItemParameters);
-        spanQpsCountJob.setIndexNameFormatter(indexNameFormatter);
-        spanQpsCountJob.setIndexTemplate(indexTemplate);
-        return spanQpsCountJob;
-    }
-
-
-    @Bean
-    public ResourceIndexTemplate indexTemplate(@Value("${qps.es-template.classpth}") String template_resource){
-        ResourceIndexTemplate indexTemplate =  new ResourceIndexTemplate();
-        indexTemplate.setResource(template_resource);
-        return indexTemplate;
-    }
-*/
-
 }

@@ -20,6 +20,7 @@ import java.util.List;
 /**
  * Created by quanchengyun on 2017/7/10.
  */
+@Deprecated
 public class ESIndexCloseJob implements SimpleJob{
     @Autowired
     private TransportClient transportClient;
