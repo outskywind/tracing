@@ -11,7 +11,9 @@ import org.springframework.boot.context.event.ApplicationReadyEvent;
 import org.springframework.context.ApplicationListener;
 import org.springframework.core.env.Environment;
 
-import java.net.InetAddress;
+import java.io.BufferedReader;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
@@ -46,7 +48,7 @@ public class PrometheusListener implements ApplicationListener<ApplicationReadyE
             String checkInterval = StringUtils.isNotBlank(env.getProperty("skye.consulCheckInterval"))?
                     env.getProperty("skye.consulCheckInterval"):env.getProperty("skye.consul-check-interval");
             String appHost = SkyeLogUtil.getPrivateIp();
-            String hostName = InetAddress.getLocalHost().getHostName();
+            String hostName = getHostName();
             String serviceId = Joiner.on('-').join(serviceName, hostName);
             String tcpAddr = Joiner.on(':').join(appHost, appPort);
 
@@ -81,6 +83,15 @@ public class PrometheusListener implements ApplicationListener<ApplicationReadyE
             logger.info("prometheus exports initialized!");
         } catch (Throwable e) {
             logger.warn("PrometheusListener onApplicationEvent error!", e);
+        }
+    }
+
+    private String getHostName() throws Exception {
+        try(
+            InputStream is = Runtime.getRuntime().exec("hostname").getInputStream();
+            BufferedReader reader = new BufferedReader(new InputStreamReader(is))
+        ) {
+            return reader.readLine();
         }
     }
 
