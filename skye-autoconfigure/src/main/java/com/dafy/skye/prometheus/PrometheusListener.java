@@ -4,7 +4,6 @@ import com.dafy.skye.log.core.SkyeLogUtil;
 import com.ecwid.consul.v1.ConsulClient;
 import com.ecwid.consul.v1.agent.model.NewService;
 import com.google.common.base.Joiner;
-import io.prometheus.client.hotspot.DefaultExports;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -12,7 +11,12 @@ import org.springframework.boot.context.event.ApplicationReadyEvent;
 import org.springframework.context.ApplicationListener;
 import org.springframework.core.env.Environment;
 
+import java.io.BufferedReader;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
 
 public class PrometheusListener implements ApplicationListener<ApplicationReadyEvent> {
 
@@ -44,8 +48,12 @@ public class PrometheusListener implements ApplicationListener<ApplicationReadyE
             String checkInterval = StringUtils.isNotBlank(env.getProperty("skye.consulCheckInterval"))?
                     env.getProperty("skye.consulCheckInterval"):env.getProperty("skye.consul-check-interval");
             String appHost = SkyeLogUtil.getPrivateIp();
-            String serviceId = Joiner.on('-').join(serviceName, appHost, appPort);
+            String hostName = getHostName();
+            String serviceId = Joiner.on('-').join(serviceName, hostName);
             String tcpAddr = Joiner.on(':').join(appHost, appPort);
+
+            Map<String, String> meta = new HashMap<>();
+            meta.put("hostname", hostName);
 
             NewService newService = new NewService();
             newService.setId(serviceId);
@@ -53,6 +61,7 @@ public class PrometheusListener implements ApplicationListener<ApplicationReadyE
             newService.setAddress(appHost);
             newService.setPort(appPort);
             newService.setTags(Collections.singletonList(TAG));
+            newService.setMeta(meta);
 
             NewService.Check check = new NewService.Check();
             check.setTcp(tcpAddr);
@@ -70,14 +79,23 @@ public class PrometheusListener implements ApplicationListener<ApplicationReadyE
                 logger.info("register service to consul successfully! serviceName={}, consulHost={}, consulPort={}, appHost={}, appPort={}",
                         serviceName, consulHost, consulPort, appHost, appPort);
             }
-            DefaultExports.initialize();
+            SkyeExports.initialize();
             logger.info("prometheus exports initialized!");
         } catch (Throwable e) {
             logger.warn("PrometheusListener onApplicationEvent error!", e);
         }
     }
 
-    private void startHttpServer(int port, String contextPath) throws Exception {
+    private String getHostName() throws Exception {
+        try(
+            InputStream is = Runtime.getRuntime().exec("hostname").getInputStream();
+            BufferedReader reader = new BufferedReader(new InputStreamReader(is))
+        ) {
+            return reader.readLine();
+        }
+    }
+
+    private void startHttpServer(int port, String contextPath) {
         Thread t = new Thread(()->{
             try{
                 new PrometheusServer(port, contextPath);
