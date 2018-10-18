@@ -1,3 +1,4 @@
+/*
 package com.dafy.skye.brave.spring.mvc;
 
 import com.github.kristofa.brave.KeyValueAnnotation;
@@ -9,9 +10,11 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
+*/
 /**
  * Created by quanchengyun on 2018/6/11.
- */
+ *//*
+
 public class HttpServerResponseAdapter implements ServerResponseAdapter {
 
     private final HttpResponse response;
@@ -33,3 +36,4 @@ public class HttpServerResponseAdapter implements ServerResponseAdapter {
         return annotationList;
     }
 }
+*/

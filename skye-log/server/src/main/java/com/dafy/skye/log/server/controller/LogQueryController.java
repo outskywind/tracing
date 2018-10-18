@@ -29,6 +29,8 @@ public class LogQueryController {
         return new Response("0",result);
     }
 
+    //
+    @Deprecated
     @RequestMapping("/series/count")
     Response countSeries(@RequestBody LogSearchRequest request){
 

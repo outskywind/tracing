@@ -1,6 +1,5 @@
 package com.dafy.skye.conf;
 
-import com.ctrip.framework.apollo.enums.PropertyChangeType;
 import com.ctrip.framework.apollo.model.ConfigChange;
 import com.dafy.base.conf.ConfigWrapper;
 import com.dafy.base.conf.DynamicConfProperties;
@@ -33,7 +32,7 @@ public class SkyeDynamicConf {
     //if defined appName and is not defined in the apollo config server
     // it will get a null instance which is not expected
     public static ConfigWrapper getInstance(String appName) {
-        //no lock with none blocking, just try it later
+        //OCC mode, just try it later
         try{
             //loop util not null or
             while(instances.get(appName)==null){
@@ -41,6 +40,7 @@ public class SkyeDynamicConf {
                     //
                     if(!isResolvable(DynamicConfig.meta_server)){
                         initialize.compareAndSet(1,2);
+                        log.warn("config servers: {} is not resolvable..",DynamicConfig.meta_server);
                         break;
                     }
                     DynamicConfProperties props = new DynamicConfProperties();
@@ -87,7 +87,8 @@ public class SkyeDynamicConf {
         }catch (Throwable ex){
             log.warn("initialize dynamicConf failed ",ex);
         }
-        return instances.get(appName);
+        ConfigWrapper result = instances.get(appName);
+        return result;
     }
 
 

@@ -13,7 +13,6 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.Serializable;
-import java.net.SocketException;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicLong;
 

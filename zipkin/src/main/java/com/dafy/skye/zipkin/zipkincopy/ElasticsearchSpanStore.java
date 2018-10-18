@@ -20,20 +20,20 @@ import java.util.*;
 
 import static java.util.Arrays.asList;
 
-final class ElasticsearchSpanStore implements SpanStore {
+public class ElasticsearchSpanStore implements SpanStore {
 
-  static final String SPAN = "span";
-  static final String DEPENDENCY = "dependency";
+  public static final String SPAN = "span";
+  public  static final String DEPENDENCY = "dependency";
   /** To not produce unnecessarily long queries, we don't look back further than first ES support */
   static final long EARLIEST_MS = 1456790400000L; // March 2016
 
-  final SearchCallFactory search;
+  protected final SearchCallFactory search;
   final String[] allSpanIndices;
-  final IndexNameFormatter indexNameFormatter;
+  protected final IndexNameFormatter indexNameFormatter;
   final boolean strictTraceId, searchEnabled;
   final int namesLookback;
 
-  ElasticsearchSpanStore(ElasticsearchStorage es,boolean searchEnabled) {
+  public ElasticsearchSpanStore(ElasticsearchStorage es,boolean searchEnabled) {
     this.search = new SearchCallFactory(es.http());
     this.allSpanIndices = new String[] {es.indexNameFormatter().formatType(SPAN)};
     this.indexNameFormatter = es.indexNameFormatter();

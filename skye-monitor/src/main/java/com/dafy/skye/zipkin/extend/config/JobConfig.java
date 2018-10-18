@@ -1,11 +1,11 @@
 package com.dafy.skye.zipkin.extend.config;
 
-import com.dafy.elasticjob.spring.boot.autoconfigure.ElasticConfigHelper;
+/*import com.dafy.elasticjob.spring.boot.autoconfigure.ElasticConfigHelper;
 import com.dafy.skye.zipkin.extend.job.ESIndexCloseJob;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Configuration;*/
 
 /**
  * Created by quanchengyun on 2017/7/10.
@@ -13,7 +13,7 @@ import org.springframework.context.annotation.Configuration;
 //@Configuration
 @Deprecated
 public class JobConfig {
-    @Autowired
+    /*@Autowired
     private ElasticConfigHelper elasticConfigHelper;
 
     @Bean
@@ -23,5 +23,5 @@ public class JobConfig {
         ESIndexCloseJob mySimpleJob=new ESIndexCloseJob();
         elasticConfigHelper.initSimpleJobScheduler(mySimpleJob,cron,shardingTotalCount,shardingItemParameters);
         return mySimpleJob;
-    }
+    }*/
 }

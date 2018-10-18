@@ -1,20 +1,24 @@
 package com.dafy.skye.context;
 
-import org.springframework.core.env.Environment;
+import org.springframework.core.convert.support.ConfigurableConversionService;
+import org.springframework.core.env.ConfigurableEnvironment;
+import org.springframework.core.env.MissingRequiredPropertiesException;
+import org.springframework.core.env.MutablePropertySources;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Created by quanchengyun on 2018/10/11.
  */
-public class WrappedEnvironment implements Environment {
+public class WrappedEnvironment implements ConfigurableEnvironment {
     //delegate target
-    private Environment environment;
+    private ConfigurableEnvironment environment;
 
     private List<EnvironmentInterceptor> interceptors=new ArrayList<>();
 
-    public WrappedEnvironment(Environment environment) {
+    public WrappedEnvironment(ConfigurableEnvironment environment) {
         this.environment = environment;
         //
     }
@@ -51,6 +55,7 @@ public class WrappedEnvironment implements Environment {
         for(EnvironmentInterceptor interceptor:interceptors){
             if(interceptor.matches(key,v)){
                 v =interceptor.replace(v);
+                break;
             }
         }
         return v;
@@ -62,6 +67,7 @@ public class WrappedEnvironment implements Environment {
         for(EnvironmentInterceptor interceptor:interceptors){
             if(interceptor.matches(key,v)){
                 v =interceptor.replace(v);
+                break;
             }
         }
         return v;
@@ -103,5 +109,80 @@ public class WrappedEnvironment implements Environment {
     @Override
     public String resolveRequiredPlaceholders(String text) throws IllegalArgumentException {
         return this.environment.resolveRequiredPlaceholders(text);
+    }
+
+    @Override
+    public void setActiveProfiles(String... profiles) {
+        this.environment.setActiveProfiles(profiles);
+    }
+
+    @Override
+    public void addActiveProfile(String profile) {
+        this.environment.addActiveProfile(profile);
+    }
+
+    @Override
+    public void setDefaultProfiles(String... profiles) {
+        this.environment.setDefaultProfiles(profiles);
+    }
+
+    @Override
+    public MutablePropertySources getPropertySources() {
+        return this.environment.getPropertySources();
+    }
+
+    @Override
+    public Map<String, Object> getSystemEnvironment() {
+        return this.environment.getSystemEnvironment();
+    }
+
+    @Override
+    public Map<String, Object> getSystemProperties() {
+        return this.environment.getSystemProperties();
+    }
+
+    @Override
+    public void merge(ConfigurableEnvironment parent) {
+        this.environment.merge(parent);
+    }
+
+    @Override
+    public ConfigurableConversionService getConversionService() {
+        return this.environment.getConversionService();
+    }
+
+    @Override
+    public void setConversionService(ConfigurableConversionService conversionService) {
+        this.environment.setConversionService(conversionService);
+    }
+
+    @Override
+    public void setPlaceholderPrefix(String placeholderPrefix) {
+        this.environment.setPlaceholderPrefix(placeholderPrefix);
+    }
+
+    @Override
+    public void setPlaceholderSuffix(String placeholderSuffix) {
+        this.environment.setPlaceholderSuffix(placeholderSuffix);
+    }
+
+    @Override
+    public void setValueSeparator(String valueSeparator) {
+        this.environment.setValueSeparator(valueSeparator);
+    }
+
+    @Override
+    public void setIgnoreUnresolvableNestedPlaceholders(boolean ignoreUnresolvableNestedPlaceholders) {
+        this.environment.setIgnoreUnresolvableNestedPlaceholders(ignoreUnresolvableNestedPlaceholders);
+    }
+
+    @Override
+    public void setRequiredProperties(String... requiredProperties) {
+        this.environment.setRequiredProperties(requiredProperties);
+    }
+
+    @Override
+    public void validateRequiredProperties() throws MissingRequiredPropertiesException {
+        this.environment.validateRequiredProperties();
     }
 }

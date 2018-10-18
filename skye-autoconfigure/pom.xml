@@ -13,7 +13,6 @@
 
     <properties>
         <prometheus.client.version>0.5.0</prometheus.client.version>
-        <skye-brave.version>1.3.0-SNAPSHOT</skye-brave.version>
     </properties>
 
     <dependencies>
@@ -37,14 +36,14 @@
         <dependency>
             <groupId>com.dafy.skye</groupId>
             <artifactId>skye-brave</artifactId>
-            <version>${skye-brave.version}</version>
+            <version>${project.version}</version>
         </dependency>
 
         <!-- log -->
         <dependency>
             <groupId>com.dafy.skye</groupId>
             <artifactId>skye-log-appender</artifactId>
-            <version>1.2.0-SNAPSHOT</version>
+            <version>${project.version}</version>
         </dependency>
 
         <!-- prometheus client -->
@@ -73,6 +72,12 @@
             <groupId>org.apache.httpcomponents</groupId>
             <artifactId>httpclient</artifactId>
         </dependency>
+        <!--  zkClient -->
+        <dependency>
+            <groupId>org.apache.curator</groupId>
+            <artifactId>curator-recipes</artifactId>
+            <version>${curator-version}</version>
+        </dependency>
 
         <!-- others -->
         <dependency>
@@ -84,13 +89,6 @@
             <groupId>org.apache.commons</groupId>
             <artifactId>commons-lang3</artifactId>
             <version>3.6</version>
-        </dependency>
-
-        <!--instrumentation -->
-        <dependency>
-            <groupId>io.zipkin.brave</groupId>
-            <artifactId>brave-instrumentation-mysql</artifactId>
-            <version>5.4.2</version>
         </dependency>
 
     </dependencies>

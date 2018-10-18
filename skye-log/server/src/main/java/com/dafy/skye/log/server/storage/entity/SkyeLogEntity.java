@@ -6,7 +6,6 @@ import org.elasticsearch.common.UUIDs;
 
 import java.util.Map;
 import java.util.Random;
-import java.util.UUID;
 
 /**
  * Created by Caedmon on 2017/4/26.
@@ -26,6 +25,8 @@ public class SkyeLogEntity {
     private String message;
     private Long seqNo;
     private String exception;
+    private String line;
+
     public String getTraceId() {
         return traceId;
     }
@@ -138,6 +139,14 @@ public class SkyeLogEntity {
         this.loggerNameSimple = loggerNameSimple;
     }
 
+    public String getLine() {
+        return line;
+    }
+
+    public void setLine(String line) {
+        this.line = line;
+    }
+
     public static SkyeLogEntity build(SkyeLogEvent event){
         SkyeLogEntity entity=new SkyeLogEntity();
         entity.setTraceId(event.getMdc().get("traceId"));
@@ -160,6 +169,7 @@ public class SkyeLogEntity {
             String exception=ThrowableProxyUtil.asString(event.getThrowableProxy());
             entity.setException(exception);
         }
+        entity.setLine(event.getCallerData()!=null && event.getCallerData().length>0 ? String.valueOf(event.getCallerData()[0].getLineNumber()):"?");
         return entity;
     }
 }

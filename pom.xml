@@ -43,7 +43,6 @@
         <spring-boot.version>1.5.3.RELEASE</spring-boot.version>
         <spring-kafka.version>2.1.0.RELEASE</spring-kafka.version>
         <logback.version>1.2.3</logback.version>
-        <brave.version>4.1.1</brave.version>
         <skye.version>1.0.0-SNAPSHOT</skye.version>
         <zipkin.reporter.version>0.10.0</zipkin.reporter.version>
         <spring.version>4.3.8.RELEASE</spring.version>

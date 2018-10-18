@@ -56,11 +56,11 @@
             <version>${zipkin.version}</version>
         </dependency>
         <!-- zipkin 收集kafka ,存储到 es end -->
-        <dependency>
+        <!--<dependency>
             <groupId>io.zipkin.brave</groupId>
             <artifactId>brave-core</artifactId>
             <version>${brave.version}</version>
-        </dependency>
+        </dependency>-->
         <dependency>
             <groupId>com.dafy.skye</groupId>
             <artifactId>skye-common</artifactId>
@@ -107,25 +107,26 @@
         </dependency>-->
         <!--  job分布式任务 -->
 
-        <dependency>
+        <!--<dependency>
             <groupId>com.dafy.spring-boot</groupId>
             <artifactId>elasticjob-spring-boot-starter</artifactId>
             <version>1.0.2-SNAPSHOT</version>
-        </dependency>
+        </dependency>-->
         <!-- 配置中心 依赖 -->
         <dependency>
             <artifactId>setcd</artifactId>
             <groupId>com.dafy.setcd</groupId>
             <version>2.0.2</version>
         </dependency>
+        <!--  datasource  -->
         <dependency>
             <groupId>mysql</groupId>
             <artifactId>mysql-connector-java</artifactId>
         </dependency>
         <dependency>
             <groupId>com.alibaba</groupId>
-            <artifactId>druid</artifactId>
-            <version>1.0.29</version>
+            <artifactId>druid-spring-boot-starter</artifactId>
+            <version>1.1.10</version>
         </dependency>
         <dependency>
             <groupId>org.mybatis.spring.boot</groupId>

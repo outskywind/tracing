@@ -15,7 +15,7 @@ zipkin:
       # Name of topic to poll for spans
       topic: ${KAFKA_TOPIC:zipkin}
       # Consumer group this process is consuming on behalf of.
-      group-id: ${KAFKA_GROUP_ID:zipkin-dev1}
+      group-id: ${KAFKA_GROUP_ID:zipkin}
       # Count of consumer threads consuming the topic
       streams: ${KAFKA_STREAMS:1}
       # Maximum size of a message containing spans in bytes

@@ -1,3 +1,4 @@
+/*
 package com.dafy.skye.zipkin.extend.job;
 
 import com.dangdang.ddframe.job.api.ShardingContext;
@@ -17,9 +18,11 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 
+*/
 /**
  * Created by quanchengyun on 2017/7/10.
- */
+ *//*
+
 @Deprecated
 public class ESIndexCloseJob implements SimpleJob{
     @Autowired
@@ -97,3 +100,4 @@ public class ESIndexCloseJob implements SimpleJob{
         return null;
     }
 }
+*/

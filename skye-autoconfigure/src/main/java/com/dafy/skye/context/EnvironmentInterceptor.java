@@ -10,4 +10,6 @@ public interface EnvironmentInterceptor {
       <T> T replace(T originV);
 
       int getOrder();
+
+      void setAppName(String appName);
 }

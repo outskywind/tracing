@@ -14,7 +14,7 @@ public class ZipkinElasticsearchStorageProperties {
     /** The index prefix to use when generating daily index names. Defaults to zipkin. */
     private String index = "zipkin";
     /** The date separator used to create the index name. Default to -. */
-    private String dateSeparator = "-";
+    private char dateSeparator = '-';
     /** Sets maximum in-flight requests from this process to any Elasticsearch host. Defaults to 64 */
     private int maxRequests = 64;
     /** Number of shards (horizontal scaling factor) per index. Defaults to 5. */
@@ -57,11 +57,11 @@ public class ZipkinElasticsearchStorageProperties {
         this.index = index;
     }
 
-    public String getDateSeparator() {
+    public char getDateSeparator() {
         return dateSeparator;
     }
 
-    public void setDateSeparator(String dateSeparator) {
+    public void setDateSeparator(char dateSeparator) {
         this.dateSeparator = dateSeparator;
     }
 

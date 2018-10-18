@@ -1,3 +1,4 @@
+/*
 package com.dafy.skye.brave.dubbo;
 
 import com.alibaba.dubbo.rpc.Invocation;
@@ -11,9 +12,11 @@ import java.util.Collection;
 import java.util.Collections;
 
 
+*/
 /**
  * Created by Caedmon on 2017/4/11.
- */
+ *//*
+
 public class DubboServerRequestAdapter implements ServerRequestAdapter{
     private Invoker invoker;
     private Invocation invocation;
@@ -64,3 +67,4 @@ public class DubboServerRequestAdapter implements ServerRequestAdapter{
                 .parentId(parentSpanId == null ? null : IdConversion.convertToLong(parentSpanId)).build();
     }
 }
+*/

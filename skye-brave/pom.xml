@@ -11,32 +11,79 @@
 
     <artifactId>skye-brave</artifactId>
     <packaging>jar</packaging>
+
+    <properties>
+        <brave.version>5.4.2</brave.version>
+        <zipkin-reporter.version>2.7.9</zipkin-reporter.version>
+    </properties>
+    <dependencyManagement>
+        <dependencies>
+            <dependency>
+                <groupId>io.zipkin.brave</groupId>
+                <artifactId>brave-bom</artifactId>
+                <version>${brave.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+            <dependency>
+                <groupId>io.zipkin.reporter2</groupId>
+                <artifactId>zipkin-reporter-bom</artifactId>
+                <version>${zipkin-reporter.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
     <dependencies>
-        <dependency>
+        <!--<dependency>
             <groupId>io.zipkin.brave</groupId>
             <artifactId>brave-core</artifactId>
-            <version>${brave.version}</version>
-        </dependency>
+        </dependency>-->
         <dependency>
             <groupId>io.zipkin.brave</groupId>
             <artifactId>brave</artifactId>
             <version>${brave.version}</version>
         </dependency>
-        <dependency>
+        <!--<dependency>
             <groupId>io.zipkin.brave</groupId>
             <artifactId>brave-okhttp</artifactId>
+        </dependency>-->
+        <!--brave instrumentation -->
+        <dependency>
+            <groupId>io.zipkin.brave</groupId>
+            <artifactId>brave-instrumentation-mysql</artifactId>
             <version>${brave.version}</version>
         </dependency>
         <dependency>
-            <groupId>io.zipkin.java</groupId>
-            <artifactId>zipkin</artifactId>
-            <version>${zipkin.version}</version>
+            <groupId>io.zipkin.brave</groupId>
+            <artifactId>brave-instrumentation-servlet</artifactId>
+            <version>${brave.version}</version>
+        </dependency>
+        <!--<dependency>
+            <groupId>io.zipkin.brave</groupId>
+            <artifactId>brave-instrumentation-dubbo-rpc</artifactId>
+        </dependency>-->
+        <dependency>
+            <groupId>io.zipkin.reporter2</groupId>
+            <artifactId>zipkin-reporter</artifactId>
         </dependency>
         <dependency>
+            <groupId>org.apache.kafka</groupId>
+            <artifactId>kafka-clients</artifactId>
+            <version>0.10.2.0</version>
+        </dependency>
+        <!-- brave instrumentation end  -->
+
+        <!--<dependency>
+            <groupId>io.zipkin.java</groupId>
+            <artifactId>zipkin</artifactId>
+        </dependency>-->
+
+        <!--<dependency>
             <groupId>io.zipkin.reporter</groupId>
             <artifactId>zipkin-sender-kafka10</artifactId>
             <version>${zipkin.reporter.version}</version>
-        </dependency>
+        </dependency>-->
         <dependency>
             <groupId>com.google.guava</groupId>
             <artifactId>guava</artifactId>
@@ -79,12 +126,28 @@
             <scope>provided</scope>
         </dependency>
 
-
         <dependency>
             <groupId>com.dafy.base</groupId>
             <artifactId>dynamic-conf-autoconfigure</artifactId>
-            <version>1.0.0-SNAPSHOT</version>
-            <!-- <scope>provided</scope> -->
+            <version>1.1.0-SNAPSHOT</version>
+        </dependency>
+
+        <dependency>
+            <groupId>cglib</groupId>
+            <artifactId>cglib</artifactId>
+            <version>3.2.8</version>
+        </dependency>
+        <dependency>
+            <groupId>org.javassist</groupId>
+            <artifactId>javassist</artifactId>
+            <version>3.23.1-GA</version>
+        </dependency>
+
+        <dependency>
+            <groupId>junit</groupId>
+            <artifactId>junit</artifactId>
+            <version>4.0</version>
+            <scope>test</scope>
         </dependency>
 
     </dependencies>

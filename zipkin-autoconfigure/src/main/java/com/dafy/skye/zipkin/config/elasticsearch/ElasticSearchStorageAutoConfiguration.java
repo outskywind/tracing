@@ -71,7 +71,7 @@ public class ElasticSearchStorageAutoConfiguration {
         ElasticsearchStorage delegate = ElasticsearchStorage.newBuilder(client).hosts(elasticsearch.getHosts())
                 .strictTraceId(strictTraceId).searchEnabled(searchEnabled).namesLookback(namesLookback).build();
         ElasticsearchHttpStorage storage = new ElasticsearchHttpStorage(delegate,true,searchEnabled,indexTemplate);
-        IndexNameFormatter indexNameFormatter = IndexNameFormatter.newBuilder().build();
+        IndexNameFormatter indexNameFormatter = IndexNameFormatter.newBuilder().index(elasticsearch.getIndex()).dateSeparator(elasticsearch.getDateSeparator()).build();
         storage.setIndexNameFormatter(indexNameFormatter);
         return storage;
     }
