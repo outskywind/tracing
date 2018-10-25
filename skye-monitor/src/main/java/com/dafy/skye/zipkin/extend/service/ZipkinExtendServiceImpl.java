@@ -61,7 +61,7 @@ public class ZipkinExtendServiceImpl implements ZipkinExtendService {
     RestDruidClient restDruidClient;
 
     @Autowired
-    private RestHighLevelClient restClient;
+    RestHighLevelClient restClient;
 
 
     @PostConstruct

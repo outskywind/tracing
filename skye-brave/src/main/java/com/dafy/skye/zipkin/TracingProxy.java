@@ -112,7 +112,7 @@ public class TracingProxy {
             long traceId = (long)args[2];
             if(traceId==0L){
                 args[2] = IDGenerator.getId();
-                args[1] = args[2];
+                //args[1] = null;
             }
             return methodProxy.invokeSuper(obj,args);
         }

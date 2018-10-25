@@ -50,7 +50,7 @@ public class ElasticsearchHttpStorage extends StorageComponent implements V2Stor
     }
 
     @Override public SpanStore spanStore() {
-        return this.spanStore();
+        return this.spanStore;
     }
 
     public void setSpanConsumer(SpanConsumer spanConsumer){

@@ -6,6 +6,7 @@ import com.dafy.skye.zipkin.extend.dto.*;
 import com.dafy.skye.zipkin.extend.enums.Dimension;
 import com.dafy.skye.zipkin.extend.enums.ResponseCode;
 import com.dafy.skye.zipkin.extend.enums.Stat;
+import com.dafy.skye.zipkin.extend.service.PrometheusService;
 import com.dafy.skye.zipkin.extend.service.RuleService;
 import com.dafy.skye.zipkin.extend.service.ZipkinExtendService;
 import com.dafy.skye.zipkin.extend.util.TimeUtil;
@@ -34,6 +35,9 @@ public class ServiceController extends BaseSessionController{
 
     @Autowired
     private UserService userService;
+
+    @Autowired
+    private PrometheusService prometheusService;
 
     @Autowired
     private ZipkinExtendService zipkinExtendService;
@@ -154,6 +158,7 @@ public class ServiceController extends BaseSessionController{
         return new Response("0",result);
     }
 
+    @Deprecated
     @RequestMapping("/series")
     @ResponseBody
     public Response  series(@RequestBody ServiceSeriesRequest request){
@@ -162,10 +167,24 @@ public class ServiceController extends BaseSessionController{
     }
 
 
+    /***
+     *  汇总一个接口里的一段时间范围里的统计值：
+     *  次数，成功率
+     *  平均响应时间
+     * @param request
+     * @return
+     */
     @RequestMapping("/interface/profile")
     @ResponseBody
     public Response  interfaceProfile(@RequestBody ServiceSeriesRequest request){
-        Collection<MonitorMetric> monitorMetrics = zipkinExtendService.getInterfacesMonitorMetric(request);
+        //Collection<MonitorMetric> monitorMetrics = zipkinExtendService.getInterfacesMonitorMetric(request);
+        if(request.getEnd()==0){
+            request.setEnd(System.currentTimeMillis());
+        }
+        if(request.getStart()==0){
+            request.setStart(request.getEnd()-3600000);
+        }
+        Collection<MonitorMetric> monitorMetrics = prometheusService.getInterfaceProfileMetric(request.getService(),request.getStart(),request.getEnd());
         //根据规则判断状态
         Rule[] rules ;
         for(MonitorMetric monitorMetric: monitorMetrics){
@@ -176,6 +195,8 @@ public class ServiceController extends BaseSessionController{
         return  new Response("0",result);
     }
 
+
+    @Deprecated
     @RequestMapping("/interface/series")
     @ResponseBody
     public Response interfaceSeries(@RequestBody InterfaceSeriesRequest request){
@@ -183,6 +204,8 @@ public class ServiceController extends BaseSessionController{
         return  new Response("0",seriesMetrics);
     }
 
+
+    @Deprecated
     @RequestMapping("/interface/traces")
     @ResponseBody
     public Response interfaceTraces(@RequestBody InterfaceSeriesRequest request){
@@ -227,14 +250,14 @@ public class ServiceController extends BaseSessionController{
             other.add(e);
         }
         //merge
-        for(int i=tail;i<failed.size();i++,tail++){
-            traces.set(i,failed.get(i));
+        for(int i=0;i<failed.size();i++,tail++){
+            traces.set(tail,failed.get(i));
         }
-        for(int i=tail;i<red.size();i++,tail++){
-            traces.set(i,red.get(i));
+        for(int i=0;i<red.size();i++,tail++){
+            traces.set(tail,red.get(i));
         }
-        for(int i=tail;i<other.size();i++,tail++){
-            traces.set(i,other.get(i));
+        for(int i=0;i<other.size();i++,tail++){
+            traces.set(tail,other.get(i));
         }
     }
 

@@ -2,19 +2,14 @@ package com.dafy.skye.autoconfigure;
 
 import brave.Tracing;
 import com.ctrip.framework.apollo.Config;
-import com.dafy.base.conf.ConfigWrapper;
 import com.dafy.skye.zipkin.ReporterDelegate;
 import com.dafy.skye.conf.SkyeDynamicConf;
-import com.dafy.skye.context.EnvironmentInterceptor;
-import com.dafy.skye.context.EnvironmentRewritePostProcessor;
-import com.dafy.skye.context.JDBCEnvironmentInterceptor;
 import com.dafy.skye.zipkin.KafkaSender10;
 import com.dafy.skye.zipkin.TracingProxy;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Bean;
@@ -43,11 +38,12 @@ public class BraveAutoConfiguration {
     //@Autowired(required = false)
     //Config dynamicConfig;
 
-    // @Value 是在Bean实例化时才会被BeanPostProcessor 注入值
-    // 但是为什么会导致注入不了？
-    @Value("${appName:}")
+
+    @Value("${appName:#{null}}")
     String appName;
 
+    @Value("${skye.dynamicConf.enable:true}")
+    boolean enableDynamicConf =true;
 
     @Bean
     @ConditionalOnMissingBean
@@ -59,8 +55,9 @@ public class BraveAutoConfiguration {
             log.warn("appName is empty");
             return null;
         }
-        return SkyeDynamicConf.getInstance(configProperties.getServiceName());
+        return enableDynamicConf?SkyeDynamicConf.getInstance(configProperties.getServiceName()):null;
     }
+
     @Bean("tracing")
     @Lazy
     //因为 @ConfigurationPorperties 使用Registrar的机制，这里会无法生效
@@ -128,8 +125,8 @@ public class BraveAutoConfiguration {
 
     /*@Bean("jdbcRewrite")
     @ConditionalOnClass(name="com.mysql.jdbc.StatementInterceptorV2")
-    public EnvironmentInterceptor interceptor(@Value("${appName}")String  appName){
-        JDBCEnvironmentInterceptor interceptor = new JDBCEnvironmentInterceptor();
+    public PropertySourceInterceptor interceptor(@Value("${appName}")String  appName){
+        JDBCPropertySourceInterceptor interceptor = new JDBCPropertySourceInterceptor();
         interceptor.setAppName(appName);
         return interceptor;
     }*/

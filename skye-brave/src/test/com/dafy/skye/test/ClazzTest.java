@@ -24,4 +24,16 @@ public class ClazzTest {
         }
     }
 
+
+    @Test
+    public void   testRef(){
+        Integer v1  = new Integer(1);
+
+        Integer v2 = v1;
+        System.out.println(v1==v2);
+        v1 = new Integer(2);
+
+        System.out.println(v1==v2);
+    }
+
 }

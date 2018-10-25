@@ -1,8 +1,8 @@
 package com.dafy.skye.autoconfigure;
 
-import com.dafy.skye.context.EnvironmentInterceptor;
+import com.dafy.skye.context.PropertySourceInterceptor;
 import com.dafy.skye.context.EnvironmentRewritePostProcessor;
-import com.dafy.skye.context.JDBCEnvironmentInterceptor;
+import com.dafy.skye.context.JDBCPropertySourceInterceptor;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -20,9 +20,9 @@ public class BeanFactoryPostProcessorAutoConfiguration {
     }
 
     @Bean("jdbcRewrite")
-    @ConditionalOnClass(name="com.mysql.jdbc.StatementInterceptorV2")
-    public EnvironmentInterceptor interceptor(){
-        JDBCEnvironmentInterceptor interceptor = new JDBCEnvironmentInterceptor();
+    @ConditionalOnClass(name={"com.mysql.jdbc.StatementInterceptorV2","brave.mysql.TracingStatementInterceptor"})
+    public PropertySourceInterceptor interceptor(){
+        JDBCPropertySourceInterceptor interceptor = new JDBCPropertySourceInterceptor();
         //interceptor.setAppName(appName);
         return interceptor;
     }

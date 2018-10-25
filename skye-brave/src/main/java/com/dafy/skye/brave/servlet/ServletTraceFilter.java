@@ -7,6 +7,7 @@ import com.dafy.skye.brave.ConstantsBrave;
 import org.slf4j.MDC;
 
 import javax.servlet.*;
+import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 
@@ -40,6 +41,7 @@ public class ServletTraceFilter implements Filter {
                         //使用这个span为当前的span ，无法区分这个traceId是否为自定义的ID，不能这么做，只能自定义Tracing
                         //tracer.withSpanInScope(span);
                         MDC.put(ConstantsBrave.MDC_TRACE_ID_KEY, Long.toHexString(tracer.currentSpan().context().traceId()));
+                        tracer.currentSpanCustomizer().name(((HttpServletRequest)request).getRequestURI());
                     }
                     try{
                         chain.doFilter(request,response);

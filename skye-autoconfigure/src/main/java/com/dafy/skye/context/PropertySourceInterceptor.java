@@ -3,13 +3,13 @@ package com.dafy.skye.context;
 /**
  * Created by quanchengyun on 2018/10/11.
  */
-public interface EnvironmentInterceptor {
+public interface PropertySourceInterceptor {
 
-      boolean matches(String key,String originV);
+     <T> boolean matches(String key,T originV);
 
       <T> T replace(T originV);
 
       int getOrder();
 
-      void setAppName(String appName);
+      boolean isOk();
 }
