@@ -1,5 +1,6 @@
 package com.dafy.skye.prometheus;
 
+import com.dafy.skye.log.core.SkyeLogUtil;
 import com.dafy.skye.util.ClientVersionUtil;
 import com.ecwid.consul.v1.ConsulClient;
 import com.ecwid.consul.v1.agent.model.NewService;
@@ -48,7 +49,7 @@ public class PrometheusListener implements ApplicationListener<ApplicationReadyE
             }
             String checkInterval = StringUtils.isNotBlank(env.getProperty("skye.consulCheckInterval"))?
                     env.getProperty("skye.consulCheckInterval"):env.getProperty("skye.consul-check-interval");
-            String appHost = InetAddress.getLocalHost().getHostAddress();
+            String appHost =  SkyeLogUtil.getPrivateIp();
             String hostName = getHostName();
             String serviceId = Joiner.on('-').join(serviceName, hostName);
             String tcpAddr = Joiner.on(':').join(appHost, appPort);

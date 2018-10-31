@@ -38,8 +38,7 @@ public class BraveAutoConfiguration {
     //@Autowired(required = false)
     //Config dynamicConfig;
 
-
-    @Value("${appName:#{null}}")
+    @Value("${appName}")
     String appName;
 
     @Value("${skye.dynamicConf.enable:true}")
