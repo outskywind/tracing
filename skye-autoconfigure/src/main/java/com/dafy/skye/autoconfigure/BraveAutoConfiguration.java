@@ -41,8 +41,8 @@ public class BraveAutoConfiguration {
     @Value("${appName}")
     String appName;
 
-    @Value("${skye.dynamicConf.enable:true}")
-    boolean enableDynamicConf =true;
+    @Value("${skye.dynamicConf.enable:false}")
+    boolean enableDynamicConf =false;
 
     @Bean
     @ConditionalOnMissingBean

@@ -6,7 +6,6 @@ import com.dafy.skye.zipkin.extend.dto.prometheus.Result;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.asynchttpclient.AsyncHttpClient;
 import org.asynchttpclient.Response;
-import org.asynchttpclient.uri.Uri;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,25 +26,24 @@ import java.util.concurrent.TimeUnit;
 public class PrometheusService {
 
     Logger log = LoggerFactory.getLogger(PrometheusService.class);
-    public static String QUERY_URL = "http://{host}/api/v1/query_range?";
+    //public static String QUERY_URL = "http://{host}/api/v1/query_range?";
 
-    public static String QUERY_URL_PARAM = "http://{host}/api/v1/query_range?query={query}&start={start}&end={end}&step={step}";
+    public static String QUERY_URL_PARAM = "http://{host}/api/v1/query?query={query}&time={end}";
 
     // http://prometheus.7daichina.com/api/v1/query_range?query=sum(request_latency_in_seconds_count%7Bexported_service%3D%22paymentcenter%22%7D)%20by%20(interfaceName)&start=1540180466.457&end=1540187666.457&step=28&_=1540121302229
     //其实是毫秒不是秒
-    public String requestCount = "sum(request_latency_in_seconds_count{exported_service=\"{service}\"}) by (interfaceName)";
+    public String requestCount =   "sum(sum_over_time(request_latency_in_seconds_count{exported_service=\"{service}\"}[{duration}])) by (interfaceName)";
 
-    public String requestSuccessCount = "sum(request_latency_in_seconds_count{exported_service=\"{service}\",status=\"1\"}) by (interfaceName)";
+    public String requestSuccessCount = "sum(sum_over_time(request_latency_in_seconds_count{exported_service=\"{service}\",status=\"1\"}[{duration}])) by (interfaceName)";
 
-    public String requestLatnecy = "sum(request_latency_in_seconds_sum{exported_service=\"{service}\"}) by (interfaceName)";
+    public String requestLatnecy =  "sum(sum_over_time(request_latency_in_seconds_sum{exported_service=\"{service}\"}[{duration}])) by (interfaceName)";
 
     @Autowired
     AsyncHttpClient httpClient;
 
-
     @Value("${prometheus.server}")
     public void setServer(String server){
-        QUERY_URL = QUERY_URL.replace("{host}",server);
+        //QUERY_URL = QUERY_URL.replace("{host}",server);
         QUERY_URL_PARAM = QUERY_URL_PARAM.replace("{host}",server);
     }
 
@@ -53,15 +51,14 @@ public class PrometheusService {
      * 有巨坑
      * @param step
      */
-    @Value("${prometheus.step}")
+    /*@Value("${prometheus.step}")
     public void setStep(String step){
         QUERY_URL = QUERY_URL.replace("{step}",step);
         QUERY_URL_PARAM = QUERY_URL_PARAM.replace("{step}",step);
-    }
+    }*/
 
     @Autowired
     ObjectMapper json ;
-
     /**
      * 返回指定服务下接口指标
      * @param service
@@ -86,6 +83,9 @@ public class PrometheusService {
             //
             metric.setName(name);
             long count = requestCount.get(name);
+            if(count==0){
+                continue;
+            }
             long success = requestSuccessCount.get(name)==null?0:requestSuccessCount.get(name);
             metric.setCount(count);
             double sc = div(success,count,1)*100;
@@ -128,13 +128,9 @@ public class PrometheusService {
             QueryResult queryResult =buildQueryAndRequest(requestLatnecy,service,start,end);
             if(queryResult.getData()!=null){
                 for(Result r : queryResult.getData().getResult()){
-                    List<List<Object>> values= r.getValues();
-                    long sumValue = 0;
-                    for(List<Object> itemPoint : values){
-                        String v = (String)(itemPoint.get(1));
-                        sumValue +=Long.valueOf(v);
-                    }
-                    result.put(r.getMetric().get("interfaceName"),Long.valueOf(sumValue));
+                    List<Object> value = r.getValue();
+                    String v = (String)(value.get(1));
+                    result.put(r.getMetric().get("interfaceName"),Long.valueOf(v));
                 }
             }
         }catch (Exception e){
@@ -149,13 +145,9 @@ public class PrometheusService {
             QueryResult queryResult =buildQueryAndRequest(requestSuccessCount,service,start,end);
             if(queryResult.getData()!=null){
                 for(Result r : queryResult.getData().getResult()){
-                    List<List<Object>> values= r.getValues();
-                    long sumValue = 0;
-                    for(List<Object> itemPoint : values){
-                        String v = (String)(itemPoint.get(1));
-                        sumValue +=Long.valueOf(v);
-                    }
-                    result.put(r.getMetric().get("interfaceName"),Long.valueOf(sumValue));
+                    List<Object> value = r.getValue();
+                    String v = (String)(value.get(1));
+                    result.put(r.getMetric().get("interfaceName"),Long.valueOf(v));
                 }
             }
         }catch (Exception e){
@@ -169,18 +161,13 @@ public class PrometheusService {
      */
     private Map<String,Long>   getRequestCount(String service, long start , long end){
          Map<String,Long> result = new HashMap<>();
-
          try{
              QueryResult queryResult =buildQueryAndRequest(requestCount,service,start,end);
              if(queryResult.getData()!=null){
                  for(Result r : queryResult.getData().getResult()){
-                     List<List<Object>> values= r.getValues();
-                     long sumValue = 0;
-                     for(List<Object> itemPoint : values){
-                         String v = (String)(itemPoint.get(1));
-                         sumValue +=Long.valueOf(v);
-                     }
-                     result.put(r.getMetric().get("interfaceName"),Long.valueOf(sumValue));
+                     List<Object> value = r.getValue();
+                     String v = (String)(value.get(1));
+                     result.put(r.getMetric().get("interfaceName"),Long.valueOf(v));
                  }
              }
          }catch (Exception e){
@@ -190,47 +177,30 @@ public class PrometheusService {
      }
 
     QueryResult buildQueryAndRequest(String prome_query, String service, long start, long end){
-        String promeQuery = prome_query.replace("{service}",service);
         QueryResult queryResult = null;
         try{
-            //start = toUTC(start);
-            //end = toUTC(end);
             //Double.toString 会用科学计数法表示
-            String httpQuery  = QUERY_URL_PARAM.replace("{query}",escapeURIPathParam(promeQuery)).
-                    replace("{start}",divToString(start,1000,3)).replace("{end}",divToString(end,1000,3));
+            String durationStr = new StringBuilder().append((int)Math.ceil(div((end-start)/1000,60,1))).append("m").toString();
+            //String endStr = new StringBuilder().append(divToString(end,1000,3)).toString();
+            String promeQuery = prome_query.replace("{service}",service).replace("{duration}",durationStr);
+            String httpQuery  = QUERY_URL_PARAM.replace("{query}",escapeURIPathParam(promeQuery)).replace("{end}",divToString(end,1000,3));
             String jsonStr = do_http_query(httpQuery);
             queryResult =json.readValue(jsonStr,QueryResult.class);
         }catch (Exception e){
-            log.error("prometheus query faild,service={}",service,e);
+            log.error("prometheus query failed,service={}",service,e);
         }
         return queryResult;
     }
-
-    protected  long toUTC(long timestamp){
-        return timestamp;
-    }
-
 
     protected String  do_http_query(String queryStr){
         Future<Response> responseFuture =   httpClient.preparePost(queryStr).execute();
         try{
             return responseFuture.get(5, TimeUnit.SECONDS).getResponseBody(Charset.forName("utf-8"));
         }catch (Exception e){
-            log.error("query fialed for {}",queryStr,e);
+            log.error("query failed for {}",queryStr,e);
         }
         return null;
     }
-
-    protected String  do_http_query(Uri query){
-        Future<Response> responseFuture =   httpClient.preparePost(query.toUrl()).execute();
-        try{
-            return responseFuture.get(5, TimeUnit.SECONDS).getResponseBody(Charset.forName("utf-8"));
-        }catch (Exception e){
-            log.error("query fialed for {}",query.toUrl(),e);
-        }
-        return null;
-    }
-
 
     public static String escapeURIPathParam(String input) {
         StringBuilder resultStr = new StringBuilder();

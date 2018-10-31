@@ -2,8 +2,8 @@ package com.dafy.skye.elasticsearch.http;
 
 
 import com.dafy.skye.zipkin.IndexNameFormatter;
+import com.dafy.skye.zipkin.extend.CustomSpanStore;
 import com.dafy.skye.zipkin.zipkincopy.ElasticsearchSpanConsumer;
-import com.dafy.skye.zipkin.zipkincopy.ElasticsearchSpanStore;
 import com.dafy.skye.zipkin.zipkincopy.EnsureIndexTemplate;
 import com.dafy.skye.zipkin.zipkincopy.LegacyElasticsearchSpanStore;
 import org.slf4j.Logger;
@@ -41,12 +41,13 @@ public class ElasticsearchHttpStorage extends StorageComponent implements V2Stor
     private IndexNameFormatter indexNameFormatter;
 
     public ElasticsearchHttpStorage(ElasticsearchStorage delegate, boolean legacyReadsEnabled,
-                                        boolean searchEnabled,String indexTemplateSpan) {
+                                        boolean searchEnabled,String indexTemplateSpan,IndexNameFormatter indexNameFormatter) {
         this.delegate = delegate;
         this.legacyReadsEnabled = legacyReadsEnabled;
         this.searchEnabled = searchEnabled;
         this.indexTemplateSpan = indexTemplateSpan;
-        this.spanStore = new ElasticsearchSpanStore(this.delegate,searchEnabled);
+        this.indexNameFormatter = indexNameFormatter;
+        this.spanStore = new CustomSpanStore(this.delegate,searchEnabled,indexNameFormatter);
     }
 
     @Override public SpanStore spanStore() {
@@ -133,13 +134,5 @@ public class ElasticsearchHttpStorage extends StorageComponent implements V2Stor
             }
         }
         return null;
-    }
-
-    public IndexNameFormatter getIndexNameFormatter() {
-        return indexNameFormatter;
-    }
-
-    public void setIndexNameFormatter(IndexNameFormatter indexNameFormatter) {
-        this.indexNameFormatter = indexNameFormatter;
     }
 }

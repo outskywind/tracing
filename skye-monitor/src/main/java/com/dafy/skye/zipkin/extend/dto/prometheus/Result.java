@@ -10,7 +10,7 @@ public class Result {
 
     private Map<String,String> metric;
 
-    private long value;
+    private List<Object> value;
 
     private List<List<Object>> values;
 
@@ -22,11 +22,11 @@ public class Result {
         this.metric = metric;
     }
 
-    public long getValue() {
+    public List<Object> getValue() {
         return value;
     }
 
-    public void setValue(long value) {
+    public void setValue(List<Object> value) {
         this.value = value;
     }
 
