@@ -63,26 +63,6 @@ zipkin:
     # Default is "match all websites"
     instrumented: .*
 
-druid:
-    zk:
-      host: druid-zk1.dafy.com:2181
-      path: /druid/discovery/druid:broker
-      namespace: druid-broker-service-discovery
-    kafka:
-      # Name of topic to poll for spans
-      topic: ${KAFKA_TOPIC:zipkin}
-      #是否自动ack
-      properties:
-          #kafka 地址
-          group.id: druid
-          bootstrap.servers: ${KAFKA_SERVER:kafka1.skye.dafy.com:9092,kafka2.skye.dafy.com:9092,kafka3.skye.dafy.com:9092}
-          max.poll.records: 100
-          max.poll.interval.ms: 60000
-          #是否自动ack
-          enable.auto.commit: false
-          auto.offset.reset: earliest
-          key.deserializer: org.apache.kafka.common.serialization.ByteArrayDeserializer
-          value.deserializer: org.apache.kafka.common.serialization.ByteArrayDeserializer
 
 server:
   port: ${QUERY_PORT:9411}
@@ -164,13 +144,6 @@ skye.log.server:
       enable.auto.commit: false
 
 elasticjob:
-  regCenter:
-    namespace: elastic-search-index-close
-    serverList: zookeeper1.dafy.com:2181
-  simpleJob:
-    cron: 0 30 0 * * ?
-    shardingTotalCount: 1    #最小值为1
-    shardingItemParameters:   #不能大于shardingTotalCount
   datasource:
       type: com.alibaba.druid.pool.DruidDataSource
       url: jdbc:mysql://10.40.11.40:3306/elasticjobevent?useUnicode=true&characterEncoding=utf-8&verifyServerCertificate=false&useSSL=false&requireSSL=false
@@ -182,5 +155,3 @@ elasticjob:
       initial-size: 5
       test-on-borrow: true
       validation-query: SELECT 1
-  indexOpenDay: 7
-  prefix: zipkin:,skye-
