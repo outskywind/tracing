@@ -44,7 +44,7 @@ public class EnvironmentRewritePostProcessor implements BeanFactoryPostProcessor
         }
         interceptors.sort(Comparator.comparingInt(PropertySourceInterceptor::getOrder));
 
-        String appName = environment.getProperty(JDBCPropertySourceInterceptor.APPNAME_KEY);
+        //String appName = environment.getProperty(JDBCPropertySourceInterceptor.APPNAME_KEY);
         //
         if(!interceptors.isEmpty()){
             //JDBCPropertySourceInterceptor interceptor = new JDBCPropertySourceInterceptor(appName);

@@ -4,7 +4,11 @@ import com.dafy.skye.zipkin.config.elasticsearch.ZipkinElasticsearchStoragePrope
 import com.dafy.skye.zipkin.extend.config.ZipkinExtendESConfigurationProperties;
 import com.dafy.skye.zipkin.extend.service.ZipkinExtendService;
 import com.dafy.skye.zipkin.extend.service.ZipkinExtendServiceImpl;
+import com.sun.tracing.ProbeName;
+import org.asynchttpclient.AsyncHttpClient;
+import org.asynchttpclient.Dsl;
 import org.elasticsearch.client.transport.TransportClient;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
@@ -29,6 +33,13 @@ public class SkyeMonitorAutoConfiguration {
         service.setZipkinESStorageProperties(zipkinESStorageProperties);
         service.setZipkinExtendESConfigurationProperties(zipkinExtendESConfigurationProperties);
         return service;
+    }
+
+    @Bean
+    @ConditionalOnMissingBean
+    public AsyncHttpClient asyncHttpClient(){
+        AsyncHttpClient client = Dsl.asyncHttpClient();
+        return client;
     }
 
 }

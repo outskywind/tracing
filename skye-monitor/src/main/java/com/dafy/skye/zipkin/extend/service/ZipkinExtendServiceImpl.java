@@ -57,7 +57,7 @@ public class ZipkinExtendServiceImpl implements ZipkinExtendService {
     @Autowired
     private TransportClient transportClient;
 
-    @Autowired
+    @Autowired(required = false)
     RestDruidClient restDruidClient;
 
     @Autowired
@@ -78,10 +78,6 @@ public class ZipkinExtendServiceImpl implements ZipkinExtendService {
         indices.toArray(result);
         return result;
     }
-
-
-
-
 
     //服务列表
     @Override
