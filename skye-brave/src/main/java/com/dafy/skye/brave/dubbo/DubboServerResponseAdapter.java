@@ -1,3 +1,4 @@
+/*
 package com.dafy.skye.brave.dubbo;
 
 import com.alibaba.dubbo.rpc.Result;
@@ -8,9 +9,11 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
+*/
 /**
  * Created by Caedmon on 2017/4/11.
- */
+ *//*
+
 public class DubboServerResponseAdapter implements ServerResponseAdapter {
     private Result result;
     private Throwable exception;
@@ -37,3 +40,4 @@ public class DubboServerResponseAdapter implements ServerResponseAdapter {
         return annotations;
     }
 }
+*/

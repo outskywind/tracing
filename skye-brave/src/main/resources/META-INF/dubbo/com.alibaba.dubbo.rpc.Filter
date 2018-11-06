@@ -1,2 +1,2 @@
-skye-brave-consumer=com.dafy.skye.brave.dubbo.DubboBraveConsumerFilter
-skye-brave-provider=com.dafy.skye.brave.dubbo.DubboBraveProviderFilter
+
+skye-trace=com.dafy.skye.brave.dubbo.DubboTracingFilter

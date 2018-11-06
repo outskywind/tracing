@@ -1,9 +1,7 @@
 package com.dafy.skye.zipkin.extend;
 
 import com.dafy.skye.common.util.IntervalTimeUnit;
-import com.dafy.skye.common.util.JacksonConvert;
 import com.dafy.skye.zipkin.extend.dto.*;
-import com.dafy.skye.zipkin.extend.job.ESIndexCloseJob;
 import com.dafy.skye.zipkin.extend.service.ZipkinExtendServiceImpl;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -25,8 +23,6 @@ public class ZipkinExtendServiceTest {
     @Autowired
     private ZipkinExtendServiceImpl zipkinExtendService;
 
-    @Autowired
-    ESIndexCloseJob job;
     @Test
     public void testGetServiceNames(){
         BasicQueryRequest request=new BasicQueryRequest();
@@ -69,8 +65,4 @@ public class ZipkinExtendServiceTest {
         System.out.println(cl.getTime());
     }
 
-    @Test
-    public void TestESIndexCloseJob(){
-        job.execute(null);
-    }
 }

@@ -1,21 +1,20 @@
+/*
 package com.dafy.skye.brave.dubbo;
 
 import com.alibaba.dubbo.rpc.Invocation;
 import com.alibaba.dubbo.rpc.Invoker;
 import com.alibaba.dubbo.rpc.RpcContext;
-import com.github.kristofa.brave.ClientRequestAdapter;
-import com.github.kristofa.brave.IdConversion;
-import com.github.kristofa.brave.KeyValueAnnotation;
-import com.github.kristofa.brave.SpanId;
-import com.twitter.zipkin.gen.Endpoint;
+import com.dafy.skye.brave.ConstantsBrave;
+
 import org.slf4j.MDC;
 
-import java.util.Collection;
 import java.util.Collections;
 
+*/
 /**
  * Created by Caedmon on 2017/4/11.
- */
+ *//*
+
 public class DubboClientRequestAdapter implements ClientRequestAdapter {
     private Invoker<?> invoker;
     private Invocation invocation;
@@ -29,7 +28,7 @@ public class DubboClientRequestAdapter implements ClientRequestAdapter {
 
     @Override
     public void addSpanIdToRequest(SpanId spanId) {
-        MDC.put(Constants.MDC_TRACE_ID_KEY,spanId.traceIdString());
+        MDC.put(ConstantsBrave.MDC_TRACE_ID_KEY,spanId.traceIdString());
         String application = RpcContext.getContext().getUrl().getParameter("application");
         RpcContext rpcContext=RpcContext.getContext();
         rpcContext.setAttachment("clientName", application);
@@ -62,3 +61,4 @@ public class DubboClientRequestAdapter implements ClientRequestAdapter {
         return null;
     }
 }
+*/

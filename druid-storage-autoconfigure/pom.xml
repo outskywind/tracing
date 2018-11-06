@@ -5,7 +5,7 @@
     <parent>
         <artifactId>skye</artifactId>
         <groupId>com.dafy.skye</groupId>
-        <version>1.0.0-SNAPSHOT</version>
+        <version>1.7.2-SNAPSHOT</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
@@ -15,7 +15,7 @@
         <dependency>
             <groupId>com.dafy.skye</groupId>
             <artifactId>druid-storage</artifactId>
-            <version>1.0.0-SNAPSHOT</version>
+            <version>${project.version}</version>
         </dependency>
     </dependencies>
 

@@ -6,10 +6,10 @@
     <parent>
         <artifactId>skye</artifactId>
         <groupId>com.dafy.skye</groupId>
-        <version>1.0.0-SNAPSHOT</version>
+        <version>1.7.2-SNAPSHOT</version>
     </parent>
     <artifactId>skye-log</artifactId>
-    <version>${project.version}</version>
+
     <modules>
         <module>core</module>
         <module>appender</module>

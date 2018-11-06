@@ -4,6 +4,7 @@ package com.dafy.skye.zipkin.zipkincopy;
  * Created by quanchengyun on 2018/3/14.
  */
 
+import com.dafy.skye.zipkin.IndexNameFormatter;
 import com.squareup.moshi.JsonWriter;
 import okio.Buffer;
 import okio.ByteString;
@@ -13,7 +14,6 @@ import zipkin2.Span;
 import zipkin2.codec.SpanBytesEncoder;
 import zipkin2.elasticsearch.ElasticsearchStorage;
 import zipkin2.elasticsearch.internal.HttpBulkIndexer;
-import zipkin2.elasticsearch.internal.IndexNameFormatter;
 import zipkin2.elasticsearch.internal.client.HttpCall;
 import zipkin2.storage.SpanConsumer;
 
@@ -28,18 +28,30 @@ public class ElasticsearchSpanConsumer implements SpanConsumer { // not final fo
     static final Logger LOG = Logger.getLogger(ElasticsearchSpanConsumer.class.getName());
 
     private ElasticsearchStorage es;
+
+    public IndexNameFormatter getIndexNameFormatter() {
+        return indexNameFormatter;
+    }
+
+    public void setIndexNameFormatter(IndexNameFormatter indexNameFormatter) {
+        this.indexNameFormatter = indexNameFormatter;
+    }
+
     private IndexNameFormatter indexNameFormatter;
+
     private boolean searchEnabled;
 
     public ElasticsearchSpanConsumer(ElasticsearchStorage es,boolean searchEnabled) {
         this.es = es;
-        this.indexNameFormatter = es.indexNameFormatter();
         this.searchEnabled = searchEnabled;
     }
 
     @Override public Call<Void> accept(List<Span> spans) {
         if (spans.isEmpty()) return Call.create(null);
         ElasticsearchSpanConsumer.BulkSpanIndexer indexer = new ElasticsearchSpanConsumer.BulkSpanIndexer(es,searchEnabled);
+        if(indexNameFormatter!=null){
+            indexer.setIndexNameFormatter(indexNameFormatter);
+        }
         indexSpans(indexer, spans);
         return indexer.newCall();
     }
@@ -63,14 +75,15 @@ public class ElasticsearchSpanConsumer implements SpanConsumer { // not final fo
         }
     }
 
-    static final class BulkSpanIndexer {
+    static class BulkSpanIndexer {
         final HttpBulkIndexer indexer;
-        final IndexNameFormatter indexNameFormatter;
+
+        IndexNameFormatter indexNameFormatter;
         final boolean searchEnabled;
 
         BulkSpanIndexer(ElasticsearchStorage es,boolean searchEnabled) {
             this.indexer = new HttpBulkIndexer("index-span", es);
-            this.indexNameFormatter = es.indexNameFormatter();
+            //this.indexNameFormatter = es.indexNameFormatter();
             this.searchEnabled =searchEnabled;
         }
 
@@ -85,33 +98,15 @@ public class ElasticsearchSpanConsumer implements SpanConsumer { // not final fo
         HttpCall<Void> newCall() {
             return indexer.newCall();
         }
+
+        public IndexNameFormatter getIndexNameFormatter() {
+            return indexNameFormatter;
+        }
+
+        public void setIndexNameFormatter(IndexNameFormatter indexNameFormatter) {
+            this.indexNameFormatter = indexNameFormatter;
+        }
     }
-
-    /*static final class BulkQpsIndexer {
-        final HttpBulkIndexer indexer;
-        final IndexNameFormatter indexNameFormatter;
-        //final boolean searchEnabled;
-
-        BulkQpsIndexer(ElasticsearchStorage es,boolean searchEnabled) {
-            this.indexer = new HttpBulkIndexer("index-qps", es);
-            this.indexNameFormatter = es.indexNameFormatter();
-            //this.searchEnabled =searchEnabled;
-        }
-
-        void add(long indexTimestamp, Span span, long timestampMillis) {
-            String index = indexNameFormatter.formatTypeAndTimestamp(ElasticsearchSpanStore.SPAN, indexTimestamp);
-            byte[] document = SpanBytesEncoder.JSON_V2.encode(span);
-            indexer.add(index, "qps", document, null *//* Allow ES to choose an ID *//*);
-        }
-
-        HttpCall<Void> newCall() {
-            return indexer.newCall();
-        }
-    }*/
-
-
-
-
 
 
     /**

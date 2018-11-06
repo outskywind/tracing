@@ -43,6 +43,9 @@
         "seqNo":{
           "type":"long"
         },
+        "line":{
+          "type":"keyword"
+        },
         "exception":{
           "type":"text",
           "analyzer":"simple"

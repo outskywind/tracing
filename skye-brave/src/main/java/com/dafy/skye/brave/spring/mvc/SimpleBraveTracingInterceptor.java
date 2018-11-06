@@ -1,3 +1,4 @@
+/*
 package com.dafy.skye.brave.spring.mvc;
 
 import com.github.kristofa.brave.Brave;
@@ -12,12 +13,14 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.net.URI;
 
+*/
 /**
  * Created by Caedmon on 2017/6/27.
  *
  * traceId 用于监控调用链跟踪，但对于分布式日志收集系统来说不是必须的
  * 因此在这里负责放入 MDC// server 端请求开始设置，结束清除
- */
+ *//*
+
 public class SimpleBraveTracingInterceptor extends HandlerInterceptorAdapter{
     private Brave brave;
     public SimpleBraveTracingInterceptor(Brave brave){
@@ -81,3 +84,4 @@ public class SimpleBraveTracingInterceptor extends HandlerInterceptorAdapter{
     }
 
 }
+*/

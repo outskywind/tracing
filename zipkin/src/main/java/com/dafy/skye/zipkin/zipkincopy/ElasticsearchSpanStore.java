@@ -1,12 +1,12 @@
 
 package com.dafy.skye.zipkin.zipkincopy;
 
+import com.dafy.skye.zipkin.IndexNameFormatter;
 import okio.BufferedSource;
 import zipkin2.Call;
 import zipkin2.DependencyLink;
 import zipkin2.Span;
 import zipkin2.elasticsearch.ElasticsearchStorage;
-import zipkin2.elasticsearch.internal.IndexNameFormatter;
 import zipkin2.elasticsearch.internal.client.Aggregation;
 import zipkin2.elasticsearch.internal.client.HttpCall;
 import zipkin2.elasticsearch.internal.client.HttpCall.BodyConverter;
@@ -20,23 +20,23 @@ import java.util.*;
 
 import static java.util.Arrays.asList;
 
-final class ElasticsearchSpanStore implements SpanStore {
+public class ElasticsearchSpanStore implements SpanStore {
 
-  static final String SPAN = "span";
-  static final String DEPENDENCY = "dependency";
+  public static final String SPAN = "span";
+  public  static final String DEPENDENCY = "dependency";
   /** To not produce unnecessarily long queries, we don't look back further than first ES support */
   static final long EARLIEST_MS = 1456790400000L; // March 2016
 
-  final SearchCallFactory search;
+  protected final SearchCallFactory search;
   final String[] allSpanIndices;
-  final IndexNameFormatter indexNameFormatter;
+  protected final IndexNameFormatter indexNameFormatter;
   final boolean strictTraceId, searchEnabled;
   final int namesLookback;
 
-  ElasticsearchSpanStore(ElasticsearchStorage es,boolean searchEnabled) {
+  public ElasticsearchSpanStore(ElasticsearchStorage es,boolean searchEnabled,IndexNameFormatter indexNameFormatter ) {
     this.search = new SearchCallFactory(es.http());
-    this.allSpanIndices = new String[] {es.indexNameFormatter().formatType(SPAN)};
-    this.indexNameFormatter = es.indexNameFormatter();
+    this.allSpanIndices = new String[] {indexNameFormatter.formatType(SPAN)};
+    this.indexNameFormatter = indexNameFormatter;
     this.strictTraceId = es.strictTraceId();
     this.searchEnabled = searchEnabled;
     this.namesLookback = es.namesLookback();
@@ -90,21 +90,19 @@ final class ElasticsearchSpanStore implements SpanStore {
     HttpCall<List<String>> traceIdsCall = search.newCall(esRequest, BodyConverters.KEYS);
 
     // When we receive span results, we need to group them by trace ID
-    BodyConverter<List<List<Span>>> converter = new BodyConverter<List<List<Span>>>() {
-        @Override public List<List<Span>> convert(BufferedSource content) throws IOException {
-          List<Span> input = BodyConverters.SPANS.convert(content);
-          List<List<Span>> traces = groupByTraceId(input, strictTraceId);
+    BodyConverter<List<List<Span>>> converter = content -> {
+      List<Span> input = BodyConverters.SPANS.convert(content);
+      List<List<Span>> traces = groupByTraceId(input, strictTraceId);
 
-          // Due to tokenization of the trace ID, our matches are imprecise on Span.traceIdHigh
-          for (Iterator<List<Span>> trace = traces.iterator(); trace.hasNext(); ) {
-            List<Span> next = trace.next();
-            if (next.get(0).traceId().length() > 16 && !request.test(next)) {
-              trace.remove();
-            }
-          }
-          return traces;
+      // Due to tokenization of the trace ID, our matches are imprecise on Span.traceIdHigh
+      for (Iterator<List<Span>> trace = traces.iterator(); trace.hasNext(); ) {
+        List<Span> next = trace.next();
+        if (next.get(0).traceId().length() > 16 && !request.test(next)) {
+          trace.remove();
         }
-      };
+      }
+      return traces;
+    };
 
     return traceIdsCall.flatMap(new Call.FlatMapper<List<String>, List<List<Span>>>() {
       @Override public Call<List<List<Span>>> map(List<String> input) {

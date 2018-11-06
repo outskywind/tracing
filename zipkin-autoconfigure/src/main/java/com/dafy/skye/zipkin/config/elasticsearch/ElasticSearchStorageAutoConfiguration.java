@@ -1,6 +1,7 @@
 package com.dafy.skye.zipkin.config.elasticsearch;
 
 import com.dafy.skye.elasticsearch.http.ElasticsearchHttpStorage;
+import com.dafy.skye.zipkin.IndexNameFormatter;
 import okhttp3.OkHttpClient;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -12,6 +13,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import zipkin.internal.V2StorageComponent;
 import zipkin2.elasticsearch.ElasticsearchStorage;
+
 import zipkin2.storage.StorageComponent;
 
 import java.util.concurrent.TimeUnit;
@@ -50,10 +52,6 @@ public class ElasticSearchStorageAutoConfiguration {
         OkHttpClient.Builder builder = elasticsearchOkHttpClientBuilder != null
                 ? elasticsearchOkHttpClientBuilder
                 : new OkHttpClient.Builder();
-        // 定制http拦截器 不过这种很不友好，不能在aop层面统一拦截处理
-        //for (Interceptor interceptor : networkInterceptors) {
-        //    builder.addNetworkInterceptor(interceptor);
-        //}
         builder.connectTimeout(timeout, TimeUnit.MILLISECONDS);
         builder.readTimeout(timeout, TimeUnit.MILLISECONDS);
         builder.writeTimeout(timeout, TimeUnit.MILLISECONDS);
@@ -72,7 +70,8 @@ public class ElasticSearchStorageAutoConfiguration {
 
         ElasticsearchStorage delegate = ElasticsearchStorage.newBuilder(client).hosts(elasticsearch.getHosts())
                 .strictTraceId(strictTraceId).searchEnabled(searchEnabled).namesLookback(namesLookback).build();
-        ElasticsearchHttpStorage storage = new ElasticsearchHttpStorage(delegate,true,searchEnabled,indexTemplate);
+        IndexNameFormatter indexNameFormatter = IndexNameFormatter.newBuilder().index(elasticsearch.getIndex()).dateSeparator(elasticsearch.getDateSeparator()).build();
+        ElasticsearchHttpStorage storage = new ElasticsearchHttpStorage(delegate,true,searchEnabled,indexTemplate,indexNameFormatter);
         return storage;
     }
 

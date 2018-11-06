@@ -1,8 +1,9 @@
-package com.dafy.skye.brave;
+package com.dafy.skye.zipkin;
 
 import com.ctrip.framework.apollo.Config;
 import com.dafy.base.conf.DynamicConfConstants;
-import zipkin.reporter.Reporter;
+import zipkin2.reporter.Reporter;
+
 
 import java.util.concurrent.atomic.AtomicBoolean;
 
@@ -17,14 +18,14 @@ public class ReporterDelegate<T> implements Reporter<T> {
 
     private Config dynamicConfig;
 
-    public  ReporterDelegate(Reporter<T> reporter , boolean isRePort){
+    public ReporterDelegate(Reporter<T> reporter, boolean isRePort) {
         this.reporter = reporter;
         this.isReport = new AtomicBoolean(isRePort);
     }
 
     @Override
     public void report(T span) {
-        if(null != dynamicConfig?dynamicConfig.getBooleanProperty(DynamicConfConstants.skye_report_key,isReport.get()):isReport.get()){
+        if (null != dynamicConfig ? dynamicConfig.getBooleanProperty(DynamicConfConstants.skye_report_key, isReport.get()) : isReport.get()) {
             reporter.report(span);
         }
     }

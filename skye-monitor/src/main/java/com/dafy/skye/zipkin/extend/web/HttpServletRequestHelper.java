@@ -4,6 +4,9 @@ import com.dafy.skye.zipkin.extend.dto.UserInfo;
 import com.dafy.skye.zipkin.extend.web.filter.FilterCallback;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import io.undertow.UndertowOptions;
+import io.undertow.util.Cookies;
+import io.undertow.util.Headers;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import sun.misc.BASE64Decoder;
@@ -47,10 +50,20 @@ public class HttpServletRequestHelper {
                     if(cookieName.equals(c.getName())){
                         String  base64V = c.getValue();
                         log.info("cookie value= {}",base64V);
+                        if(base64V.endsWith("=")){
+                            base64V = base64V +"=";
+                        }
                         BASE64Decoder decoder = new BASE64Decoder();
                         byte[] bytes = decoder.decodeBuffer(base64V);
-                        String jsonstr = new String(bytes,"utf-8");
-                        u = json.readValue(jsonstr, UserInfo.class);
+                        String z_auth = new String(bytes,"utf-8");
+                        //兼容新旧cookie
+                        if(z_auth.startsWith("{") && z_auth.endsWith("}")){
+                            u = json.readValue(z_auth, UserInfo.class);
+                        }else {
+                            u = new UserInfo();
+                            u.setEmail(z_auth);
+                            u.setName(z_auth);
+                        }
                         //do something here
                         callback.callback(u);
                         request.getSession(true).setAttribute("user",u);

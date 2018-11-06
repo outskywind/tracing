@@ -5,27 +5,17 @@
     <parent>
         <artifactId>skye-log</artifactId>
         <groupId>com.dafy.skye</groupId>
-        <version>1.0.0-SNAPSHOT</version>
+        <version>1.7.2-SNAPSHOT</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
     <artifactId>skye-log-server</artifactId>
-    <version>${project.version}</version>
+
     <dependencies>
         <dependency>
             <groupId>com.dafy.skye</groupId>
             <artifactId>skye-log-core</artifactId>
             <version>${project.version}</version>
         </dependency>
-        <!--<dependency>
-            <groupId>redis.clients</groupId>
-            <artifactId>jedis</artifactId>
-            <version>${jedis.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>com.dafy.spring-boot</groupId>
-            <artifactId>jedis-spring-boot-starter</artifactId>
-            <version>1.0.0-SNAPSHOT</version>
-        </dependency>-->
         <dependency>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
@@ -46,17 +36,6 @@
             <groupId>org.elasticsearch.client</groupId>
             <artifactId>transport</artifactId>
         </dependency>
-        <!--<dependency>
-            <groupId>com.datastax.cassandra</groupId>
-            <artifactId>cassandra-driver-core</artifactId>
-            <version>${datastx.cassandra.version}</version>
-            <exclusions>
-                <exclusion>
-                    <groupId>io.netty</groupId>
-                    <artifactId>netty-handler</artifactId>
-                </exclusion>
-            </exclusions>
-        </dependency>-->
 
         <dependency>
             <groupId>org.springframework.boot</groupId>
@@ -78,11 +57,7 @@
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-undertow</artifactId>
         </dependency>
-        <!--<dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-websocket</artifactId>
-            <version>${spring-boot.version}</version>
-        </dependency>-->
+
 
         <dependency>
             <groupId>${project.groupId}</groupId>
@@ -92,18 +67,9 @@
         <dependency>
             <groupId>com.dafy.skye</groupId>
             <artifactId>kafka</artifactId>
-            <version>1.0.0-SNAPSHOT</version>
+            <version>1.7.2-SNAPSHOT</version>
         </dependency>
-        <!--<dependency>
-            <groupId>org.elasticsearch</groupId>
-            <artifactId>elasticsearch</artifactId>
-            <version>${elasticsearch.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.elasticsearch.plugin</groupId>
-            <artifactId>transport-netty4-client</artifactId>
-            <version>${elasticsearch.version}</version>
-        </dependency>-->
+
     </dependencies>
 
 </project>

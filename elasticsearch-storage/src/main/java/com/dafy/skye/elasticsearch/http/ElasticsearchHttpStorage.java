@@ -1,6 +1,8 @@
 package com.dafy.skye.elasticsearch.http;
 
 
+import com.dafy.skye.zipkin.IndexNameFormatter;
+import com.dafy.skye.zipkin.extend.CustomSpanStore;
 import com.dafy.skye.zipkin.zipkincopy.ElasticsearchSpanConsumer;
 import com.dafy.skye.zipkin.zipkincopy.EnsureIndexTemplate;
 import com.dafy.skye.zipkin.zipkincopy.LegacyElasticsearchSpanStore;
@@ -34,16 +36,22 @@ public class ElasticsearchHttpStorage extends StorageComponent implements V2Stor
 
     private SpanConsumer spanConsumer ;
 
+    private SpanStore spanStore;
+
+    private IndexNameFormatter indexNameFormatter;
+
     public ElasticsearchHttpStorage(ElasticsearchStorage delegate, boolean legacyReadsEnabled,
-                                        boolean searchEnabled,String indexTemplateSpan) {
+                                        boolean searchEnabled,String indexTemplateSpan,IndexNameFormatter indexNameFormatter) {
         this.delegate = delegate;
         this.legacyReadsEnabled = legacyReadsEnabled;
         this.searchEnabled = searchEnabled;
         this.indexTemplateSpan = indexTemplateSpan;
+        this.indexNameFormatter = indexNameFormatter;
+        this.spanStore = new CustomSpanStore(this.delegate,searchEnabled,indexNameFormatter);
     }
 
     @Override public SpanStore spanStore() {
-        return delegate.spanStore();
+        return this.spanStore;
     }
 
     public void setSpanConsumer(SpanConsumer spanConsumer){
@@ -55,10 +63,11 @@ public class ElasticsearchHttpStorage extends StorageComponent implements V2Stor
      * @return
       */
     @Override public SpanConsumer spanConsumer() {
-        //return delegate.spanConsumer();
         ensureIndexTemplates();
         if(this.spanConsumer==null){
-            return new ElasticsearchSpanConsumer(delegate,this.searchEnabled);
+            ElasticsearchSpanConsumer consumer =  new ElasticsearchSpanConsumer(delegate,this.searchEnabled);
+            consumer.setIndexNameFormatter(indexNameFormatter);
+            this.spanConsumer = consumer;
         }
         return this.spanConsumer;
     }
@@ -117,6 +126,11 @@ public class ElasticsearchHttpStorage extends StorageComponent implements V2Stor
                 }
             }catch(IOException e){
                 log.error("索引配置文件读取失败",e);
+            }
+            try{
+                in.close();
+            }catch (Exception e){
+                //
             }
         }
         return null;

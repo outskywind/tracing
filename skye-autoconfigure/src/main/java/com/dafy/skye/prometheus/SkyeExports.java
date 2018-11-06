@@ -38,7 +38,7 @@ public class SkyeExports {
     private static void initializeDruidExports() {
         try {
             new DruidExports().register();
-        } catch (UnsupportedOperationException e) {
+        } catch (Exception e) {
             logger.warn("skip druid exports!");
         }
     }

@@ -1,6 +1,7 @@
 package com.dafy.skye.prometheus;
 
 import com.dafy.skye.log.core.SkyeLogUtil;
+import com.dafy.skye.util.ClientVersionUtil;
 import com.ecwid.consul.v1.ConsulClient;
 import com.ecwid.consul.v1.agent.model.NewService;
 import com.google.common.base.Joiner;
@@ -14,6 +15,7 @@ import org.springframework.core.env.Environment;
 import java.io.BufferedReader;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.net.InetAddress;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
@@ -47,13 +49,15 @@ public class PrometheusListener implements ApplicationListener<ApplicationReadyE
             }
             String checkInterval = StringUtils.isNotBlank(env.getProperty("skye.consulCheckInterval"))?
                     env.getProperty("skye.consulCheckInterval"):env.getProperty("skye.consul-check-interval");
-            String appHost = SkyeLogUtil.getPrivateIp();
+            String appHost =  SkyeLogUtil.getPrivateIp();
             String hostName = getHostName();
             String serviceId = Joiner.on('-').join(serviceName, hostName);
             String tcpAddr = Joiner.on(':').join(appHost, appPort);
 
             Map<String, String> meta = new HashMap<>();
             meta.put("hostname", hostName);
+            //key 不能包含 '.'
+            meta.put("skye-version", ClientVersionUtil.version());
 
             NewService newService = new NewService();
             newService.setId(serviceId);
@@ -62,6 +66,7 @@ public class PrometheusListener implements ApplicationListener<ApplicationReadyE
             newService.setPort(appPort);
             newService.setTags(Collections.singletonList(TAG));
             newService.setMeta(meta);
+
 
             NewService.Check check = new NewService.Check();
             check.setTcp(tcpAddr);
