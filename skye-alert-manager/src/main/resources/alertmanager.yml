@@ -16,10 +16,12 @@ tapd:
   reporter: ''
 
 spring:
-  jms:
-    pub-sub-domain: true
-  activemq:
-    broker-url: 'failover:(tcp://activemq1.dafy.com:61616,tcp://activemq2.dafy.com:61616,tcp://activemq3.dafy.com:61616)'
+  kafka:
+    bootstrap-servers: kafka1.skye.dafy.com:9092,kafka2.skye.dafy.com:9092,kafka3.skye.dafy.com:9092
+    producer:
+      retries: 0
+      batch-size: 16384
+      buffer-memory: 33554432
 
 alert:
   mq:

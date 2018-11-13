@@ -19,10 +19,10 @@ import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.time.DateFormatUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.jms.core.JmsTemplate;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
 
-import javax.jms.Topic;
 import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -37,17 +37,17 @@ public class PrometheusAlertServiceImpl implements PrometheusAlertService {
 
     private final PrometheusAlertDao alertDao;
     private final Map<NotificationChannel, Notifier> notifierMapping;
-    private final JmsTemplate jmsTemplate;
-    private final Topic alertTopic;
+    private final KafkaTemplate<String, String> kafkaTemplate;
+    private final String alertTopic;
 
     @Autowired
     public PrometheusAlertServiceImpl(PrometheusAlertDao alertDao,
                                       Set<Notifier> notifiers,
-                                      JmsTemplate jmsTemplate,
-                                      Topic alertTopic) {
+                                      KafkaTemplate<String, String> kafkaTemplate,
+                                      @Value("${alert.mq.topic}") String alertTopic) {
         this.alertDao = alertDao;
         this.notifierMapping = notifiers.stream().collect(Collectors.toMap(Notifier::getNotificationChannel, Function.identity()));
-        this.jmsTemplate = jmsTemplate;
+        this.kafkaTemplate = kafkaTemplate;
         this.alertTopic = alertTopic;
     }
 
@@ -86,7 +86,6 @@ public class PrometheusAlertServiceImpl implements PrometheusAlertService {
 
     @Override
     public void sendAlerts(SendAlertsRequestDTO dto) {
-        NotificationChannel notificationChannel = NotificationChannel.valueOf(dto.getNotificationChannel());
         if(ArrayUtils.isNotEmpty(dto.getAlertIds())) {
             List<PrometheusAlertPO> alerts = alertDao.getAlertsByIds(dto.getAlertIds());
 
@@ -94,7 +93,7 @@ public class PrometheusAlertServiceImpl implements PrometheusAlertService {
             extraInfo.setReceiverIds(dto.getReceiverIds());
             extraInfo.setCcIds(dto.getCcIds());
 
-            sendAlert(notificationChannel, alerts, extraInfo);
+            sendAlert(NotificationChannel.valueOf(dto.getNotificationChannel()), alerts, extraInfo);
             updateAlerts(dto);
         }
     }
@@ -109,7 +108,7 @@ public class PrometheusAlertServiceImpl implements PrometheusAlertService {
 
     @Override
     public void pushAlerts(List<PrometheusAlertPO> alerts) {
-        alerts.forEach(alert -> jmsTemplate.convertAndSend(alertTopic, alert));
+        alerts.forEach(alert -> kafkaTemplate.send(alertTopic, JSON.toJSONString(alert)));
     }
 
     private void sendAlert(NotificationChannel notificationChannel, List<PrometheusAlertPO> alerts, AlertExtraInfo extraInfo) {
