@@ -14,3 +14,13 @@ qywx:
 tapd:
   workspace-id: ''
   reporter: ''
+
+spring:
+  jms:
+    pub-sub-domain: true
+  activemq:
+    broker-url: 'failover:(tcp://activemq1.dafy.com:61616,tcp://activemq2.dafy.com:61616,tcp://activemq3.dafy.com:61616)'
+
+alert:
+  mq:
+    topic: 'skye.alert'

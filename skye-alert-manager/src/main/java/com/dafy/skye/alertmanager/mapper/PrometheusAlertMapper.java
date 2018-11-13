@@ -20,4 +20,9 @@ public interface PrometheusAlertMapper {
     List<PrometheusAlertPO> getAlertsByIds(@Param("ids") long[] ids);
 
     PrometheusAlertPO getAlertById(@Param("id") long id);
+
+    int updateAlerts(@Param("ids") long[] ids,
+                     @Param("receivers") String receivers,
+                     @Param("cc") String cc,
+                     @Param("notificationChannel") int notificationChannel);
 }

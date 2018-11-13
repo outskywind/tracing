@@ -1,12 +1,13 @@
 package com.dafy.skye.alertmanager.dao;
 
+import com.dafy.skye.alertmanager.constant.NotificationChannel;
 import com.dafy.skye.alertmanager.po.PrometheusAlertPO;
 
 import java.util.List;
 
 public interface PrometheusAlertDao {
 
-    int addAlert(PrometheusAlertPO alert);
+    boolean addAlert(PrometheusAlertPO alert);
 
     List<PrometheusAlertPO> getAlerts(String[] services, String startTime, String endTime, int limit);
 
@@ -14,4 +15,5 @@ public interface PrometheusAlertDao {
 
     PrometheusAlertPO getAlertById(long id);
 
+    boolean updateAlerts(long[] ids, String receivers, String cc, NotificationChannel notificationChannel);
 }

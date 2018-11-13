@@ -19,8 +19,10 @@ import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.time.DateFormatUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.jms.core.JmsTemplate;
 import org.springframework.stereotype.Service;
 
+import javax.jms.Topic;
 import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -35,21 +37,31 @@ public class PrometheusAlertServiceImpl implements PrometheusAlertService {
 
     private final PrometheusAlertDao alertDao;
     private final Map<NotificationChannel, Notifier> notifierMapping;
+    private final JmsTemplate jmsTemplate;
+    private final Topic alertTopic;
 
     @Autowired
-    public PrometheusAlertServiceImpl(PrometheusAlertDao alertDao, Set<Notifier> notifiers) {
+    public PrometheusAlertServiceImpl(PrometheusAlertDao alertDao,
+                                      Set<Notifier> notifiers,
+                                      JmsTemplate jmsTemplate,
+                                      Topic alertTopic) {
         this.alertDao = alertDao;
         this.notifierMapping = notifiers.stream().collect(Collectors.toMap(Notifier::getNotificationChannel, Function.identity()));
+        this.jmsTemplate = jmsTemplate;
+        this.alertTopic = alertTopic;
     }
 
     @Override
-    public void saveAlerts(PrometheusWebHookDTO dto) {
+    public List<PrometheusAlertPO> saveAlerts(PrometheusWebHookDTO dto) {
         try {
-            for(PrometheusAlertPO alert : convertToPrometheusAlertList(dto)) {
+            List<PrometheusAlertPO> alerts = convertToPrometheusAlertList(dto);
+            for(PrometheusAlertPO alert : alerts) {
                 alertDao.addAlert(alert);
             }
+            return alerts;
         } catch (Exception e) {
             log.error("saveAlerts error! {}", dto, e);
+            return Collections.emptyList();
         }
     }
 
@@ -83,7 +95,21 @@ public class PrometheusAlertServiceImpl implements PrometheusAlertService {
             extraInfo.setCcIds(dto.getCcIds());
 
             sendAlert(notificationChannel, alerts, extraInfo);
+            updateAlerts(dto);
         }
+    }
+
+    private void updateAlerts(SendAlertsRequestDTO dto) {
+        alertDao.updateAlerts(
+                dto.getAlertIds(),
+                StringUtils.join(dto.getReceiverIds(), ','),
+                StringUtils.join(dto.getCcIds(), ','),
+                NotificationChannel.valueOf(dto.getNotificationChannel()));
+    }
+
+    @Override
+    public void pushAlerts(List<PrometheusAlertPO> alerts) {
+        alerts.forEach(alert -> jmsTemplate.convertAndSend(alertTopic, alert));
     }
 
     private void sendAlert(NotificationChannel notificationChannel, List<PrometheusAlertPO> alerts, AlertExtraInfo extraInfo) {

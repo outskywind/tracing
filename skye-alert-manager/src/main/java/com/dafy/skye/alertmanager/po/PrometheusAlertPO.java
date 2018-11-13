@@ -29,5 +29,6 @@ public class PrometheusAlertPO {
     private Integer version;
     private String groupLabels;
     private String receivers;
+    private String cc;
     private Integer notificationChannel;
 }

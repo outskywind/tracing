@@ -1,5 +1,6 @@
 package com.dafy.skye.alertmanager.dao.impl;
 
+import com.dafy.skye.alertmanager.constant.NotificationChannel;
 import com.dafy.skye.alertmanager.dao.PrometheusAlertDao;
 import com.dafy.skye.alertmanager.po.PrometheusAlertPO;
 import com.dafy.skye.alertmanager.mapper.PrometheusAlertMapper;
@@ -19,8 +20,9 @@ public class PrometheusAlertDaoImpl implements PrometheusAlertDao {
     }
 
     @Override
-    public int addAlert(PrometheusAlertPO alert) {
-        return mapper.addAlert(alert);
+    public boolean addAlert(PrometheusAlertPO alert) {
+        int count = mapper.addAlert(alert);
+        return count > 0;
     }
 
     @Override
@@ -36,5 +38,11 @@ public class PrometheusAlertDaoImpl implements PrometheusAlertDao {
     @Override
     public PrometheusAlertPO getAlertById(long id) {
         return mapper.getAlertById(id);
+    }
+
+    @Override
+    public boolean updateAlerts(long[] ids, String receivers, String cc, NotificationChannel notificationChannel) {
+        int count = mapper.updateAlerts(ids, receivers, cc, notificationChannel.getValue());
+        return count > 0;
     }
 }

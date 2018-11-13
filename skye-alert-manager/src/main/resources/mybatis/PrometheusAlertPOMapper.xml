@@ -22,6 +22,7 @@
 		<result column="version" property="version" />
 		<result column="group_labels" property="groupLabels" />
 		<result column="receivers" property="receivers" />
+		<result column="cc" property="cc" />
 		<result column="notification_channel" property="notificationChannel" />
 	</resultMap>
 
@@ -33,7 +34,7 @@
 			extra_labels,summary,grafana_link,
 			skye_link,extra_annotations,start_time,
 			version,group_labels,receivers,
-			notify_channel)
+			cc,notify_channel)
 		values (
 			#{status},#{alertname},#{hostname},
 			#{instance},#{job},#{receiverGroup},
@@ -41,7 +42,7 @@
 			#{extraLabels},#{summary},#{grafanaLink},
 			#{skyeLink},#{extraAnnotations},#{startTime},
 			#{version},#{groupLabels},#{receivers},
-			#{notificationChannel})
+			#{cc},#{notificationChannel})
 	</insert>
 
 
@@ -79,5 +80,14 @@
 			id = #{id}
 		LIMIT 1
 	</select>
+
+	<update id="updateAlerts">
+		UPDATE t_bank_card
+		SET receivers = #{receivers}, cc = #{cc}, notification_channel = #{notificationChannel}
+		WHERE id IN
+		<foreach collection="ids" index="index" item="id" open="(" separator="," close=")">
+			#{id}
+		</foreach>
+	</update>
 
 </mapper>

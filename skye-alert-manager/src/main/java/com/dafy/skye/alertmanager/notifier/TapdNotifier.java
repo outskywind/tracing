@@ -1,16 +1,15 @@
 package com.dafy.skye.alertmanager.notifier;
 
-import com.dafy.skye.alertmanager.config.TapdConfigProperties;
-import com.dafy.skye.alertmanager.constant.NotificationChannel;
-import com.dafy.skye.alertmanager.dto.AlertExtraInfo;
-import com.dafy.skye.alertmanager.po.PrometheusAlertPO;
 import com.dafy.base.channel.tapd.api.TapdApiClient;
 import com.dafy.base.channel.tapd.api.TapdApiClientFactory;
 import com.dafy.base.channel.tapd.api.dto.AddBugRequest;
 import com.dafy.base.channel.tapd.api.dto.AddBugResponse;
-import com.google.common.base.Joiner;
+import com.dafy.skye.alertmanager.config.TapdConfigProperties;
+import com.dafy.skye.alertmanager.constant.NotificationChannel;
+import com.dafy.skye.alertmanager.dto.AlertExtraInfo;
+import com.dafy.skye.alertmanager.po.PrometheusAlertPO;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.ArrayUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -47,8 +46,8 @@ public class TapdNotifier extends DefaultNotifier {
     protected void sendAlert(String alertContent, AlertExtraInfo extraInfo) {
         AddBugRequest request = new AddBugRequest();
         request.setWorkspaceId(configProperties.getWorkspaceId());
-        request.setCurrentOwner(joinIds(extraInfo.getReceiverIds()));
-        request.setCc(joinIds(extraInfo.getCcIds()));
+        request.setCurrentOwner(StringUtils.join(extraInfo.getReceiverIds(), ','));
+        request.setCc(StringUtils.join(extraInfo.getCcIds(), ','));
         request.setDescription(alertContent);
         request.setTitle(extraInfo.getGroupName());
 
@@ -58,7 +57,4 @@ public class TapdNotifier extends DefaultNotifier {
         }
     }
 
-    private String joinIds(String[] ids) {
-        return ArrayUtils.isEmpty(ids) ? null : Joiner.on(',').join(ids);
-    }
 }
