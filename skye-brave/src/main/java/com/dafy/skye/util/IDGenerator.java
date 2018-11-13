@@ -20,14 +20,14 @@ public class IDGenerator {
     private static final long MASK = ((1L<<41)-1);//shit 1 is parsed as int
 
     private static volatile AtomicInteger state = new AtomicInteger(0);
-    private static long  workerID=0;
+    private static long  workerID=-1;
     //序列号器，全局共享，线程竞争，循环自增
     private static volatile AtomicInteger seqNo = new AtomicInteger(0);
 
     public static long getId(){
         //取低41位
-        long timestap = System.currentTimeMillis()-START;
-        long new41bit = (timestap & MASK);
+        long timestamp = System.currentTimeMillis()-START;
+        long new41bit = (timestamp & MASK);
         //
         int v = (seqNo.getAndIncrement()&((1<<12)-1));
         return (new41bit<<MOV)+(workerId()<<12)+v;
@@ -36,13 +36,15 @@ public class IDGenerator {
     //10bit  2^10=1024
     //子网+pid , 子网128=7bit,
     private static long  workerId(){
-        while(workerID==0){
+        while(workerID==-1){
             //只有一个初始化
             if(state.compareAndSet(0,1)){
                 //will we just register on the workerId
+                //if last subip is 128 ,then 7bit 0000000
                 long networkIp = networkIp();
                 long processId = processId();
-                workerID = ((networkIp<<3) & processId);
+                //fix bug[7bit,3bit]
+                workerID = (networkIp<<3) +(processId & 7);
                 state.compareAndSet(1,2);
             }
         }
@@ -76,6 +78,10 @@ public class IDGenerator {
             networkIp = b & ((1<<7)-1);
         }catch (Throwable tx){
             //随机
+            networkIp = new Random().nextInt(127);
+        }
+        while(networkIp == 0){
+            //随机util !=0
             networkIp = new Random().nextInt(127);
         }
         return networkIp;
