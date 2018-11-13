@@ -1,0 +1,16 @@
+server:
+  context-path: /alert
+  port: 9074
+
+mybatis:
+  config-location: 'classpath:mybatis.xml'
+  mapper-locations: 'classpath:mybatis/*.xml'
+
+qywx:
+  agent-id: '1000025'
+  secret: '9ADDEg3LhngTOzqtjs1VuEgOmtldRiTz4nksYdH2l5k'
+  corp-id: 'wxad8b8474f08dc086'
+
+tapd:
+  workspace-id: ''
+  reporter: ''

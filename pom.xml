@@ -23,6 +23,7 @@
         <module>druid-storage-autoconfigure</module>
         <module>zipkin</module>
         <module>zipkin-autoconfigure</module>
+        <module>skye-alert-manager</module>
     </modules>
     <properties>
         <spring-data-elasticsearc.version>2.1.4.RELEASE</spring-data-elasticsearc.version>
