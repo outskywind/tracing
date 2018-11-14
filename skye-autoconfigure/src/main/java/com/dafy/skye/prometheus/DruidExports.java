@@ -1,10 +1,7 @@
 package com.dafy.skye.prometheus;
 
 import com.dafy.skye.constants.DruidAttributeConstants;
-import com.google.gson.JsonArray;
-import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
-import com.google.gson.JsonParser;
+import com.google.gson.*;
 import io.prometheus.client.Collector;
 import io.prometheus.client.GaugeMetricFamily;
 import org.slf4j.Logger;
@@ -161,12 +158,12 @@ public class DruidExports extends Collector {
 
                     for(JsonElement elem : contentArray) {
                         contentObj = elem.getAsJsonObject();
-                        totalTime = contentObj.getAsJsonPrimitive("TotalTime").getAsLong();
+                        totalTime = getValueAsLong(contentObj, "TotalTime");
                         // 由于druid存储sql的时候是做了sql格式化的，这里为了方便显示取消了格式化
                         sql = contentObj.getAsJsonPrimitive("SQL").getAsString().replaceAll("\\s{2,}", " ");
-                        fetchRowCount = contentObj.getAsJsonPrimitive("FetchRowCount").getAsLong();
-                        executeCount = contentObj.getAsJsonPrimitive("ExecuteCount").getAsLong();
-                        maxTimespanOccurTime = contentObj.getAsJsonPrimitive("MaxTimespanOccurTime").getAsString();
+                        fetchRowCount = getValueAsLong(contentObj, "FetchRowCount");
+                        executeCount = getValueAsLong(contentObj, "ExecuteCount");
+                        maxTimespanOccurTime = getValueAsString(contentObj, "MaxTimespanOccurTime");
 
                         // 这里保存sql的平均执行时间
                         GaugeMetricFamily metricFamily = new GaugeMetricFamily("alibaba_druid_slow_sql", "慢SQL", SQL_LABELS);
@@ -180,6 +177,16 @@ public class DruidExports extends Collector {
                 logger.error("fail to get slow sql!", e);
             }
         }
+    }
+
+    private String getValueAsString(JsonObject contentObj, String attr) {
+        JsonPrimitive primitive = contentObj.getAsJsonPrimitive(attr);
+        return primitive == null ? "" : primitive.getAsString();
+    }
+
+    private long getValueAsLong(JsonObject contentObj, String attr) {
+        JsonPrimitive primitive = contentObj.getAsJsonPrimitive(attr);
+        return primitive == null ? 0L : primitive.getAsLong();
     }
 
     private String getTop10ForSlowSqlInJson() throws Exception {
