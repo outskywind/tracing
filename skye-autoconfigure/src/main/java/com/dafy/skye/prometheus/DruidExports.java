@@ -180,13 +180,13 @@ public class DruidExports extends Collector {
     }
 
     private String getValueAsString(JsonObject contentObj, String attr) {
-        JsonPrimitive primitive = contentObj.getAsJsonPrimitive(attr);
-        return primitive == null ? "" : primitive.getAsString();
+        JsonElement element = contentObj.get(attr);
+        return element == null || element instanceof JsonNull ? "" : element.getAsString();
     }
 
     private long getValueAsLong(JsonObject contentObj, String attr) {
-        JsonPrimitive primitive = contentObj.getAsJsonPrimitive(attr);
-        return primitive == null ? 0L : primitive.getAsLong();
+        JsonElement element = contentObj.get(attr);
+        return element == null || element instanceof JsonNull ? 0L : element.getAsLong();
     }
 
     private String getTop10ForSlowSqlInJson() throws Exception {
