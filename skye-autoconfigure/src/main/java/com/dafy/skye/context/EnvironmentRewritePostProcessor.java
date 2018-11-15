@@ -7,7 +7,8 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.EnvironmentAware;
-import org.springframework.context.support.PropertySourcesPlaceholderConfigurer;
+import org.springframework.core.Ordered;
+import org.springframework.core.PriorityOrdered;
 import org.springframework.core.env.*;
 
 import java.util.*;
@@ -15,14 +16,18 @@ import java.util.*;
 
 /**
  * 支持对String 类型的属性值进行自定义的替换
+ * 因为 PropertySourcesPlaceholderConfigurer 是 内置且 PriorityOrdered 最低优先级
+ * 须定义在它优先级之前
  * Created by quanchengyun on 2018/10/11.
  */
-public class EnvironmentRewritePostProcessor implements BeanFactoryPostProcessor,EnvironmentAware,ApplicationContextAware {
+public class EnvironmentRewritePostProcessor implements BeanFactoryPostProcessor,EnvironmentAware,ApplicationContextAware,PriorityOrdered {
 
     private ConfigurableEnvironment environment;
     private ConfigurableApplicationContext context;
 
     private List<PropertySourceInterceptor> interceptors=new ArrayList<>();
+
+    private int order = Ordered.HIGHEST_PRECEDENCE;
 
     @Override
     public void setEnvironment(Environment environment) {
@@ -36,7 +41,8 @@ public class EnvironmentRewritePostProcessor implements BeanFactoryPostProcessor
         if(this.environment==null){
             return;
         }
-        Map<String,PropertySourceInterceptor>  interceptorBeans = beanFactory.getBeansOfType(PropertySourceInterceptor.class,true,true);
+        //提前初始化会导致其他的Bean全部提前初始化，在对应的BeanPostProcessor注册之前
+        Map<String,PropertySourceInterceptor>  interceptorBeans = beanFactory.getBeansOfType(PropertySourceInterceptor.class,true,false);
         for (PropertySourceInterceptor interceptor:interceptorBeans.values()){
             if(interceptor.isOk()){
                 interceptors.add(interceptor);
@@ -60,12 +66,15 @@ public class EnvironmentRewritePostProcessor implements BeanFactoryPostProcessor
             }
         }
         //and then replace the  PropertySourcesPlaceholderConfigurer
-        PropertySourcesPlaceholderConfigurer bean ;
+        //fixed: modify environment before PropertySourcesPlaceholderConfigurer applied
+        /*PropertySourcesPlaceholderConfigurer bean ;
         Map<String, PropertySourcesPlaceholderConfigurer> beans = beanFactory
                 .getBeansOfType(PropertySourcesPlaceholderConfigurer.class, false,
                         false);
+        //
         if (beans.size() == 1) {
             bean =  beans.values().iterator().next();
+
             MutablePropertySources propertySources= (MutablePropertySources)bean.getAppliedPropertySources();
             propertySources.replace(PropertySourcesPlaceholderConfigurer.ENVIRONMENT_PROPERTIES_PROPERTY_SOURCE_NAME,
                     new PropertySource<Environment>(
@@ -76,7 +85,7 @@ public class EnvironmentRewritePostProcessor implements BeanFactoryPostProcessor
                     return this.source.getProperty(key);
                 }
             });
-        }
+        }*/
     }
 
 
@@ -85,6 +94,11 @@ public class EnvironmentRewritePostProcessor implements BeanFactoryPostProcessor
         if(this.context instanceof ConfigurableApplicationContext){
             this.context = (ConfigurableApplicationContext)applicationContext;
         }
+    }
+
+    @Override
+    public int getOrder() {
+        return this.order;
     }
 
     /**
