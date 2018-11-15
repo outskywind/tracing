@@ -60,7 +60,7 @@ public class ServletTraceFilter implements Filter {
             return;
         }
         try{
-            if(exception==null && response.getStatus()<400){
+            if(exception==null && response.getStatus()<500){
                 tracer.currentSpanCustomizer().tag("status",ConstantsBrave.SUCCESS);
             }
         }catch (Throwable e){
