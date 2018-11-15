@@ -19,8 +19,6 @@
         <module>skye-monitor</module>
         <module>skye-monitor-autoconfigure</module>
         <module>elasticsearch-storage</module>
-        <module>druid-storage</module>
-        <module>druid-storage-autoconfigure</module>
         <module>zipkin</module>
         <module>zipkin-autoconfigure</module>
         <module>skye-alert-manager</module>
