@@ -26,7 +26,7 @@
     <properties>
         <spring-data-elasticsearc.version>2.1.4.RELEASE</spring-data-elasticsearc.version>
         <elasticsearch.version>6.2.0</elasticsearch.version>
-        <kafka.version>0.10.2.0</kafka.version>
+        <kafka.version>0.10.2.2</kafka.version>
         <spring-boot.version>1.5.3.RELEASE</spring-boot.version>
         <auto-value.version>1.4.1</auto-value.version>
         <guava.version>19.0</guava.version>
